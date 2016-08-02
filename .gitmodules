@@ -1,0 +1,3 @@
+[submodule "cdap"]
+	path = cdap
+	url = git@github.com:caskdata/cdap.git
