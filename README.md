@@ -7,7 +7,7 @@ are located under `app-artifacts`, so CDAP should be built using
 `-Dadditional.artifacts.dir=$(pwd)/app-artifacts` to include the
 Hydrator Plugins in the CDAP Master packages. Compiling the Hydrator
 Plugins requires first building and installing the CDAP API JARs into
-your local Maven checkout.
+your local Maven repository.
 
 ## Installing CDAP API JARs:
 ```bash
