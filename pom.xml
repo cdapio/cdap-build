@@ -27,6 +27,7 @@
   <name>Cask Data Application Platform (CDAP) build</name>
 
   <modules>
+    <module>app-artifacts/hydrator-plugins</module>
     <module>cdap</module>
   </modules>
 
