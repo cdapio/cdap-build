@@ -30,6 +30,7 @@
     <module>app-artifacts/cask-tracker</module>
     <module>app-artifacts/cdap-navigator</module>
     <module>app-artifacts/hydrator-plugins</module>
+    <module>security-extensions/cdap-security-extn</module>
     <module>cdap</module>
   </modules>
 
