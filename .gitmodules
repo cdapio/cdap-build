@@ -1,7 +1,7 @@
 [submodule "cdap"]
 	path = cdap
 	url = git@github.com:caskdata/cdap.git
-        branch = release/3.4
+	branch = release/3.4
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = git@github.com:caskdata/hydrator-plugins.git
