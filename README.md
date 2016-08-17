@@ -13,7 +13,7 @@ your local Maven repository.
 ## Installing CDAP API JARs:
 ```bash
 export MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m"
-mvn install -DskipTests -B -am -pl cdap/cdap-api,cdap/cdap-app-templates/cdap-etl/cdap-etl-api -P templates
+mvn install -DskipTests -B -am -pl cdap/cdap-api,cdap/cdap-app-templates -P templates
 ```
 
 ## Compiling CDAP + Cask Tracker + CDAP Navigator + Hydrator Plugins (example)
