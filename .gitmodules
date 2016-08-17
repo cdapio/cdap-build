@@ -14,3 +14,11 @@
 	path = app-artifacts/cdap-navigator
 	url = git@github.com:caskdata/cdap-navigator.git
 	branch = release/0.2
+[submodule "security-extensions/cdap-security-extn"]
+	path = security-extensions/cdap-security-extn
+	url = git@github.com:caskdata/cdap-security-extn.git
+	branch = release/0.2
+[submodule "apache-sentry"]
+	path = apache-sentry
+	url = git@github.com:apache/sentry.git
+	branch = branch-1.7.0
