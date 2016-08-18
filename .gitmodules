@@ -13,7 +13,7 @@
 [submodule "app-artifacts/cdap-navigator"]
 	path = app-artifacts/cdap-navigator
 	url = git@github.com:caskdata/cdap-navigator.git
-	branch = release/0.3
+	branch = release/0.2
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = git@github.com:caskdata/cdap-security-extn.git
