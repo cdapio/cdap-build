@@ -22,7 +22,3 @@
 	path = apache-sentry
 	url = https://github.com/apache/sentry.git
 	branch = branch-1.7.0
-[submodule "wrangler-transform"]
-	path = wrangler-transform
-	url = git@github.com:hydrator/wrangler-transform.git
-	branch = develop
