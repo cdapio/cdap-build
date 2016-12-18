@@ -17,7 +17,7 @@
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = https://github.com/caskdata/cdap-security-extn.git
-	branch = develop
+	branch = release/0.3
 [submodule "apache-sentry"]
 	path = apache-sentry
 	url = https://github.com/apache/sentry.git
