@@ -1,23 +1,23 @@
 [submodule "cdap"]
 	path = cdap
 	url = https://github.com/caskdata/cdap.git
-	branch = develop
+	branch = release/4.1
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = https://github.com/caskdata/hydrator-plugins.git
-	branch = develop
+	branch = release/1.6
 [submodule "app-artifacts/cask-tracker"]
 	path = app-artifacts/cask-tracker
 	url = https://github.com/caskdata/cask-tracker.git
-	branch = develop
+	branch = release/0.4
 [submodule "app-artifacts/cdap-navigator"]
 	path = app-artifacts/cdap-navigator
 	url = https://github.com/caskdata/cdap-navigator.git
-	branch = develop
+	branch = release/0.5
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = https://github.com/caskdata/cdap-security-extn.git
-	branch = develop
+	branch = release/0.4
 [submodule "apache-sentry"]
 	path = apache-sentry
 	url = https://github.com/apache/sentry.git
