@@ -20,5 +20,5 @@
 	branch = release/0.3
 [submodule "apache-sentry"]
 	path = apache-sentry
-	url = https://github.com/apache/sentry.git
+	url = git://git.apache.org/apache/sentry.git
 	branch = branch-1.7.0
