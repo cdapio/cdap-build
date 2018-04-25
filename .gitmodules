@@ -22,3 +22,7 @@
 	path = apache-sentry
 	url = git://git.apache.org/sentry.git
 	branch = branch-1.7.0
+[submodule "app-artifacts/mmds"]
+	path = app-artifacts/mmds
+	url = https://github.com/cask-solutions/mmds.git
+	branch = develop
