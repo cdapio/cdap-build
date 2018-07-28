@@ -28,7 +28,6 @@
 
   <modules>
     <module>app-artifacts/cask-tracker</module>
-    <module>app-artifacts/cdap-navigator</module>
     <module>app-artifacts/dre</module>
     <module>app-artifacts/hydrator-plugins</module>
     <module>app-artifacts/mmds</module>
