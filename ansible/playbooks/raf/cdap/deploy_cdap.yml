@@ -1,5 +1,5 @@
 ---
- 
+
 - name: Retrieve facts all host
   hosts:
     - all
@@ -9,11 +9,12 @@
     - 'always'
   tasks: []
  
-- name: UnInstall CDAP from Ambari
+- name: Deploy CDAP to Ambari
   hosts:
     - all:!loadbalancer-nodes
   any_errors_fatal: true
   vars_files:
-    - ../../inventory/group_vars/all.yml
+    - ../../inventory/templates/group_vars/global/all/raf/cdap.yml
   roles:
-    - cdap/undeploy
+    - raf/cdap/deploy
+

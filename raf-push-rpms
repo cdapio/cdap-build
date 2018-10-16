@@ -1,0 +1,21 @@
+#!/bin/bash
+
+MPR_BUILD_NUMBER=$2
+MPR_RPM_DIR=$1
+
+info() {
+    echo "== $*"
+}
+
+# This will prevent uploading of RPMs from dev builds.
+if [[ -z "${MPR_BUILD_NUMBER}" ]]; then
+    info "Not pushing any RPM because this is a dev build"
+    exit 0
+fi
+
+[[ ! -d ${MPR_RPM_DIR} ]] && exit 1
+
+for rpm in ${MPR_RPM_DIR}/*.rpm; do
+    info "Uploading ${rpm}"
+    curl -u dev-deployer:dev@guavus -X PUT "http://artifacts.ggn.in.guavus.com/ggn-dev-rpms/RAF/release/RPMS/" -T ${rpm}
+done
