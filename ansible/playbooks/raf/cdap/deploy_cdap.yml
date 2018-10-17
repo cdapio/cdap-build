@@ -32,8 +32,6 @@
   hosts:
     - all:!loadbalancer-nodes
   any_errors_fatal: true
-  vars_files:
-    - ../../inventory/templates/group_vars/global/all/raf/cdap.yml
   roles:
     - raf/cdap/deploy
 
