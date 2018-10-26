@@ -18,3 +18,7 @@
 	path = app-artifacts/mmds
 	url = https://github.com/cask-solutions/mmds.git
 	branch = release/1.1
+[submodule "app-artifacts/dre"]
+	path = app-artifacts/dre
+	url = https://github.com/cask-solutions/dre.git
+	branch = release/1.1
