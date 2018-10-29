@@ -16,9 +16,9 @@
 	branch = branch-1.7.0
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
-	url = https://github.com/cask-solutions/mmds.git
-	branch = release/1.1
+	url = https://github.com/Guavus/mmds.git
+	branch = build_guavus_1.1
 [submodule "app-artifacts/dre"]
 	path = app-artifacts/dre
-	url = https://github.com/cask-solutions/dre.git
-	branch = release/1.1
+	url = https://github.com/Guavus/dre.git
+	branch = build_guavus_1.1
