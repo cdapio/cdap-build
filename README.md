@@ -71,3 +71,57 @@ mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,t
  -Dadditional.artifacts.dir=$(pwd)/app-artifacts \
  -Dsecurity.extensions.dir=$(pwd)/security-extensions
 ```
+
+## Guavus steps to BUILD CDAP RPMs
+
+Run the following commands to successfully build the CDAP RPMs
+
+```bash
+git clone --recursive -b build_guavus https://github.com/Guavus/cdap-build.git
+```
+
+Run the above command to clone the guavus cdap branch name "build_guavus".
+Once the above command succeeded move inside the cdap-build folder.
+
+```bash
+cd cdap-build
+```
+
+Run the following to command to checkout specific branch for all the modules specify inside the .gitmodules file
+
+```bash
+git submodule update --remote
+```
+
+After the execution of the above command do the following steps for the complete checkout of the project.
+
+```bash
+cd app-artifacts/hydrator-plugins/
+git submodule update --init --recursive --remote
+```
+
+Once the command succeeded move to the cdap module directory
+
+```bash
+cd ../../cdap/
+```
+
+And run the following command
+
+```bash
+mvn clean install -Dmaven.test.failure.ignore=false 
+```
+
+After the completion of the command move to the parent directory and run the following commands in the sequence
+
+```bash
+cd ../
+mvn clean install -Dmaven.test.failure.ignore=false -f apache-sentry
+export MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m"
+mvn install -Dmaven.test.failure.ignore=false -B -am -pl cdap/cdap-api -P templates
+mvn install -Dmaven.test.failure.ignore=false -B -am -f cdap/cdap-app-templates -P templates
+mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests \
+-Dmaven.test.failure.ignore=false \
+-Dadditional.artifacts.dir=$(pwd)/app-artifacts \
+-Dsecurity.extensions.dir=$(pwd)/security-extensions
+```
