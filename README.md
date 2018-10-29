@@ -77,7 +77,7 @@ mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,t
 Run the following commands to successfully build the CDAP RPMs
 
 ```bash
-git clone --recursive -b build_guavus https://github.com/Guavus/cdap-build.git
+git clone --recursive -b build_guavus_5.1 https://github.com/Guavus/cdap-build.git
 ```
 
 Run the above command to clone the guavus cdap branch name "build_guavus".
