@@ -1,11 +1,11 @@
 [submodule "cdap"]
 	path = cdap
-	url = https://github.com/caskdata/cdap.git
-	branch = release/5.1
+	url = https://github.com/Guavus/cdap.git
+	branch = build_guavus_5.1
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
-	url = https://github.com/caskdata/hydrator-plugins.git
-	branch = release/2.1
+	url = https://github.com/Guavus/hydrator-plugins.git
+	branch = build_guavus_2.1
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = https://github.com/caskdata/cdap-security-extn.git
