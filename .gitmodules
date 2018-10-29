@@ -17,8 +17,8 @@
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
 	url = https://github.com/Guavus/mmds.git
-	branch = build_guavus_1.1
+	branch = build_guavus_1.1_latest
 [submodule "app-artifacts/dre"]
 	path = app-artifacts/dre
 	url = https://github.com/Guavus/dre.git
-	branch = build_guavus_1.1
+	branch = build_guavus_1.1_latest
