@@ -8,8 +8,8 @@
 	branch = build_guavus_2.1
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
-	url = https://github.com/caskdata/cdap-security-extn.git
-	branch = release/0.8
+	url = https://github.com/Guavus/cdap-security-extn.git
+	branch = build_guavus_0.8
 [submodule "apache-sentry"]
 	path = apache-sentry
 	url = git://git.apache.org/sentry.git
