@@ -91,37 +91,17 @@ Run the following to command to checkout specific branch for all the modules spe
 
 ```bash
 git submodule update --remote
-```
-
-After the execution of the above command do the following steps for the complete checkout of the project.
-
-```bash
-cd app-artifacts/hydrator-plugins/
 git submodule update --init --recursive --remote
-```
-
-Once the command succeeded move to the cdap module directory
-
-```bash
-cd ../../cdap/
-```
-
-And run the following command
-
-```bash
-mvn clean install -Dmaven.test.failure.ignore=false 
 ```
 
 After the completion of the command move to the parent directory and run the following commands in the sequence
 
 ```bash
-cd ../
-mvn clean install -Dmaven.test.failure.ignore=false -f apache-sentry
 export MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m"
-mvn install -Dmaven.test.failure.ignore=false -B -am -pl cdap/cdap-api -P templates
-mvn install -Dmaven.test.failure.ignore=false -B -am -f cdap/cdap-app-templates -P templates
-mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests \
--Dmaven.test.failure.ignore=false \
+mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates
+mvn install -DskipTests -B -am -f cdap/cdap-app-templates -P templates
+mvn package -P examples,templates,dist,release,rpm-prepare,rpm \
+-Dmaven.test.failure.ignore=true \
 -Dadditional.artifacts.dir=$(pwd)/app-artifacts \
 -Dsecurity.extensions.dir=$(pwd)/security-extensions
 ```
