@@ -100,8 +100,10 @@ After the completion of the command move to the parent directory and run the fol
 export MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m"
 mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates
 mvn install -DskipTests -B -am -f cdap/cdap-app-templates -P templates
+rm -rf cdap/cdap-security/target/*
 mvn package -P examples,templates,dist,release,rpm-prepare,rpm \
--Dmaven.test.failure.ignore=true \
+-DskipTests \
 -Dadditional.artifacts.dir=$(pwd)/app-artifacts \
--Dsecurity.extensions.dir=$(pwd)/security-extensions
+-Dsecurity.extensions.dir=$(pwd)/security-extensions \
+-DbuildNumber=1
 ```
