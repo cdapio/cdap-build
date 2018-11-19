@@ -1,0 +1,76 @@
+---
+
+- name: Stop CDAP service from Ambari
+  include: stop_service.yml
+  vars:
+    service_name: 'CDAP'
+  when: inventory_hostname == groups['management-nodes'][0]
+
+
+- name: Delete CDAP service from Ambari
+  include: delete_service.yml
+  vars:
+    service_name: "{{ item }}"
+  when: inventory_hostname == groups['management-nodes'][0]
+  with_items:
+    "{{ hdp_services }}"
+
+- name: "Uninstall CDAP packages"
+  ignore_errors: True
+  package:
+    name: "{{ item }}"
+    state: absent
+  with_items:
+    - 'cdap*'
+
+- name: "Clean CDAP Log directories"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /var/log/cdap
+    - /data/cdap-kafka/
+
+- name: "Remove CDAP config folders on all nodes"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /etc/cdap
+    - /etc/alternatives/cdap-conf
+    - /etc/logrotate.d/cdap
+    - /opt/cdap
+    - /etc/yum.repos.d/CDAP.repo
+
+- name: "Remove CDAP PID on all nodes"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /var/run/cdap
+
+- name: "Remove CDAP library folders on all nodes"
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - /var/cdap
+    - /var/tmp/cdap
+    - /var/lib/alternatives/cdap-conf
+    - /var/lib/ambari-server/resources/common-services/CDAP
+    - /var/lib/ambari-agent/cache/common-services/CDAP
+    - /tmp/cdap
+
+
+- name: "Remove CDAP service users on all nodes"
+  delay: "{{ retry_stagger | random + 3 }}"
+  retries: 4
+  user:
+    name: "{{ item }}"
+    remove: true
+    state: absent
+  with_items:
+    - cdap
+  notify: Restart ambari-server
+
+- meta: flush_handlers
