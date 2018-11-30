@@ -5,5 +5,99 @@ cdap_version: '4.3.4'
 cdap_properties_dir: "/opt/guavus/ambari-api/cdap/properties"
 postgres_port: 5432
 mysql_port: 3306
+rangeradmin_username: "admin"
+rangeradmin_password: "Sbe7UGkRBMF8"
 
+cdap_path_policy_config: |
+  {
+   "name":"cdap_path",
+   "service": "{{ hdp_cluster_name }}_hadoop",
+   "isEnabled": true,
+   "isAuditEnabled": true,
+   "resources": {
+        "path": {
+            "values": [
+                "/user/cdap",
+                "/cdap/tx.snapshot"
+            ],
+            "isExcludes": false,
+            "isRecursive": true
+        }
+    },
+    "policyItems": [
+        {
+            "accesses": [
+                {
+                    "type": "write",
+                    "isAllowed": true
+                },
+                {
+                    "type": "read",
+                    "isAllowed": true
+                },
+                {
+                    "type": "execute",
+                    "isAllowed": true
+                }
+            ],
+            "users": [
+                "cdap"
+            ],
+            "groups": [],
+            "conditions": [],
+            "delegateAdmin": false
+        }
+    ],
+    "denyPolicyItems": [],
+    "allowExceptions": [],
+    "denyExceptions": [],
+    "dataMaskPolicyItems": [],
+    "rowFilterPolicyItems": []
+  }
+yarn_path_policy_config: |
+  {
+   "name":"yarn_path",
+   "service": "{{ hdp_cluster_name }}_hadoop",
+   "isEnabled": true,
+   "isAuditEnabled": true,
+   "resources": {
+        "path": {
+            "values": [
+                "/user/yarn",
+                "/cdap"
+            ],
+            "isExcludes": false,
+            "isRecursive": true
+        }
+    },
+    "policyItems": [
+        {
+            "accesses": [
+                {
+                    "type": "write",
+                    "isAllowed": true
+                },
+                {
+                    "type": "read",
+                    "isAllowed": true
+                },
+                {
+                    "type": "execute",
+                    "isAllowed": true
+                }
+            ],
+            "users": [
+                "yarn"
+            ],
+            "groups": [],
+            "conditions": [],
+            "delegateAdmin": false
+        }
+    ],
+    "denyPolicyItems": [],
+    "allowExceptions": [],
+    "denyExceptions": [],
+    "dataMaskPolicyItems": [],
+    "rowFilterPolicyItems": []
+  }
 

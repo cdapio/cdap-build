@@ -183,8 +183,8 @@
          (cdap_check_task.content|from_json).Requests.request_status == 'FAILED' or
          (cdap_check_task.content|from_json).Requests.request_status == 'TIMEDOUT' or
          (cdap_check_task.content|from_json).Requests.request_status == 'ABORTED')
-  retries: 20
-  delay: 30
+  retries: 30
+  delay: 60
   when: inventory_hostname == groups[cdap_management_nodes][0] and cdap_install_task.content != ""
 
 - name: Start CDAP Service
@@ -269,3 +269,37 @@
   delay: 30
   when: inventory_hostname == groups[cdap_management_nodes][0] and restart_reqd_services.content != ""
 
+- name: Add/Update ranger hdfs policies
+  uri:
+    url: "http://{{ hostvars[groups['loadbalancer-vip'][0]]['ansible_host'] }}:6080/service/public/v2/api/policy"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
+    body: "{{ item }}"
+    body_format: json
+    status_code: 200,201,202,400
+    return_content: yes
+  with_items:
+    - "{{ cdap_path_policy_config }}"
+    - "{{ yarn_path_policy_config }}"
+
+- name: 'Add all cdap machines in haproxy'
+  blockinfile:
+    dest: /etc/haproxy/haproxy.cfg
+    backup: yes
+    marker: "# {mark} CDAP MANAGED BLOCK"
+    block: |
+       listen CDAP_11011
+         bind {{ site_floating_ip.ip }}:11011
+         mode  http
+         balance  roundrobin
+         appsession JSESSIONID len 1024 timeout 1h request-learn
+         option forwardfor
+         {% for host in groups['master-nodes'] %}server {{ hostvars[host]['ansible_hostname'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:11011
+         {%- if loop.first %} check
+         {% else %}  check
+         {% endif -%}
+         {% endfor %}
+  when: inventory_hostname in groups['loadbalancer-nodes']
