@@ -22,3 +22,7 @@
 	path = app-artifacts/dre
 	url = https://github.com/Guavus/dre.git
 	branch = build_guavus_1.1_latest
+[submodule "cdap-ambari-service"]
+	path = cdap-ambari-service
+	url = https://github.com/Guavus/cdap-ambari-service.git
+        branch = build_guavus_5.1 
