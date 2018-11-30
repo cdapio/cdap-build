@@ -155,6 +155,23 @@
     - all:!loadbalancer-nodes
   when: inventory_hostname == groups[cdap_management_nodes][0] and cdap_install_status.status != 409 
 
+- name: Add/Update ranger hdfs policies
+  uri:
+    url: "http://{{ cdap_loadbalancer_vip }}:6080/service/public/v2/api/policy"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
+    body: "{{ item }}"
+    body_format: json
+    status_code: 200,201,202,400
+    return_content: yes
+  with_items:
+    - "{{ cdap_path_policy_config }}"
+    - "{{ yarn_path_policy_config }}"
+    - "{{ hbase_all_policy_config }}"
+
 - name: Install CDAP Service
   uri:
     url: "http://{{ cdap_loadbalancer_vip }}:8080/api/v1/clusters/{{ cluster_name }}/services/CDAP"
@@ -269,20 +286,4 @@
   delay: 30
   when: inventory_hostname == groups[cdap_management_nodes][0] and restart_reqd_services.content != ""
 
-- name: Add/Update ranger hdfs policies
-  uri:
-    url: "http://{{ cdap_loadbalancer_vip }}:6080/service/public/v2/api/policy"
-    method: POST
-    force_basic_auth: yes
-    user: "{{ rangeradmin_username }}"
-    password: "{{ rangeradmin_password }}"
-    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
-    body: "{{ item }}"
-    body_format: json
-    status_code: 200,201,202,400
-    return_content: yes
-  with_items:
-    - "{{ cdap_path_policy_config }}"
-    - "{{ yarn_path_policy_config }}"
-    - "{{ hbase_all_policy_config }}"
  
