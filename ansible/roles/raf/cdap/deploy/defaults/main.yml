@@ -11,7 +11,7 @@ rangeradmin_password: "Sbe7UGkRBMF8"
 cdap_path_policy_config: |
   {
    "name":"cdap_path",
-   "service": "{{ hdp_cluster_name }}_hadoop",
+   "service": "{{ cdap_cluster_name }}_hadoop",
    "isEnabled": true,
    "isAuditEnabled": true,
    "resources": {
@@ -56,14 +56,13 @@ cdap_path_policy_config: |
   }
 yarn_path_policy_config: |
   {
-   "name":"yarn_path",
-   "service": "{{ hdp_cluster_name }}_hadoop",
+   "name":"cdap_yarn_path",
+   "service": "{{ cdap_cluster_name }}_hadoop",
    "isEnabled": true,
    "isAuditEnabled": true,
    "resources": {
         "path": {
             "values": [
-                "/user/yarn",
                 "/cdap"
             ],
             "isExcludes": false,
@@ -100,4 +99,67 @@ yarn_path_policy_config: |
     "dataMaskPolicyItems": [],
     "rowFilterPolicyItems": []
   }
-
+hbase_all_policy_config: |
+  {
+   "name":"hbase-cdap-all",
+   "service": "{{ cdap_cluster_name }}_hbase",
+   "isEnabled": true,
+   "isAuditEnabled": true,
+        "resources": {
+            "column-family": {
+                "values": [
+                    "*"
+                ],
+                "isExcludes": false,
+                "isRecursive": false
+            },
+            "column": {
+                "values": [
+                    "*"
+                ],
+                "isExcludes": false,
+                "isRecursive": false
+            },
+            "table": {
+                "values": [
+                    "cdap*.*",
+                    "*"
+                ],
+                "isExcludes": false,
+                "isRecursive": false
+            }
+        },
+        "policyItems": [
+            {
+                "accesses": [
+                    {
+                        "type": "read",
+                        "isAllowed": true
+                    },
+                    {
+                        "type": "write",
+                        "isAllowed": true
+                    },
+                    {
+                        "type": "create",
+                        "isAllowed": true
+                    },
+                    {
+                        "type": "admin",
+                        "isAllowed": true
+                    }
+                ],
+                "users": [
+                    "cdap",
+                ],
+                "groups": [],
+                "conditions": [],
+                "delegateAdmin": false
+            }
+        ],
+        "denyPolicyItems": [],
+        "allowExceptions": [],
+        "denyExceptions": [],
+        "dataMaskPolicyItems": [],
+        "rowFilterPolicyItems": []
+  }

@@ -32,6 +32,38 @@
   hosts:
     - all:!loadbalancer-nodes
   any_errors_fatal: true
+  vars_files:
+    - "../../../playbooks/hortonworks/playbooks/group_vars/all"
+    - "../../../playbooks/hortonworks/playbooks/group_vars/ambari-server"
+  vars:
+    - cdap_cluster_name: "{{ cluster_name  }}"
+    - cdap_master_nodes: "master-nodes"
+    - cdap_management_nodes: "management-nodes"
+    - cdap_loadbalancer_vip: "{{ site_floating_ip.fqdn }}"
   roles:
     - raf/cdap/deploy
 
+- name: 'Add all cdap machines in haproxy'
+  hosts:
+    - loadbalancer-nodes
+  any_errors_fatal: true
+  vars:
+    - cdap_loadbalancer_vip: "{{ site_floating_ip.ip }}"
+  tasks:
+    - blockinfile:
+        dest: /etc/haproxy/haproxy.cfg
+        backup: yes
+        marker: "# {mark} CDAP MANAGED BLOCK"
+        block: |
+           listen CDAP_11011
+             bind {{ cdap_loadbalancer_vip }}:11011
+             mode  http
+             balance  roundrobin
+             appsession JSESSIONID len 1024 timeout 1h request-learn
+             option forwardfor
+             {% for host in groups['master-nodes'] %}server {{ hostvars[host]['ansible_hostname'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:11011
+             {%- if loop.first %} check
+             {% else %}  check
+             {% endif -%}
+             {% endfor %}
+      when: inventory_hostname in groups['loadbalancer-nodes']
