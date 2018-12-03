@@ -286,4 +286,23 @@
   delay: 30
   when: inventory_hostname == groups[cdap_management_nodes][0] and restart_reqd_services.content != ""
 
- 
+- name: Add CDAP Plugins repo
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/yum.repos.d/{{ item }}"
+  with_items:
+    - cdap-plugins.repo
+  when: install_cdap_plugins == "true"
+
+- name: Install cdap-accelerator-plugin package
+  package:
+    name: 'cdap-plugins-solution-installer'
+    state: present
+  when:
+    - inventory_hostname == groups[cdap_management_nodes][0]
+    - install_cdap_plugins == "true"
+
+- name: Run guavus cdap plugin role
+  include_role:
+    name: guavus_cdap_plugins/deploy
+  when: install_cdap_plugins == "true"
