@@ -45,7 +45,7 @@
     - /etc/alternatives/cdap-conf
     - /etc/logrotate.d/cdap
     - /opt/cdap
-    - /etc/yum.repos.d/CDAP.repo
+    - /etc/yum.repos.d/cask.repo
 
 - name: "Remove CDAP PID on all nodes"
   file:
