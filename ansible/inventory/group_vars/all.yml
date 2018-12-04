@@ -15,4 +15,4 @@ cdap_version: '5.1.0'
 cdap_major_version: '5.1.0'
 hdp_version: '2.6.5.0'
 spark2_2_home: "/usr/hdp/2.6.3.0-235/spark2"
-install_cdap_plugins: true
+install_guavus_accelerator: true

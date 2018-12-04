@@ -41,7 +41,8 @@
     - cdap_management_nodes: "management-nodes"
     - cdap_loadbalancer_vip: "{{ site_floating_ip.fqdn }}"
   roles:
-    - raf/cdap/deploy
+    - {role: raf/cdap/deploy}
+    - {role: guavus_cdap_plugins/deploy, when: install_guavus_accelerator == true}
 
 - name: 'Add all cdap machines in haproxy'
   hosts:
