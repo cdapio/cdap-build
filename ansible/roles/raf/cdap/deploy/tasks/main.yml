@@ -23,7 +23,6 @@
   user:
     name: "{{ item.user }}"
     comment: '"{{ item.comment }}"'
-    uid: "{{ item.id }}"
     group: hadoop
     groups: hadoop
   with_items:
