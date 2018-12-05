@@ -1,10 +1,5 @@
 ---
 
-- name: Run guavus cdap plugin role
-  include_role:
-    name: guavus_cdap_plugins/undeploy
-  when: install_guavus_accelerator == true
-
 - name: Stop CDAP service from Ambari
   include: stop_service.yml
   vars:

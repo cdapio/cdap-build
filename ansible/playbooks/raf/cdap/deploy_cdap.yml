@@ -43,16 +43,6 @@
   roles:
     - {role: raf/cdap/deploy}
 
-- name: CDAP deploy
-  hosts:
-    - all:!loadbalancer-nodes
-  any_errors_fatal: true
-  vars_files:
-    - "../../../playbooks/hortonworks/playbooks/group_vars/all"
-    - "../../../playbooks/hortonworks/playbooks/group_vars/ambari-server"
-  roles:
-    - { role: guavus_cdap_plugins/deploy, when: install_guavus_accelerator == true }
-
 - name: 'Add all cdap machines in haproxy'
   hosts:
     - loadbalancer-nodes
