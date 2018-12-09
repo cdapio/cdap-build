@@ -170,6 +170,7 @@
     - "{{ cdap_path_policy_config }}"
     - "{{ yarn_path_policy_config }}"
     - "{{ hbase_all_policy_config }}"
+  when: inventory_hostname == groups[cdap_management_nodes][0]
 
 - name: Install CDAP Service
   uri:
