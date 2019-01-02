@@ -43,14 +43,14 @@ pipeline {
 		"""
 	}}}
 	  
-	stage('SonarQube analysis') {
-	  steps {
-	    script {
-	      def scannerHome = tool 'sonar';
-		withSonarQubeEnv('sonar') {
-		echo "sonar"
-		sh 'cd ${WORKSPACE}/source && mvn sonar:sonar'
-            }}}}
+	//stage('SonarQube analysis') {
+	  //steps {
+	    //script {
+	      //def scannerHome = tool 'sonar';
+		//withSonarQubeEnv('sonar') {
+		//echo "sonar"
+		//sh 'cd ${WORKSPACE}/source && mvn sonar:sonar'
+            //}}}}
 	  
 	stage("RPM PUSH"){
 	  steps{
