@@ -63,7 +63,8 @@ pipeline {
 	    script{
 	    sh ''
 //	    rpm_push( env.buildType, '.', 'ggn-dev-rpms/cdap-build' )
-	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target/*.rpm', 'ggn-dev-rpms/cdap-build' )
+	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target', 'ggn-dev-rpms/cdap-build' )
+	  rpm_push( env.buildType, '${WORKSPACE}/ansible_rpm', 'ggn-dev-rpms/cdap-build' )
     }}}
   }
 	
