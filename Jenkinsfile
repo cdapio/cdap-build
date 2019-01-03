@@ -43,20 +43,20 @@ pipeline {
 		"""
 	}}}
 	
-	stage('SonarQube analysis') {
-    	  steps {
-      	      script {
-        	sonarqube('${WORKSPACE}/cdap')
-      	}}}
-	  
 	//stage('SonarQube analysis') {
-	//  steps {
-	//    script {
-	//      def scannerHome = tool 'sonar';
-	//	withSonarQubeEnv('sonar') {
-	//	echo "sonar"
-	//	sh 'cd ${WORKSPACE} && mvn sonar:sonar'
-        //    }}}}
+    	//  steps {
+      	//      script {
+        //	sonarqube('${WORKSPACE}/cdap')
+      	// }}}
+	  
+	stage('SonarQube analysis') {
+	  steps {
+	    script {
+	      def scannerHome = tool 'sonar';
+		withSonarQubeEnv('sonar') {
+		echo "sonar"
+		sh 'cd ${WORKSPACE}/cdap && mvn sonar:sonar'
+            }}}}
 	  
 	stage("RPM PUSH"){
 	  steps{
@@ -69,7 +69,7 @@ pipeline {
 	
 post {
        always {
-          reports_alerts('source/target/checkstyle-result.xml', 'source/target/surefire-reports/*.xml', 'source/**/target/site/cobertura/coverage.xml', 'allure-report/', 'index.html')
+          reports_alerts('target/checkstyle-result.xml', 'target/surefire-reports/*.xml', '**/target/site/cobertura/coverage.xml', 'allure-report/', 'index.html')
      	  slackalert('jenkins-cdap-alerts')
        }
     }
