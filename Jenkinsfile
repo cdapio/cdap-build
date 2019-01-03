@@ -42,15 +42,21 @@ pipeline {
 		-Dsecurity.extensions.dir=${env.WORKSPACE}/security-extensions -DbuildNumber=${REL_BUILD_NO}   \
 		"""
 	}}}
-	  
+	
 	stage('SonarQube analysis') {
-	  steps {
-	    script {
-	      def scannerHome = tool 'sonar';
-		withSonarQubeEnv('sonar') {
-		echo "sonar"
-		sh 'cd #${WORKSPACE}/source && mvn sonar:sonar'
-            }}}}
+    	  steps {
+      	      script {
+        	sonarqube('${WORKSPACE}/cdap')
+      	}}}
+	  
+	//stage('SonarQube analysis') {
+	//  steps {
+	//    script {
+	//      def scannerHome = tool 'sonar';
+	//	withSonarQubeEnv('sonar') {
+	//	echo "sonar"
+	//	sh 'cd ${WORKSPACE} && mvn sonar:sonar'
+        //    }}}}
 	  
 	stage("RPM PUSH"){
 	  steps{
