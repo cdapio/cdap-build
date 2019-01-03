@@ -43,21 +43,21 @@ pipeline {
 		"""
 	}}}
 	  
-	//stage('SonarQube analysis') {
-	  //steps {
-	    //script {
-	      //def scannerHome = tool 'sonar';
-		//withSonarQubeEnv('sonar') {
-		//echo "sonar"
-		//sh 'cd ${WORKSPACE}/source && mvn sonar:sonar'
-            //}}}}
+	stage('SonarQube analysis') {
+	  steps {
+	    script {
+	      def scannerHome = tool 'sonar';
+		withSonarQubeEnv('sonar') {
+		echo "sonar"
+		sh 'cd #${WORKSPACE}/source && mvn sonar:sonar'
+            }}}}
 	  
 	stage("RPM PUSH"){
 	  steps{
 	    script{
 	    sh ''
 //	    rpm_push( env.buildType, '.', 'ggn-dev-rpms/cdap-build' )
-	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target/', 'ggn-dev-rpms/cdap-build' )
+	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target', 'ggn-dev-rpms/cdap-build' )
     }}}
   }
 	
