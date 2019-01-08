@@ -11,8 +11,8 @@ ambari_admin_user: 'admin'
 ambari_admin_password: 'Sbe7UGkRBMF8'
 cdap_properties_dir: "/opt/guavus/ambari-api/cdap/properties"
 site_default_rpm_repo_host: "artifacts.ggn.in.guavus.com:80"
-cdap_version: '5.1.0'
-cdap_major_version: '5.1.0'
+cdap_version: '5.1.2'
+cdap_major_version: '5.1.2'
 hdp_version: '2.6.5.0'
 spark2_2_home: "/usr/hdp/2.6.3.0-235/spark2"
 install_guavus_accelerator: true

@@ -1,7 +1,7 @@
 [submodule "cdap"]
 	path = cdap
 	url = https://github.com/Guavus/cdap.git
-	branch = build_guavus_5.1
+	branch = build_guavus_5.1.2
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = https://github.com/Guavus/hydrator-plugins.git
