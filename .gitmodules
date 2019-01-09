@@ -29,3 +29,4 @@
 [submodule "app-artifacts/auto-feature-engineering"]
 	path = app-artifacts/auto-feature-engineering
 	url = git@github.com:Guavus/auto-feature-engineering.git
+        branch = 1.0.0
