@@ -58,7 +58,7 @@ pipeline {
 	    sh ''
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap-ambari-service/target', 'ggn-dev-rpms/cdap-build' )
-	  rpm_push( env.buildType, '${WORKSPACE}/cdap-provisioner*.rpm', 'ggn-dev-rpms/cdap-build' )
+	  rpm_push( env.buildType, 'cdap-provisioner*.rpm', 'ggn-dev-rpms/cdap-build' )
     }}}
   }
 	
