@@ -12,7 +12,7 @@
 	branch = release/0.8
 [submodule "apache-sentry"]
 	path = apache-sentry
-	url = git://git.apache.org/sentry.git
+	url = https://gitbox.apache.org/repos/asf/sentry.git
 	branch = branch-1.7.0
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
