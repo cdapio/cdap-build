@@ -1,0 +1,44 @@
+---
+
+- name: Retrieve facts all host
+  hosts:
+    - all
+  gather_facts: true
+  any_errors_fatal: True
+  tags:
+    - 'always'
+  tasks: []
+
+- name: "Set raf docker registry"
+  hosts:
+    - management-nodes
+  tags:
+    - always
+  tasks:
+    - set_fact:
+        raf_docker_registry: '{{ docker_default_registry }}'
+      when: site_connectivity == 'offline'
+    - debug:
+        msg: "Raf docker registry is: {{ raf_docker_registry }}"
+    - set_fact:
+        site_floating_ip:
+          ip: "{{ hostvars[groups['management-nodes'][0]]['ansible_default_ipv4']['address'] }}"
+      when: site_deployment_type == 'NONHA'
+    - debug:
+        msg: "Setup type is NONHA and site_floating_ip.ip is: {{ site_floating_ip.ip }}"
+      when: site_deployment_type == 'NONHA'
+ 
+- name: Enabling Security for CDAP
+  hosts:
+    - all:!loadbalancer-nodes
+  any_errors_fatal: true
+  vars_files:
+    - "../../../playbooks/hortonworks/playbooks/group_vars/all"
+    - "../../../playbooks/hortonworks/playbooks/group_vars/ambari-server"
+  vars:
+    - cdap_cluster_name: "{{ cluster_name  }}"
+    - cdap_master_nodes: "master-nodes"
+    - cdap_management_nodes: "management-nodes"
+    - cdap_loadbalancer_vip: "{{ site_floating_ip.ip }}"
+  roles:
+    - {role: raf/cdap-perimeter-security/deploy}

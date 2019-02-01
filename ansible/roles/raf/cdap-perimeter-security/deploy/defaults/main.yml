@@ -1,0 +1,91 @@
+---
+# defaults file for cdap-parameter-security
+postgres_port: 5432
+mysql_port: 3306
+rangeradmin_username: "admin"
+rangeradmin_password: "Sbe7UGkRBMF8"
+
+cdap_loadbalancer_vip: "{{ site_floating_ip.ip }}"
+cluster_name: '{{ site_inventory_name }}-reflex-platform'
+site_deployment_type: "{{site_deployment_type}}"
+install_using_public_repos: "false"
+cdap_master_nodes: "master-nodes"
+cdap_management_nodes: "management-nodes"
+raf_docker_registry: "artifacts.ggn.in.guavus.com:4245"
+ambari_admin_user: 'admin'
+ambari_admin_password: 'Sbe7UGkRBMF8'
+cdap_properties_dir: "/opt/guavus/ambari-api/cdap/properties"
+site_default_rpm_repo_host: "artifacts.ggn.in.guavus.com:80"
+cdap_version: '5.1.2'
+cdap_major_version: '5.1.2'
+hdp_version: '2.6.5.0'
+spark2_2_home: "/usr/hdp/2.6.3.0-235/spark2"
+install_guavus_accelerator: true
+
+#----------------------------
+#    cdap-site parameter
+#----------------------------
+cdap__security_enabled: 'true'
+cdap__ssl_external_enabled: 'true'
+cdap__router_ssl_bind_port: 10443
+cdap__security_auth_server_ssl_bind_port: 10010
+cdap__dashboard_ssl_bind_port: 9443
+cdap__security_auth_server_ssl_truststore_path: /etc/cdap/truststore.jks
+cdap__security_auth_server_ssl_truststore_password: changeit
+cdap__security_auth_server_ssl_truststore_type: JKS
+cdap__dashboard_ssl_disable_cert_check: 'true'
+
+#----------------------------
+#   cdap-security parameter
+#----------------------------
+cdap__security_auth_server_ssl_keystore_path: /etc/cdap/keystore.jks
+cdap__security_auth_server_ssl_keystore_password: changeit
+cdap__security_auth_server_ssl_keystore_keypassword: changeit
+cdap__security_auth_server_ssl_keystore_type: JKS
+cdap__router_ssl_keystore_path: /etc/cdap/keystore.jks
+cdap__router_ssl_keystore_password: changeit
+cdap__router_ssl_keystore_keypassword: changeit
+cdap__router_ssl_keystore_type: JKS
+cdap__dashboard_ssl_cert: /etc/cdap/cdap-ui-cert.pem
+cdap__dashboard_ssl_key: /etc/cdap/cdap-ui-key.key
+
+#----------------------------
+#   cdap-site kerberos
+#----------------------------
+cdap__kerberos_auth_enabled: 'true'
+cdap__cdap_master_kerberos_keytab: "/etc/security/keytabs/cdap.service.keytab"
+cdap__cdap_master_kerberos_principal: "cdap/_HOST@GVS.GGN"
+
+#----------------------------
+#  cdap-site authentication
+#----------------------------
+cdap__security_authentication_handlerClassName: "co.cask.cdap.security.server.LDAPAuthenticationHandler"
+cdap__security_authentication_loginmodule_className: "co.cask.cdap.security.server.LDAPLoginModule"
+cdap__security_authentication_handler_debug: 'true'
+cdap__security_authentication_handler_hostname: "guavus.com"
+cdap__security_authentication_handler_port: "636"
+cdap__security_authentication_handler_userBaseDn: "OU=gurgaon,OU=India,OU=UserIDs,DC=guavus,DC=com"
+cdap__security_authentication_handler_userRdnAttribute: "sAMAccountName"
+cdap__security_authentication_handler_userObjectClass: "user"
+cdap__security_authentication_handler_userIdAttribute: "sAMAccountName"
+cdap__security_authentication_handler_roleBaseDn: "OU=Groups,DC=guavus,DC=com"
+cdap__security_authentication_handler_roleNameAttribute: "cn"
+cdap__security_authentication_handler_roleMemberAttribute: "member"
+cdap__security_authentication_handler_roleObjectClass: "group"
+
+#--------------------------------
+#  cdap-security authentication
+#--------------------------------
+cdap__security_authentication_handler_bindDn: "CN=svc-devops,OU=ApplicationObjects,OU=Custom,DC=guavus,DC=com"
+cdap__security_authentication_handler_bindPassword: MSWmdT9XZnQwJ9GntCsG
+
+#-----------------------------------
+#  cdap-site AD SSL authentication
+#-----------------------------------
+cdap__security_authentication_handler_useLdaps: 'true'
+cdap__security_authentication_handler_ldapsVerifyCertificate: 'false'
+
+#----------------------------
+#   cdap jar path
+#----------------------------
+cdap__cdap_jar_path: "/home/cdap_security.tar"
