@@ -9,7 +9,6 @@
     - { config: 'cdap-site', key: 'security.auth.server.ssl.bind.port', value: '{{cdap__security_auth_server_ssl_bind_port}}' }
     - { config: 'cdap-site', key: 'dashboard.ssl.bind.port', value: '{{cdap__dashboard_ssl_bind_port}}' }
     - { config: 'cdap-site', key: 'security.auth.server.ssl.truststore.path', value: '{{cdap__security_auth_server_ssl_truststore_path}}' }
-    - { config: 'cdap-site', key: 'security.auth.server.ssl.truststore.password', value: '{{cdap__security_auth_server_ssl_truststore_password}}' }
     - { config: 'cdap-site', key: 'security.auth.server.ssl.truststore.type', value: '{{cdap__security_auth_server_ssl_truststore_type}}' }
     - { config: 'cdap-site', key: 'dashboard.ssl.disable.cert.check', value: '{{cdap__dashboard_ssl_disable_cert_check}}' }
   when: inventory_hostname == groups[cdap_management_nodes][0]
@@ -18,12 +17,8 @@
   shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
   with_items:
     - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.path', value: '{{cdap__security_auth_server_ssl_keystore_path}}' }
-    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.password', value: '{{cdap__security_auth_server_ssl_keystore_password}}' }
-    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.keypassword', value: '{{cdap__security_auth_server_ssl_keystore_keypassword}}' }
     - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.type', value: '{{cdap__security_auth_server_ssl_keystore_type}}' }
     - { config: 'cdap-security', key: 'router.ssl.keystore.path', value: '{{cdap__router_ssl_keystore_path}}' }
-    - { config: 'cdap-security', key: 'router.ssl.keystore.password', value: '{{cdap__router_ssl_keystore_password}}' }
-    - { config: 'cdap-security', key: 'router.ssl.keystore.keypassword', value: '{{cdap__router_ssl_keystore_keypassword}}' }
     - { config: 'cdap-security', key: 'router.ssl.keystore.type', value: '{{cdap__router_ssl_keystore_type}}' }
     - { config: 'cdap-security', key: 'dashboard.ssl.cert', value: '{{cdap__dashboard_ssl_cert}}' }
     - { config: 'cdap-security', key: 'dashboard.ssl.key', value: '{{cdap__dashboard_ssl_key}}' }
@@ -60,7 +55,19 @@
   shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
   with_items:
     - { config: 'cdap-security', key: 'security.authentication.handler.bindDn', value: '{{cdap__security_authentication_handler_bindDn}}' }
+  when: inventory_hostname == groups[cdap_management_nodes][0]
+
+- name: Setting Config Password
+- name: Enabling AD authentication (cdap-security) 
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
     - { config: 'cdap-security', key: 'security.authentication.handler.bindPassword', value: '{{cdap__security_authentication_handler_bindPassword}}' }
+    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.password', value: '{{cdap__security_auth_server_ssl_keystore_password}}' }
+    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.keypassword', value: '{{cdap__security_auth_server_ssl_keystore_keypassword}}' }
+    - { config: 'cdap-security', key: 'router.ssl.keystore.password', value: '{{cdap__router_ssl_keystore_password}}' }
+    - { config: 'cdap-security', key: 'router.ssl.keystore.keypassword', value: '{{cdap__router_ssl_keystore_keypassword}}' }
+    - { config: 'cdap-site', key: 'security.auth.server.ssl.truststore.password', value: '{{cdap__security_auth_server_ssl_truststore_password}}' }
+  no_log: true
   when: inventory_hostname == groups[cdap_management_nodes][0]
 
 - name: Enabling AD SSL authentication (cdap-site)
