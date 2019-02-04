@@ -44,6 +44,9 @@ cp -rfP ./ansible/playbooks/raf ${RPM_BUILD_ROOT}/%{reflex_root_prefix}/playbook
 cp -rfP ./ansible/roles/raf ${RPM_BUILD_ROOT}/%{reflex_root_prefix}/roles/
 cp -rfP ./ansible/inventory/group_vars/all.yml ${RPM_BUILD_ROOT}/%{reflex_root_prefix}/inventory/templates/group_vars/global/all/raf/cdap.yml
 
+# Copying cdap_security.tar 
+cp -rfP ./cdap_security.tar ${RPM_BUILD_ROOT}/%{raf_repo_path}/
+
 
 %clean
 rm -rf %{buildroot}
