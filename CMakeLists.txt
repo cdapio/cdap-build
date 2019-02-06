@@ -25,7 +25,7 @@ add_custom_target(cdap_provisioner_rpm ALL
                   -r ${CMAKE_CURRENT_SOURCE_DIR}
                   -o ${PLATFORM_RPM_REFLEX_DIR}
                   --version ${SUPER_VERSION}
-                  --release $ENV{BUILD_NUMBER}
+                  --release $ENV{RELEASE}
                   VERBATIM)
 
 add_dependencies(cdap_provisioner_rpm patch_build_id)
