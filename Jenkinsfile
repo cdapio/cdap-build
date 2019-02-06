@@ -14,7 +14,6 @@ pipeline {
 	stage('Build') {
 	  steps {
 	    script {
-		def REL_BUILD_NO = currentBuild.getNumber()
 		sh"""
 		git clean -xfd  && \
 		git submodule foreach --recursive git clean -xfd && \
@@ -39,7 +38,7 @@ pipeline {
 		-DskipTests \
 		-Dcheckstyle.skip=true \
 		-Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
-		-Dsecurity.extensions.dir=${env.WORKSPACE}/security-extensions -DbuildNumber=${REL_BUILD_NO}   \
+		-Dsecurity.extensions.dir=${env.WORKSPACE}/security-extensions -DbuildNumber=${env.RELEASE}   \
 		"""
 	}}}
 	  
