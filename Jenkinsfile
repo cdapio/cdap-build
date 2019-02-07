@@ -35,7 +35,7 @@ pipeline {
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
 		rm -rf ${env.WORKSPACE}/ansible_rpm/*.rpm  && \
 		cd cdap && \
-		mvn clean install -DskipTests && \
+		mvn clean install -DskipTests -Dcheckstyle.skip && \
 		cd .. && \
 		mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
 		-DskipTests \
