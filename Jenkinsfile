@@ -34,6 +34,9 @@ pipeline {
 		mvn install -DskipTests -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
 		rm -rf ${env.WORKSPACE}/ansible_rpm/*.rpm  && \
+		cd cdap && \
+		mvn clean install -DskipTests && \
+		cd .. && \
 		mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
 		-DskipTests \
 		-Dcheckstyle.skip=true \
