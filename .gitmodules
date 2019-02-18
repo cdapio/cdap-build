@@ -25,4 +25,4 @@
 [submodule "sentry"]
 	path = sentry
 	url = https://github.com/Guavus/sentry
-	branch = branch-1.7.0
+	branch = build_guavus_1.7.0_5.1.201
