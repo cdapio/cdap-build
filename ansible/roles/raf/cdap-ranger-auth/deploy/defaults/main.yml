@@ -4,7 +4,7 @@
 #---------------------------
 #  cdap 
 #----------------------------
-cdap__security_authorization_enabled: 'true'
+cdap__security_authorization_enabled: "{{is_security_authorization_enabled}}"
 cdap__security_authorization_extension_jar_path: "/opt/cdap/master/ext/security/cdap-ranger-binding-0.1.4.jar"
 cdap__security_authorization_extension_extra_classpath: "/usr/local/ranger-cdap-conf/"
 

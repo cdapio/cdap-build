@@ -2,34 +2,34 @@
 #----------------------------
 #    cdap-site parameter
 #----------------------------
-cdap__security_enabled: 'true'
-cdap__ssl_external_enabled: 'true'
+cdap__security_enabled: "{{is_security_enabled}}"
+cdap__ssl_external_enabled: "{{cdap__security_enabled}}"
 cdap__router_ssl_bind_port: 10443
 cdap__security_auth_server_ssl_bind_port: 10010
 cdap__dashboard_ssl_bind_port: 9443
-cdap__security_auth_server_ssl_truststore_path: /etc/cdap/truststore.jks
-cdap__security_auth_server_ssl_truststore_password: changeit
+cdap__security_auth_server_ssl_truststore_path: "{{security_auth_server_ssl_truststore_path}}"
+cdap__security_auth_server_ssl_truststore_password: "{{security_auth_server_ssl_truststore_password}}"
 cdap__security_auth_server_ssl_truststore_type: JKS
-cdap__dashboard_ssl_disable_cert_check: 'true'
+cdap__dashboard_ssl_disable_cert_check: "{{is_dashboard_ssl_disable_cert_check}}"
 
 #----------------------------
 #   cdap-security parameter
 #----------------------------
-cdap__security_auth_server_ssl_keystore_path: /etc/cdap/keystore.jks
-cdap__security_auth_server_ssl_keystore_password: changeit
-cdap__security_auth_server_ssl_keystore_keypassword: changeit
+cdap__security_auth_server_ssl_keystore_path: "{{security_auth_server_ssl_keystore_path}}"
+cdap__security_auth_server_ssl_keystore_password: "{{security_auth_server_ssl_keystore_password}}"
+cdap__security_auth_server_ssl_keystore_keypassword: "{{security_auth_server_ssl_keystore_keypassword}}"
 cdap__security_auth_server_ssl_keystore_type: JKS
-cdap__router_ssl_keystore_path: /etc/cdap/keystore.jks
-cdap__router_ssl_keystore_password: changeit
-cdap__router_ssl_keystore_keypassword: changeit
+cdap__router_ssl_keystore_path: "{{router_ssl_keystore_path}}"
+cdap__router_ssl_keystore_password: "{{router_ssl_keystore_password}}"
+cdap__router_ssl_keystore_keypassword: "{{router_ssl_keystore_keypassword}}"
 cdap__router_ssl_keystore_type: JKS
-cdap__dashboard_ssl_cert: /etc/cdap/cdap-ui-cert.pem
-cdap__dashboard_ssl_key: /etc/cdap/cdap-ui-key.key
+cdap__dashboard_ssl_cert: "{{dashboard_ssl_cert}}"
+cdap__dashboard_ssl_key: "{{dashboard_ssl_key}}"
 
 #----------------------------
 #   cdap-site kerberos
 #----------------------------
-cdap__kerberos_auth_enabled: 'true'
+cdap__kerberos_auth_enabled: "{{is_kerberos_auth_enabled}}"
 cdap__cdap_master_kerberos_keytab: "/etc/security/keytabs/cdap.service.keytab"
 cdap__cdap_master_kerberos_principal: "cdap/_HOST@GVS.GGN"
 
@@ -38,31 +38,31 @@ cdap__cdap_master_kerberos_principal: "cdap/_HOST@GVS.GGN"
 #----------------------------
 cdap__security_authentication_handlerClassName: "co.cask.cdap.security.server.LDAPAuthenticationHandler"
 cdap__security_authentication_loginmodule_className: "co.cask.cdap.security.server.LDAPLoginModule"
-cdap__security_authentication_handler_debug: 'true'
-cdap__security_authentication_handler_hostname: "guavus.com"
-cdap__security_authentication_handler_port: "636"
-cdap__security_authentication_handler_userBaseDn: "OU=gurgaon,OU=India,OU=UserIDs,DC=guavus,DC=com"
-cdap__security_authentication_handler_userRdnAttribute: "sAMAccountName"
-cdap__security_authentication_handler_userObjectClass: "user"
-cdap__security_authentication_handler_userIdAttribute: "sAMAccountName"
-cdap__security_authentication_handler_roleBaseDn: "OU=Groups,DC=guavus,DC=com"
-cdap__security_authentication_handler_roleNameAttribute: "cn"
-cdap__security_authentication_handler_roleMemberAttribute: "member"
-cdap__security_authentication_handler_roleObjectClass: "group"
+cdap__security_authentication_handler_debug: "{{is_security_authentication_handler_debug}}"
+cdap__security_authentication_handler_hostname: "{{security_authentication_handler_hostname}}"
+cdap__security_authentication_handler_port: "{{security_authentication_handler_port}}"
+cdap__security_authentication_handler_userBaseDn: "{{security_authentication_handler_userBaseDn}}"
+cdap__security_authentication_handler_userRdnAttribute: "{{security_authentication_handler_userRdnAttribute}}"
+cdap__security_authentication_handler_userObjectClass: "{{security_authentication_handler_userObjectClass}}"
+cdap__security_authentication_handler_userIdAttribute: "{{security_authentication_handler_userIdAttribute}}"
+cdap__security_authentication_handler_roleBaseDn: "{{security_authentication_handler_roleBaseDn}}"
+cdap__security_authentication_handler_roleNameAttribute: "{{security_authentication_handler_roleNameAttribute}}"
+cdap__security_authentication_handler_roleMemberAttribute: "{{security_authentication_handler_roleMemberAttribute}}"
+cdap__security_authentication_handler_roleObjectClass: "{{security_authentication_handler_roleObjectClass}}"
 
 #--------------------------------
 #  cdap-security authentication
 #--------------------------------
-cdap__security_authentication_handler_bindDn: "CN=svc-devops,OU=ApplicationObjects,OU=Custom,DC=guavus,DC=com"
-cdap__security_authentication_handler_bindPassword: changeit
+cdap__security_authentication_handler_bindDn: "{{security_authentication_handler_bindDn}}"
+cdap__security_authentication_handler_bindPassword: "{{security_authentication_handler_bindPassword}}"
 
 #-----------------------------------
 #  cdap-site AD SSL authentication
 #-----------------------------------
-cdap__security_authentication_handler_useLdaps: 'true'
-cdap__security_authentication_handler_ldapsVerifyCertificate: 'false'
+cdap__security_authentication_handler_useLdaps: "{{is_security_authentication_handler_useLdaps}}"
+cdap__security_authentication_handler_ldapsVerifyCertificate: "{{is_security_authentication_handler_ldapsVerifyCertificate}}"
 
 #----------------------------
 #   cdap jar path
 #----------------------------
-cdap__cdap_jar_path: "/home/cdap_security.tar"
+cdap__cdap_jar_path: "/opt/repos/raf/cdap_security.tar"

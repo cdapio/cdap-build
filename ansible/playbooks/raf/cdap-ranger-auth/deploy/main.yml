@@ -15,6 +15,8 @@
   tags:
     - always
   tasks:
+    - debug:
+        msg: "Environment should be kerberos for enabling CDAP security and kerberos is {{is_kerberos_auth_enabled}}"
     - set_fact:
         site_floating_ip:
           ip: "{{ hostvars[groups['management-nodes'][0]]['ansible_default_ipv4']['address'] }}"
@@ -27,10 +29,6 @@
   hosts:
     - all:!loadbalancer-nodes
   any_errors_fatal: true
-  vars:
-    - cdap_cluster_name: "{{ cluster_name  }}"
-    - cdap_master_nodes: "master-nodes"
-    - cdap_management_nodes: "management-nodes"
-    - cdap_loadbalancer_vip: "{{ site_floating_ip.ip }}"
   roles:
     - {role: raf/cdap-ranger-auth/deploy}
+  when: is_kerberos_auth_enabled == true

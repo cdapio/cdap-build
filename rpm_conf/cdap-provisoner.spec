@@ -42,7 +42,7 @@ mkdir -p ${RPM_BUILD_ROOT}/%{raf_repo_path}/rpms
 mkdir -p ${RPM_BUILD_ROOT}/%{raf_repo_path}/docker
 cp -rfP ./ansible/playbooks/raf ${RPM_BUILD_ROOT}/%{reflex_root_prefix}/playbooks/
 cp -rfP ./ansible/roles/raf ${RPM_BUILD_ROOT}/%{reflex_root_prefix}/roles/
-cp -rfP ./ansible/inventory/group_vars/all.yml ${RPM_BUILD_ROOT}/%{reflex_root_prefix}/inventory/templates/group_vars/global/all/raf/cdap.yml
+cp -rfP ./ansible/inventory/group_vars/* ${RPM_BUILD_ROOT}/%{reflex_root_prefix}/inventory/templates/group_vars/global/all/raf/
 
 
 %clean

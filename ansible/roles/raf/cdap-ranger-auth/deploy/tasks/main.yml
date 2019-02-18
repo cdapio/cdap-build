@@ -7,7 +7,7 @@
     - { config: 'cdap-site', key: 'security.authorization.enabled', value: '{{cdap__security_authorization_enabled}}' }
     - { config: 'cdap-site', key: 'security.authorization.extension.jar.path', value: '{{cdap__security_authorization_extension_jar_path}}' }
     - { config: 'cdap-site', key: 'security.authorization.extension.extra.classpath', value: '{{cdap__security_authorization_extension_extra_classpath}}' }
-  when: inventory_hostname == groups[cdap_management_nodes][0]
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
 
 - name: Creating required CDAP plugin directory
   file:
@@ -15,8 +15,7 @@
     state: directory
     owner: ranger
     group: ranger
-  when: inventory_hostname == groups[cdap_management_nodes][0]
-
+  when: inventory_hostname in groups['ranger-nodes']
 
 - name: Fetching CDAP Ranger lookup jar to CDAP plugin directory
   fetch:
@@ -26,7 +25,7 @@
     remote_src: yes
   with_items:
     - "{{ cdap__ranger_lookup_jar }}"
-  when: inventory_hostname == groups[cdap_master_nodes][0]
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Setting required ownership & permission
   file:
@@ -34,11 +33,11 @@
     owner: ranger
     group: ranger
     recurse: yes 
-  when: inventory_hostname == groups[cdap_management_nodes][0]
+  when: inventory_hostname in groups['ranger-nodes']
 
 - name: Add CDAP services to Ranger Admin
   uri:
-    url: "http://{{ hostvars[groups['management-nodes'][0]]['ansible_hostname'] }}:6080/service/plugins/definitions"
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/plugins/definitions"
     method: POST
     force_basic_auth: yes
     user: "{{ rangeradmin_username }}"
@@ -50,7 +49,7 @@
     return_content: no
   with_items:
     - "{{ cdap__ranger_servicedef_cdap }}"
-  when: inventory_hostname == groups[cdap_management_nodes][0]
+  when: inventory_hostname == groups['ranger-nodes'][0]
 
 - name: Installing CDAP Authorization Binding for Enforcement
   file:
@@ -58,7 +57,7 @@
     state: directory
     owner: cdap
     group: cdap
-  when: inventory_hostname == groups[cdap_management_nodes][0]
+  when: inventory_hostname in groups['ranger-nodes']
 
 - name: Copying ranger cdap config files
   template:
@@ -70,7 +69,7 @@
     - ranger-cdap-audit
     - ranger-cdap-security
     - ranger-policymgr-ssl
-  when: inventory_hostname == groups[cdap_management_nodes][0]
+  when: inventory_hostname in groups['ranger-nodes']
 
 - name: Start CDAP Service
   uri:
@@ -84,7 +83,7 @@
     status_code: 200,201,202,404
     return_content: yes
   register: cdap_start_task
-  when: inventory_hostname == groups[cdap_management_nodes][0]
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
 
 - name: WAIT FOR CDAP TO START
   uri:
@@ -102,7 +101,7 @@
          (cdap_check_task.content|from_json).Requests.request_status == 'ABORTED')
   retries: 20
   delay: 30
-  when: inventory_hostname == groups[cdap_management_nodes][0] and cdap_start_task.content != ""
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and cdap_start_task.content != ""
 
 
 - name: Restart ALL Required SERVICES
@@ -117,7 +116,7 @@
     status_code: 200,201,202,404
     return_content: yes
   register: restart_reqd_services
-  when: inventory_hostname == groups[cdap_management_nodes][0]
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
 
 - name: WAIT FOR SERVICES TO RESTART
   uri:
@@ -133,4 +132,4 @@
   until: (restartservice.content|from_json).Requests.request_status == 'COMPLETED'
   retries: 30
   delay: 30
-  when: inventory_hostname == groups[cdap_management_nodes][0] and restart_reqd_services.content != ""
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and restart_reqd_services.content != ""
