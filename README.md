@@ -72,6 +72,9 @@ mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,t
  -Dsecurity.extensions.dir=$(pwd)/security-extensions
 ```
 
+## Confluence Link for CDAP Builds / Versions and Branches.
+https://guavus.atlassian.net/wiki/spaces/RAF/pages/446398514/Guavus+CDAP+RAF+Releases
+
 ## Guavus steps to BUILD CDAP RPMs
 
 Run the following commands to successfully build the CDAP RPMs
