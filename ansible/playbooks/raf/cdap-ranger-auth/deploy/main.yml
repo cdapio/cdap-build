@@ -30,5 +30,4 @@
     - all:!loadbalancer-nodes
   any_errors_fatal: true
   roles:
-    - {role: raf/cdap-ranger-auth/deploy}
-  when: is_kerberos_auth_enabled == true
+    - {role: raf/cdap-ranger-auth/deploy, when: is_kerberos_auth_enabled == true}
