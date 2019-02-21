@@ -13,6 +13,9 @@ cdap__security_authorization_extension_extra_classpath: "/usr/local/ranger-cdap-
 #-----------------------
 cdap__ranger_lookup_jar: cdap-ranger-lookup-0.1.4-jar-with-dependencies.jar
 
+rangeradmin_username: "admin"
+rangeradmin_password: "Sbe7UGkRBMF8"
+
 cdap__ranger_servicedef_cdap: |
   {
     "id": 11,
