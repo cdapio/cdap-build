@@ -70,7 +70,6 @@
   when: inventory_hostname == groups['cdap-management-nodes'][0]
 
 - name: Setting Config Password
-- name: Enabling AD authentication (cdap-security) 
   shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
   with_items:
     - { config: 'cdap-security', key: 'security.authentication.handler.bindPassword', value: '{{cdap__security_authentication_handler_bindPassword}}' }
