@@ -33,9 +33,6 @@ pipeline {
 		cd cdap && \
 		mvn clean install -DskipTests -Dcheckstyle.skip && \
 		cd .. && \
-		cd cdap && \
-		mvn clean install -DskipTests -Dcheckstyle.skip && \
-		cd .. && \
 		mvn install -DskipTests -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
 		mvn install -DskipTests -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
