@@ -57,7 +57,7 @@
     state: directory
     owner: cdap
     group: cdap
-  when: inventory_hostname in groups['ranger-nodes']
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Copying ranger cdap config files
   template:
@@ -69,7 +69,7 @@
     - ranger-cdap-audit
     - ranger-cdap-security
     - ranger-policymgr-ssl
-  when: inventory_hostname in groups['ranger-nodes']
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Start CDAP Service
   uri:

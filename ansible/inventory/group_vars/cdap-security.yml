@@ -1,3 +1,16 @@
+#---------------------------
+# Use default ssl cert & key
+# or keystore & truststore
+#--------------------------
+use_default_ssl_cert: false
+use_default_store: false
+
+security_auth_server_ssl_truststore_path: /etc/cdap/truststore.jks                            # location on management node
+security_auth_server_ssl_keystore_path: /etc/cdap/keystore.jks                            # location on management node
+router_ssl_keystore_path: /etc/cdap/keystore.jks                            # location on management node
+dashboard_ssl_cert: /etc/cdap/cdap-ui-cert.pem                            # location on management node
+dashboard_ssl_key: /etc/cdap/cdap-ui-key.key                            # location on management node
+
 #---------------------
 # CDAP Security Config
 #---------------------
@@ -21,11 +34,6 @@ security_authentication_handler_roleMemberAttribute: "member"
 security_authentication_handler_roleObjectClass: "group"
 security_authentication_handler_bindDn: "CN=svc-devops,OU=ApplicationObjects,OU=Custom,DC=guavus,DC=com"
 
-security_auth_server_ssl_truststore_path: /etc/cdap/truststore.jks
-security_auth_server_ssl_keystore_path: /etc/cdap/keystore.jks
-router_ssl_keystore_path: /etc/cdap/keystore.jks
-dashboard_ssl_cert: /etc/cdap/cdap-ui-cert.pem
-dashboard_ssl_key: /etc/cdap/cdap-ui-key.key
 security_auth_server_ssl_truststore_password: changeit
 security_auth_server_ssl_keystore_password: changeit
 security_auth_server_ssl_keystore_keypassword: changeit

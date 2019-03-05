@@ -1,5 +1,24 @@
 ---
 # tasks file for cdap-parameter-security
+- name: Use Default SSL cert and key
+  copy:
+    src: "{{item | basename}}"
+    dest: "{{ item }}"
+  with_items:
+    - "{{dashboard_ssl_cert}}"
+    - "{{dashboard_ssl_key}}"
+  when: use_default_ssl_cert == true
+
+- name: Use Default JKS keystore & truststore
+  copy:
+    src: "{{item | basename}}"
+    dest: "{{ item }}"
+  with_items:
+    - "{{security_auth_server_ssl_truststore_path}}"
+    - "{{security_auth_server_ssl_keystore_path}}"
+    - "{{router_ssl_keystore_path}}"
+  when: use_default_store == true
+
 - name: Copying keystore and truststore to cdap nodes
   copy:
     src: "{{ item.src }}"
@@ -191,3 +210,22 @@
   retries: 30
   delay: 30
   when: inventory_hostname == groups['cdap-management-nodes'][0] and restart_reqd_services.content != ""
+
+- name: 'Add all cdap machines in haproxy'
+  blockinfile:
+    dest: /etc/haproxy/haproxy.cfg
+    backup: yes
+    marker: "# {mark} CDAP SSL MANAGED BLOCK"
+    block: |
+       listen CDAP_9443
+         bind {{ cdap_loadbalancer_vip }}:9443
+         mode  https
+         balance  roundrobin
+         appsession JSESSIONID len 1024 timeout 1h request-learn
+         option forwardfor
+         {% for host in groups['cdap-master-nodes'] %}server {{ hostvars[host]['ansible_hostname'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:9443
+         {%- if loop.first %} check
+         {% else %}  check
+         {% endif -%}
+         {% endfor %}
+  when: inventory_hostname in groups['loadbalancer-nodes']
