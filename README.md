@@ -111,8 +111,11 @@ mvn package -P examples,templates,dist,release,rpm-prepare,rpm \
 -DbuildNumber=1
 ```
 
-## To Upgrade version for all pom's inside the cdap submodule
+## To Upgrade version 
+For all pom's inside the cdap submodule
 ```
 grep -lr --include=pom.xml "5.1.201" * | xargs sed -i -e 's/5.1.201/5.1.202/g'
 ```
 Above command is to upgrade from version 5.1.201 to 5.1.202
+
+In All submodules change the version of variable cdap.version inside the pom.xml to the version we are upgrading
