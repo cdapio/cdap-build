@@ -7,7 +7,7 @@
   with_items:
     - "{{dashboard_ssl_cert}}"
     - "{{dashboard_ssl_key}}"
-  when: use_default_ssl_cert == true
+  when: use_default_ssl_cert == true and inventory_hostname in groups['management-nodes']
 
 - name: Use Default JKS keystore & truststore
   copy:
@@ -17,7 +17,7 @@
     - "{{security_auth_server_ssl_truststore_path}}"
     - "{{security_auth_server_ssl_keystore_path}}"
     - "{{router_ssl_keystore_path}}"
-  when: use_default_store == true
+  when: use_default_store == true and inventory_hostname in groups['management-nodes']
 
 - name: Copying keystore and truststore to cdap nodes
   copy:
@@ -219,7 +219,7 @@
     block: |
        listen CDAP_9443
          bind {{ cdap_loadbalancer_vip }}:9443
-         mode  https
+         mode  tcp
          balance  roundrobin
          appsession JSESSIONID len 1024 timeout 1h request-learn
          option forwardfor
@@ -228,4 +228,6 @@
          {% else %}  check
          {% endif -%}
          {% endfor %}
+  notify:
+      - restart haproxy
   when: inventory_hostname in groups['loadbalancer-nodes']

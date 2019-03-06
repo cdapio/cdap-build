@@ -27,7 +27,7 @@
  
 - name: Enabling Security for CDAP
   hosts:
-    - all:!loadbalancer-nodes
+    - all:loadbalancer-nodes
   any_errors_fatal: true
   roles:
     - {role: raf/cdap-perimeter-security/deploy, when: is_kerberos_auth_enabled == true}
