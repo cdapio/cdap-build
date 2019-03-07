@@ -34,7 +34,7 @@ the License.
 
   <property>
     <name>ranger.plugin.cdap.policy.rest.url</name>
-    <value>http://{{ ansible_nodename }}:6080</value>
+    <value>http://{{ site_floating_ip.ip }}:6080</value>
     <description>
       URL to Ranger Admin
     </description>
@@ -57,7 +57,7 @@ the License.
   </property>
   <property>
     <name>ranger.plugin.cdap.policy.cache.dir</name>
-    <value>/etc/ranger/cdapdev/policycache</value>
+    <value>/etc/ranger/{{cluster_name}}_cdap/policycache</value>
     <description>
       Directory where Ranger policies are cached after successful retrieval from the source
     </description>
