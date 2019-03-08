@@ -101,6 +101,29 @@
     - is_security_authentication_handler_useLdaps == true
     - ldap_ssl_connection.rc == 0
 
+- name: Checking yarn queue exists
+  uri:
+   url: "http://{{ site_floating_ip.ip }}:8088/ws/v1/cluster/scheduler"
+   method: GET
+   return_content: yes
+  register: queue
+  when:
+    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - check_yarn_queue | bool
+
+- set_fact:
+    queues: "{{queue.json.scheduler.schedulerInfo.queues.queue}}"
+  when:
+    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - queue.status == 200
+
+- fail:
+    msg: "{{ yarn_queue_name }} yarn queue does not exist."
+  when:
+    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - yarn_queue_name not in (queues|map(attribute='queueName')|list)
+    - queue.status == 200
+
 - name: Checking Required Services
   uri:
    url: "http://{{ cdap_loadbalancer_vip }}:8080/api/v1/clusters/{{ cluster_name }}/services/{{item}}/?fields=ServiceInfo/state"
