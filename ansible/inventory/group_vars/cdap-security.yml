@@ -1,0 +1,43 @@
+#---------------------------
+# Use default ssl cert & key
+# or keystore & truststore
+#--------------------------
+use_default_ssl_cert: false
+use_default_store: false
+
+security_auth_server_ssl_truststore_path: /etc/cdap/truststore.jks                            # location on management node
+security_auth_server_ssl_keystore_path: /etc/cdap/keystore.jks                            # location on management node
+router_ssl_keystore_path: /etc/cdap/keystore.jks                            # location on management node
+dashboard_ssl_cert: /etc/cdap/cdap-ui-cert.pem                            # location on management node
+dashboard_ssl_key: /etc/cdap/cdap-ui-key.key                            # location on management node
+
+#---------------------
+# CDAP Security Config
+#---------------------
+is_security_enabled: true
+is_dashboard_ssl_disable_cert_check: true
+is_security_authorization_enabled: true
+is_kerberos_auth_enabled: true
+is_security_authentication_handler_debug: true
+is_security_authentication_handler_useLdaps: true
+is_security_authentication_handler_ldapsVerifyCertificate: false
+
+security_authentication_handler_hostname: "guavus.com"
+security_authentication_handler_port: "636"
+security_authentication_handler_userBaseDn: "OU=gurgaon,OU=India,OU=UserIDs,DC=guavus,DC=com"
+security_authentication_handler_userRdnAttribute: "sAMAccountName"
+security_authentication_handler_userObjectClass: "user"
+security_authentication_handler_userIdAttribute: "sAMAccountName"
+security_authentication_handler_roleBaseDn: "OU=Groups,DC=guavus,DC=com"
+security_authentication_handler_roleNameAttribute: "cn"
+security_authentication_handler_roleMemberAttribute: "member"
+security_authentication_handler_roleObjectClass: "group"
+security_authentication_handler_bindDn: "CN=svc-devops,OU=ApplicationObjects,OU=Custom,DC=guavus,DC=com"
+
+security_auth_server_ssl_truststore_password: changeit
+security_auth_server_ssl_keystore_password: changeit
+security_auth_server_ssl_keystore_keypassword: changeit
+security_authentication_handler_bindPassword: changeit
+router_ssl_keystore_password: changeit
+router_ssl_keystore_keypassword: changeit
+

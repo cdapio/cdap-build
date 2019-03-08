@@ -15,3 +15,10 @@ cdap_version: '5.1.2'
 cdap_major_version: '5.1.2'
 spark2_2_home: "/usr/hdp/{{ hdp_version }}/spark2"
 install_guavus_accelerator: true
+
+#-------------------------
+# Enable Security For CDAP
+#-------------------------
+
+is_authentication_enabled: true
+is_authorization_enabled: true

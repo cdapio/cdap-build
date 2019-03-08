@@ -1,0 +1,319 @@
+---
+# defaults file for cdap-ranger-auth
+
+#---------------------------
+#  cdap 
+#----------------------------
+cdap__security_authorization_enabled: "{{is_security_authorization_enabled|lower}}"
+cdap__security_authorization_extension_jar_path: "/opt/cdap/master/ext/security/cdap-ranger-binding-0.1.4.jar"
+cdap__security_authorization_extension_extra_classpath: "/usr/local/ranger-cdap-conf/"
+
+#-----------------------
+#  cdap ranger jar
+#-----------------------
+cdap__ranger_lookup_jar: cdap-ranger-lookup-0.1.4-jar-with-dependencies.jar
+
+rangeradmin_username: "admin"
+rangeradmin_password: "Sbe7UGkRBMF8"
+
+cdap__ranger_servicedef_cdap: |
+  {
+    "id": 11,
+    "name": "cdap",
+    "implClass": "co.cask.cdap.security.authorization.ranger.lookup.RangerLookupService",
+    "label": "CDAP",
+    "description": "CDAP",
+    "resources": [
+      {
+        "itemId": 1,
+        "name": "instance",
+        "type": "string",
+        "level": 10,
+        "parent": "",
+        "mandatory": true,
+        "lookupSupported": false,
+        "recursiveSupported": false,
+        "excludesSupported": false,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "CDAP Instance",
+        "description": "CDAP Instance"
+      },
+      {
+        "itemId": 2,
+        "name": "namespace",
+        "type": "string",
+        "level": 20,
+        "parent": "instance",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Namespace",
+        "description": "CDAP Namespace"
+      },
+      {
+        "itemId": 30,
+        "name": "application",
+        "type": "string",
+        "level": 30,
+        "parent": "namespace",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Application",
+        "description": "CDAP Application"
+      },
+      {
+        "itemId": 40,
+        "name": "artifact",
+        "type": "string",
+        "level": 30,
+        "parent": "namespace",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Artifact",
+        "description": "CDAP Artifact"
+      },
+      {
+        "itemId": 50,
+        "name": "dataset",
+        "type": "string",
+        "level": 30,
+        "parent": "namespace",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Dataset",
+        "description": "CDAP Dataset"
+      },
+      {
+        "itemId": 60,
+        "name": "dataset_module",
+        "type": "string",
+        "level": 30,
+        "parent": "namespace",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Dataset Module",
+        "description": "CDAP Dataset Module"
+      },
+      {
+        "itemId": 70,
+        "name": "dataset_type",
+        "type": "string",
+        "level": 30,
+        "parent": "namespace",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Dataset Type",
+        "description": "CDAP Dataset Type"
+      },
+      {
+        "itemId": 80,
+        "name": "secure_key",
+        "type": "string",
+        "level": 30,
+        "parent": "namespace",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Secure Key",
+        "description": "CDAP Secure Key"
+      },
+      {
+        "itemId": 90,
+        "name": "stream",
+        "type": "string",
+        "level": 30,
+        "parent": "namespace",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Stream",
+        "description": "CDAP Stream"
+      },
+      {
+        "itemId": 100,
+        "name": "principal",
+        "type": "string",
+        "level": 20,
+        "parent": "instance",
+        "mandatory": false,
+        "lookupSupported": false,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Principal",
+        "description": "Kerberos Principal"
+      },
+      {
+        "itemId": 110,
+        "name": "program",
+        "type": "string",
+        "level": 40,
+        "parent": "application",
+        "mandatory": false,
+        "lookupSupported": true,
+        "recursiveSupported": false,
+        "excludesSupported": true,
+        "matcher": "org.apache.ranger.plugin.resourcematcher.RangerDefaultResourceMatcher",
+        "matcherOptions": {
+          "wildCard": true,
+          "ignoreCase": false
+        },
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Program",
+        "description": "CDAP Program"
+      }
+    ],
+    "accessTypes": [
+      {
+        "itemId": 1,
+        "name": "read",
+        "label": "Read"
+      },
+      {
+        "itemId": 2,
+        "name": "write",
+        "label": "Write"
+      },
+      {
+        "itemId": 3,
+        "name": "execute",
+        "label": "Execute"
+      },
+      {
+        "itemId": 4,
+        "name": "admin",
+        "label": "Admin"
+      }
+    ],
+    "configs": [
+      {
+        "itemId": 1,
+        "name": "cdap.username",
+        "type": "string",
+        "subType": "",
+        "mandatory": true,
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Username"
+      },
+      {
+        "itemId": 2,
+        "name": "cdap.password",
+        "type": "password",
+        "subType": "",
+        "mandatory": true,
+        "validationRegEx": "",
+        "validationMessage": "",
+        "uiHint": "",
+        "label": "Password"
+      },
+      {
+        "itemId": 3,
+        "name": "cdap.instance.url",
+        "type": "string",
+        "subType": "",
+        "mandatory": true,
+        "label": "Instance URL",
+        "defaultValue": "",
+        "validationRegEx": "",
+        "validationMessage": ""
+      }
+    ],
+    "enums": [],
+    "contextEnrichers": [],
+    "policyConditions": []
+  }

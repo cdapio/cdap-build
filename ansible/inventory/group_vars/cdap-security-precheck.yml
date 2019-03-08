@@ -1,0 +1,19 @@
+---
+#----------------
+# Common Config
+#----------------
+kerberos_keytab_path: '/etc/security/keytabs'
+kerberos_keytab_filename: 'hdfs.headless.keytab'
+ldap_cert_path: '/etc/openldap/certs/'
+ldap_cert_name: 'default.crt'
+ldap_cert_alias: 'default'
+
+#-----------------
+# Validation Flags
+#-----------------
+check_kerberos: true
+check_store_path: true
+check_ssl_path: true
+check_keystore_truststore: true
+check_ldap_connection: true
+check_services: true

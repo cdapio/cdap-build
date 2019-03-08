@@ -1,0 +1,233 @@
+---
+# tasks file for cdap-parameter-security
+- name: Use Default SSL cert and key
+  copy:
+    src: "{{item | basename}}"
+    dest: "{{ item }}"
+  with_items:
+    - "{{dashboard_ssl_cert}}"
+    - "{{dashboard_ssl_key}}"
+  when: use_default_ssl_cert == true and inventory_hostname in groups['management-nodes']
+
+- name: Use Default JKS keystore & truststore
+  copy:
+    src: "{{item | basename}}"
+    dest: "{{ item }}"
+  with_items:
+    - "{{security_auth_server_ssl_truststore_path}}"
+    - "{{security_auth_server_ssl_keystore_path}}"
+    - "{{router_ssl_keystore_path}}"
+  when: use_default_store == true and inventory_hostname in groups['management-nodes']
+
+- name: Copying keystore and truststore to cdap nodes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "{{security_auth_server_ssl_truststore_path}}", dest: "{{security_auth_server_ssl_truststore_path}}" }
+    - { src: "{{security_auth_server_ssl_keystore_path}}", dest: "{{security_auth_server_ssl_keystore_path}}" }
+    - { src: "{{router_ssl_keystore_path}}", dest: "{{router_ssl_keystore_path}}" }
+    - { src: "{{dashboard_ssl_cert}}", dest: "{{dashboard_ssl_cert}}" }
+    - { src: "{{dashboard_ssl_key}}", dest: "{{dashboard_ssl_key}}" }
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Enabling security in CDAP (cdap-site)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-site', key: 'security.enabled', value: '{{cdap__security_enabled}}' }
+    - { config: 'cdap-site', key: 'ssl.external.enabled', value: '{{cdap__ssl_external_enabled}}' }
+    - { config: 'cdap-site', key: 'router.ssl.bind.port', value: '{{cdap__router_ssl_bind_port}}' }
+    - { config: 'cdap-site', key: 'security.auth.server.ssl.bind.port', value: '{{cdap__security_auth_server_ssl_bind_port}}' }
+    - { config: 'cdap-site', key: 'dashboard.ssl.bind.port', value: '{{cdap__dashboard_ssl_bind_port}}' }
+    - { config: 'cdap-site', key: 'security.auth.server.ssl.truststore.path', value: '{{cdap__security_auth_server_ssl_truststore_path}}' }
+    - { config: 'cdap-site', key: 'security.auth.server.ssl.truststore.type', value: '{{cdap__security_auth_server_ssl_truststore_type}}' }
+    - { config: 'cdap-site', key: 'dashboard.ssl.disable.cert.check', value: '{{cdap__dashboard_ssl_disable_cert_check}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Enabling security in CDAP (cdap-security)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.path', value: '{{cdap__security_auth_server_ssl_keystore_path}}' }
+    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.type', value: '{{cdap__security_auth_server_ssl_keystore_type}}' }
+    - { config: 'cdap-security', key: 'router.ssl.keystore.path', value: '{{cdap__router_ssl_keystore_path}}' }
+    - { config: 'cdap-security', key: 'router.ssl.keystore.type', value: '{{cdap__router_ssl_keystore_type}}' }
+    - { config: 'cdap-security', key: 'dashboard.ssl.cert', value: '{{cdap__dashboard_ssl_cert}}' }
+    - { config: 'cdap-security', key: 'dashboard.ssl.key', value: '{{cdap__dashboard_ssl_key}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Configuring Kerberos (cdap-site)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-site', key: 'kerberos.auth.enabled', value: '{{cdap__kerberos_auth_enabled}}' }
+    - { config: 'cdap-site', key: 'cdap.master.kerberos.keytab', value: '{{cdap__cdap_master_kerberos_keytab}}' }
+    - { config: 'cdap-site', key: 'cdap.master.kerberos.principal', value: '{{cdap__cdap_master_kerberos_principal}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Enabling AD authentication (cdap-site)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-site', key: 'security.authentication.handlerClassName', value: '{{cdap__security_authentication_handlerClassName}}' }
+    - { config: 'cdap-site', key: 'security.authentication.loginmodule.className', value: '{{cdap__security_authentication_loginmodule_className}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.debug', value: '{{cdap__security_authentication_handler_debug}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.hostname', value: '{{cdap__security_authentication_handler_hostname}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.port', value: '{{cdap__security_authentication_handler_port}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.userBaseDn', value: '{{cdap__security_authentication_handler_userBaseDn}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.userRdnAttribute', value: '{{cdap__security_authentication_handler_userRdnAttribute}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.userIdAttribute', value: '{{cdap__security_authentication_handler_userIdAttribute}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.userObjectClass', value: '{{cdap__security_authentication_handler_userObjectClass}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.roleBaseDn', value: '{{cdap__security_authentication_handler_roleBaseDn}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.roleNameAttribute', value: '{{cdap__security_authentication_handler_roleNameAttribute}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.roleMemberAttribute', value: '{{cdap__security_authentication_handler_roleMemberAttribute}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.roleObjectClass', value: '{{cdap__security_authentication_handler_roleObjectClass}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.bindDn', value: '{{cdap__security_authentication_handler_bindDn}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Enabling AD authentication (cdap-security) 
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-security', key: 'security.authentication.handler.bindDn', value: '{{cdap__security_authentication_handler_bindDn}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Setting Config Password
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-security', key: 'security.authentication.handler.bindPassword', value: '{{cdap__security_authentication_handler_bindPassword}}' }
+    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.password', value: '{{cdap__security_auth_server_ssl_keystore_password}}' }
+    - { config: 'cdap-security', key: 'security.auth.server.ssl.keystore.keypassword', value: '{{cdap__security_auth_server_ssl_keystore_keypassword}}' }
+    - { config: 'cdap-security', key: 'router.ssl.keystore.password', value: '{{cdap__router_ssl_keystore_password}}' }
+    - { config: 'cdap-security', key: 'router.ssl.keystore.keypassword', value: '{{cdap__router_ssl_keystore_keypassword}}' }
+    - { config: 'cdap-site', key: 'security.auth.server.ssl.truststore.password', value: '{{cdap__security_auth_server_ssl_truststore_password}}' }
+  no_log: true
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Enabling AD SSL authentication (cdap-site)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-site', key: 'security.authentication.handler.useLdaps', value: '{{cdap__security_authentication_handler_useLdaps}}' }
+    - { config: 'cdap-site', key: 'security.authentication.handler.ldapsVerifyCertificate', value: '{{cdap__security_authentication_handler_ldapsVerifyCertificate}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Copying logback.json to temporary directory
+  copy:
+    src: logback.json
+    dest: /tmp/logback.json
+
+- name: Enabling Access Logging (cdap-logback)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -f {{ item.value }}"
+  with_items:
+    - { config: 'cdap-logback', value: '/tmp/logback.json' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Removing existing CDAP jars
+  file:
+    path:  "/opt/cdap/master/ext/security/"
+    state: absent
+    owner: cdap
+    group: cdap
+  ignore_errors: true
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Creating required CDAP plugin directory
+  file:
+    path:  "/opt/cdap/master/ext/"
+    state: directory
+    owner: cdap
+    group: cdap
+  ignore_errors: true
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Extracting required cdap jars
+  unarchive:
+    src: "{{ cdap__cdap_jar_path }}"
+    dest: "/opt/cdap/master/ext/"
+    extra_opts: [--strip-components=1]
+    exclude: 
+      - ranger-cdap-conf
+      - ranger-servicedef-cdap.json
+    owner: cdap
+    group: cdap
+  ignore_errors: true
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Start CDAP Service
+  uri:
+    url: "http://{{ cdap_loadbalancer_vip }}:8080/api/v1/clusters/{{ cluster_name }}/services/CDAP"
+    method: PUT
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari"}'
+    body: '{ "RequestInfo": {"context" :"Start CDAP components via REST api"}, "Body": {"ServiceInfo": {"state" : "STARTED"}}}'
+    status_code: 200,201,202,404
+    return_content: yes
+  register: cdap_start_task
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: WAIT FOR CDAP TO START
+  uri:
+    url: "{{ (cdap_start_task.content|from_json).href }}"
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari", "Content-Type":"application/json"}'
+    status_code: 200,201,202
+    return_content: yes
+  register: cdap_check_task
+  until: (((cdap_check_task.content|from_json).Requests.request_status == 'COMPLETED' and (cdap_check_task.content|from_json).Requests.completed_task_count|int > 0) or
+         (cdap_check_task.content|from_json).Requests.request_status == 'FAILED' or
+         (cdap_check_task.content|from_json).Requests.request_status == 'TIMEDOUT' or
+         (cdap_check_task.content|from_json).Requests.request_status == 'ABORTED')
+  retries: 20
+  delay: 30
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and cdap_start_task.content != ""
+
+- name: Restart ALL Required SERVICES
+  uri:
+    url: "http://{{ ansible_fqdn }}:8080/api/v1/clusters/{{ cluster_name }}/requests"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari"}'
+    body: ' {"RequestInfo": { "command":"RESTART", "context":"Restart all required services", "operation_level":"host_component" }, "Requests/resource_filters": [{ "hosts_predicate":"HostRoles/stale_configs=true" }]} '
+    status_code: 200,201,202,404
+    return_content: yes
+  register: restart_reqd_services
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: WAIT FOR SERVICES TO RESTART
+  uri:
+    url: "http://{{ ansible_fqdn }}:8080/api/v1/clusters/{{ cluster_name }}/requests/{{ (restart_reqd_services.content|from_json).Requests.id }}"
+    method: GET
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari"}'
+    status_code: 200,201,202,404
+    return_content: yes
+  register: restartservice
+  until: (restartservice.content|from_json).Requests.request_status == 'COMPLETED'
+  retries: 30
+  delay: 30
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and restart_reqd_services.content != ""
+
+- name: 'Add all cdap machines in haproxy'
+  blockinfile:
+    dest: /etc/haproxy/haproxy.cfg
+    backup: yes
+    marker: "# {mark} CDAP SSL MANAGED BLOCK"
+    block: |
+       listen CDAP_9443
+         bind {{ cdap_loadbalancer_vip }}:9443
+         mode  tcp
+         balance  roundrobin
+         appsession JSESSIONID len 1024 timeout 1h request-learn
+         option forwardfor
+         {% for host in groups['cdap-master-nodes'] %}server {{ hostvars[host]['ansible_hostname'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:9443
+         {%- if loop.first %} check
+         {% else %}  check
+         {% endif -%}
+         {% endfor %}
+  notify:
+      - restart haproxy
+  when: inventory_hostname in groups['loadbalancer-nodes']

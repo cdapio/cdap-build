@@ -1,0 +1,135 @@
+---
+# tasks file for cdap-ranger-auth
+
+- name: Enabling Kerberos authorization (cdap-site)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-site', key: 'security.authorization.enabled', value: '{{cdap__security_authorization_enabled}}' }
+    - { config: 'cdap-site', key: 'security.authorization.extension.jar.path', value: '{{cdap__security_authorization_extension_jar_path}}' }
+    - { config: 'cdap-site', key: 'security.authorization.extension.extra.classpath', value: '{{cdap__security_authorization_extension_extra_classpath}}' }
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: Creating required CDAP plugin directory
+  file:
+    path: "/usr/hdp/current/ranger-admin/ews/webapp/WEB-INF/classes/ranger-plugins/cdap"
+    state: directory
+    owner: ranger
+    group: ranger
+  when: inventory_hostname in groups['ranger-nodes']
+
+- name: Fetching CDAP Ranger lookup jar to CDAP plugin directory
+  fetch:
+    src: "/opt/cdap/master/ext/security/{{item}}"
+    dest: "/usr/hdp/current/ranger-admin/ews/webapp/WEB-INF/classes/ranger-plugins/cdap/{{item}}"
+    flat: yes
+    remote_src: yes
+  with_items:
+    - "{{ cdap__ranger_lookup_jar }}"
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Setting required ownership & permission
+  file:
+    path: "/usr/hdp/current/ranger-admin/ews/webapp/WEB-INF/classes/ranger-plugins/cdap/"
+    owner: ranger
+    group: ranger
+    recurse: yes 
+  when: inventory_hostname in groups['ranger-nodes']
+
+- name: Add CDAP services to Ranger Admin
+  uri:
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/plugins/definitions"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
+    body: "{{ item }}"
+    body_format: json
+    status_code: 200,201,202,400
+    return_content: no
+  with_items:
+    - "{{ cdap__ranger_servicedef_cdap }}"
+  when: inventory_hostname == groups['ranger-nodes'][0]
+
+- name: Installing CDAP Authorization Binding for Enforcement
+  file:
+    path: "/usr/local/ranger-cdap-conf"
+    state: directory
+    owner: cdap
+    group: cdap
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Copying ranger cdap config files
+  template:
+    src: "{{ item }}.j2"
+    dest: "/usr/local/ranger-cdap-conf/{{item}}.xml"
+    owner: cdap
+    group: cdap
+  with_items:
+    - ranger-cdap-audit
+    - ranger-cdap-security
+    - ranger-policymgr-ssl
+  when: inventory_hostname in groups['cdap-master-nodes']
+
+- name: Start CDAP Service
+  uri:
+    url: "http://{{ cdap_loadbalancer_vip }}:8080/api/v1/clusters/{{ cluster_name }}/services/CDAP"
+    method: PUT
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari"}'
+    body: '{ "RequestInfo": {"context" :"Start CDAP components via REST api"}, "Body": {"ServiceInfo": {"state" : "STARTED"}}}'
+    status_code: 200,201,202,404
+    return_content: yes
+  register: cdap_start_task
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: WAIT FOR CDAP TO START
+  uri:
+    url: "{{ (cdap_start_task.content|from_json).href }}"
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari", "Content-Type":"application/json"}'
+    status_code: 200,201,202
+    return_content: yes
+  register: cdap_check_task
+  until: (((cdap_check_task.content|from_json).Requests.request_status == 'COMPLETED' and (cdap_check_task.content|from_json).Requests.completed_task_count|int > 0) or
+         (cdap_check_task.content|from_json).Requests.request_status == 'FAILED' or
+         (cdap_check_task.content|from_json).Requests.request_status == 'TIMEDOUT' or
+         (cdap_check_task.content|from_json).Requests.request_status == 'ABORTED')
+  retries: 20
+  delay: 30
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and cdap_start_task.content != ""
+
+
+- name: Restart ALL Required SERVICES
+  uri:
+    url: "http://{{ ansible_fqdn }}:8080/api/v1/clusters/{{ cluster_name }}/requests"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari"}'
+    body: ' {"RequestInfo": { "command":"RESTART", "context":"Restart all required services", "operation_level":"host_component" }, "Requests/resource_filters": [{ "hosts_predicate":"HostRoles/stale_configs=true" }]} '
+    status_code: 200,201,202,404
+    return_content: yes
+  register: restart_reqd_services
+  when: inventory_hostname == groups['cdap-management-nodes'][0]
+
+- name: WAIT FOR SERVICES TO RESTART
+  uri:
+    url: "http://{{ ansible_fqdn }}:8080/api/v1/clusters/{{ cluster_name }}/requests/{{ (restart_reqd_services.content|from_json).Requests.id }}"
+    method: GET
+    force_basic_auth: yes
+    user: "{{ ambari_admin_user }}"
+    password: "{{ ambari_admin_password }}"
+    headers: '{"X-Requested-By":"ambari"}'
+    status_code: 200,201,202,404
+    return_content: yes
+  register: restartservice
+  until: (restartservice.content|from_json).Requests.request_status == 'COMPLETED'
+  retries: 30
+  delay: 30
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and restart_reqd_services.content != ""

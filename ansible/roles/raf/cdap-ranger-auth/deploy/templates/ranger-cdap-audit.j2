@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!--
+Copyright © 2017 Cask Data, Inc.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+  <configuration>
+    
+    <property>
+      <name>ranger.plugin.cdap.ambari.cluster.name</name>
+      <value>{{cluster_name}}</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.db</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.hdfs</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.hdfs.batch.filespool.dir</name>
+      <value>/var/log/cdap/audit/hdfs/spool</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.hdfs.dir</name>
+      <value>hdfs://{{platform_hadoop_nameservices}}/ranger/audit</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.solr</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.solr.batch.filespool.dir</name>
+      <value>/var/log/cdap/audit/solr/spool</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.solr.force.use.inmemory.jaas.config</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.solr.urls</name>
+      <value></value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.destination.solr.zookeepers</name>
+      <value>{% for zk in groups['zookeeper-nodes'] %}{{ hostvars[zk]['ansible_fqdn'] }}:2181{% if not loop.last %},{% endif %}{% endfor %}/infra-solr</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.is.enabled</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.jaas.Client.loginModuleControlFlag</name>
+      <value>required</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.jaas.Client.loginModuleName</name>
+      <value>com.sun.security.auth.module.Krb5LoginModule</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.jaas.Client.option.keyTab</name>
+      <value>/etc/security/keytabs/cdap.service.keytab</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.jaas.Client.option.principal</name>
+      <value>cdap/_HOST@GVS.GGN</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.jaas.Client.option.serviceName</name>
+      <value>solr</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.jaas.Client.option.storeKey</name>
+      <value>false</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.jaas.Client.option.useKeyTab</name>
+      <value>true</value>
+    </property>
+    
+    <property>
+      <name>xasecure.audit.provider.summary.enabled</name>
+      <value>true</value>
+    </property>
+  
+  </configuration>
+

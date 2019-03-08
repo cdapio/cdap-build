@@ -1,0 +1,33 @@
+---
+
+- name: Retrieve facts all host
+  hosts:
+    - all
+  gather_facts: true
+  any_errors_fatal: True
+  tags:
+    - 'always'
+  tasks: []
+
+- name: "Setting Environment"
+  hosts:
+    - management-nodes
+  tags:
+    - always
+  tasks:
+    - debug:
+        msg: "Environment should be kerberos for enabling CDAP security and kerberos is {{is_kerberos_auth_enabled}}"
+    - set_fact:
+        site_floating_ip:
+          ip: "{{ hostvars[groups['management-nodes'][0]]['ansible_default_ipv4']['address'] }}"
+      when: site_deployment_type == 'NONHA'
+    - debug:
+        msg: "Setup type is NONHA and site_floating_ip.ip is: {{ site_floating_ip.ip }}"
+      when: site_deployment_type == 'NONHA'
+ 
+- name: Running Prerequisites for CDAP Security
+  hosts:
+    - all
+  any_errors_fatal: true
+  roles:
+    - raf/cdap-security-precheck
