@@ -1,0 +1,117 @@
+---
+# tasks file for cdap-security-precheck
+
+- name: Getting kerberos principal using keytab
+  shell: "klist -tke {{kerberos_keytab_path}}/{{kerberos_keytab_filename}} |grep '@' |awk -F' ' '{print $4}'|head -1"
+  become: true
+  become_user: hdfs
+  become_method: su
+  register: kerberos_keytab_principal
+  failed_when: kerberos_keytab_principal.stderr != ""
+  when: inventory_hostname == groups['cdap-master-nodes'][0] and (check_kerberos|lower)|bool
+
+- name: Getting kerberos ticket using keytab
+  shell: "kinit -kt {{kerberos_keytab_path}}/{{kerberos_keytab_filename}} {{kerberos_keytab_principal.stdout}}"
+  become: true
+  become_user: hdfs
+  become_method: su
+  register: kerberos_ticket
+  failed_when: kerberos_ticket.stderr != ""
+  when: inventory_hostname == groups['cdap-master-nodes'][0] and (kerberos_keytab_principal.stderr == "")
+
+- name: Testing hdfs connection using generated ticket
+  shell: "hdfs dfs -test -d /"
+  become: true
+  become_user: hdfs
+  become_method: su
+  register: hdfs_test
+  failed_when: hdfs_test.stderr != ""
+  when: inventory_hostname == groups['cdap-master-nodes'][0] and kerberos_ticket.stderr == ""
+
+- name: Checking existence of keystore and truststore
+  stat:
+    path: "{{ item }}"
+  with_items:
+    - "{{ security_auth_server_ssl_truststore_path }}"
+    - "{{ security_auth_server_ssl_keystore_path }}"
+    - "{{ router_ssl_keystore_path }}"
+  register: store
+  failed_when: not store.stat.exists
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_store_path|lower)|bool
+
+- name: Checking existence of SSL cert and key
+  stat:
+    path: "{{ item }}"
+  with_items:
+    - "{{dashboard_ssl_cert}}"
+    - "{{dashboard_ssl_key}}"
+  register: ssl_stat
+  failed_when: not ssl_stat.stat.exists
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_ssl_path|lower)|bool
+
+- name: Getting info from JKS store
+  shell: "keytool -list -v -keystore {{ item.path }} -storepass {{ item.password }}"
+  with_items:
+    - { path: "{{security_auth_server_ssl_truststore_path}}", password: "{{security_auth_server_ssl_truststore_password}}" }
+    - { path: "{{security_auth_server_ssl_keystore_path}}", password: "{{security_auth_server_ssl_keystore_password}}" }
+    - { path: "{{router_ssl_keystore_path}}", password: "{{router_ssl_keystore_password}}" }
+  register: store_info
+  failed_when: store_info.rc != 0
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_keystore_truststore|lower)|bool
+  no_log: true
+
+- name: Verifying ldap package exists
+  shell: which ldapsearch
+  register: pkg
+  failed_when: pkg.rc == 1
+  when:
+    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - check_ldap_connection |bool
+
+- name: Checking ldap connection using SSL
+  shell: "ldapsearch -ZZ -D \"{{security_authentication_handler_bindDn}}\" -w {{security_authentication_handler_bindPassword}} -H ldap://{{security_authentication_handler_hostname}}:{{security_authentication_handler_port}} -b \"{{security_authentication_handler_roleBaseDn}}\""
+  register: ldap_ssl_connection
+  failed_when: ldap_ssl_connection.rc != 0
+  no_log: true
+  when: 
+    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - is_security_authentication_handler_useLdaps |bool 
+    - check_ldap_connection |bool
+
+- name: Checking ldap connection without SSL
+  shell: "ldapsearch -D \"{{security_authentication_handler_bindDn}}\" -w {{security_authentication_handler_bindPassword}} -p {{security_authentication_handler_port}} -h {{security_authentication_handler_hostname}} -b \"{{security_authentication_handler_roleBaseDn}}\""
+  register: ldap_connection
+  failed_when: ldap_connection.rc != 0
+  no_log: true
+  when: 
+    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - is_security_authentication_handler_useLdaps == false
+    - check_ldap_connection |bool
+
+- name: Import ldap cert to truststore
+  shell: "keytool -importcert -v -trustcacerts -file {{ ldap_cert_path}}/{{ ldap_cert_name }} -keystore {{ security_auth_server_ssl_truststore_path }} -alias {{ ldap_cert_alias }}"
+  args:
+    chdir: /tmp/
+    creates: "{{ldap_cert_alias}}_imported"
+  register: ldap_cert_import
+  failed_when: ldap_cert_import.rc != 0
+  no_log: true
+  when:
+    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - is_security_authentication_handler_useLdaps == true
+    - ldap_ssl_connection.rc == 0
+
+- name: Checking Required Services
+  uri:
+   url: "http://{{ cdap_loadbalancer_vip }}:8080/api/v1/clusters/{{ cluster_name }}/services/{{item}}/?fields=ServiceInfo/state"
+   method: GET
+   force_basic_auth: yes
+   user: "{{ ambari_admin_user }}"
+   password: "{{ ambari_admin_password }}"
+   headers: '{"X-Requested-By":"ambari"}'
+   status_code: 200
+  with_items:
+    - CDAP
+    - RANGER
+    - TEZ
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and check_services |bool
