@@ -34,7 +34,7 @@ the License.
 
   <property>
     <name>ranger.plugin.cdap.policy.rest.url</name>
-    <value>http://{{ site_floating_ip.ip }}:6080</value>
+    <value>http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080</value>
     <description>
       URL to Ranger Admin
     </description>

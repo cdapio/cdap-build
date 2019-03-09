@@ -37,7 +37,7 @@
     - "{{ router_ssl_keystore_path }}"
   register: store
   failed_when: not store.stat.exists
-  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_store_path|lower)|bool
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_store_path|lower)|bool and (use_default_store|lower == false)
 
 - name: Checking existence of SSL cert and key
   stat:
@@ -47,7 +47,7 @@
     - "{{dashboard_ssl_key}}"
   register: ssl_stat
   failed_when: not ssl_stat.stat.exists
-  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_ssl_path|lower)|bool
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_ssl_path|lower)|bool and (use_default_ssl_cert|lower == false)
 
 - name: Getting info from JKS store
   shell: "keytool -list -v -keystore {{ item.path }} -storepass {{ item.password }}"
@@ -57,7 +57,7 @@
     - { path: "{{router_ssl_keystore_path}}", password: "{{router_ssl_keystore_password}}" }
   register: store_info
   failed_when: store_info.rc != 0
-  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_keystore_truststore|lower)|bool
+  when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_keystore_truststore|lower)|bool and (use_default_store|lower == false)
   no_log: true
 
 - name: Verifying ldap package exists
@@ -65,27 +65,25 @@
   register: pkg
   failed_when: pkg.rc == 1
   when:
-    - inventory_hostname == groups['cdap-management-nodes'][0]
+    - inventory_hostname == groups['cdap-master-nodes'][0]
     - check_ldap_connection |bool
 
 - name: Checking ldap connection using SSL
-  shell: "ldapsearch -ZZ -D \"{{security_authentication_handler_bindDn}}\" -w {{security_authentication_handler_bindPassword}} -H ldap://{{security_authentication_handler_hostname}}:{{security_authentication_handler_port}} -b \"{{security_authentication_handler_roleBaseDn}}\""
+  shell: "ldapsearch -Z -D \"{{security_authentication_handler_bindDn}}\" -w {{security_authentication_handler_bindPassword}} -H ldaps://{{security_authentication_handler_hostname}}:{{security_authentication_handler_port}} -b \"{{security_authentication_handler_roleBaseDn}}\""
   register: ldap_ssl_connection
   failed_when: ldap_ssl_connection.rc != 0
-  no_log: true
   when: 
-    - inventory_hostname == groups['cdap-management-nodes'][0]
-    - is_security_authentication_handler_useLdaps |bool 
+    - inventory_hostname == groups['cdap-master-nodes'][0]
+    - is_security_authentication_handler_ldapsVerifyCertificate |bool 
     - check_ldap_connection |bool
 
 - name: Checking ldap connection without SSL
   shell: "ldapsearch -D \"{{security_authentication_handler_bindDn}}\" -w {{security_authentication_handler_bindPassword}} -p {{security_authentication_handler_port}} -h {{security_authentication_handler_hostname}} -b \"{{security_authentication_handler_roleBaseDn}}\""
   register: ldap_connection
   failed_when: ldap_connection.rc != 0
-  no_log: true
   when: 
-    - inventory_hostname == groups['cdap-management-nodes'][0]
-    - is_security_authentication_handler_useLdaps == false
+    - inventory_hostname == groups['cdap-master-nodes'][0]
+    - is_security_authentication_handler_ldapsVerifyCertificate == false
     - check_ldap_connection |bool
 
 - name: Import ldap cert to truststore
@@ -95,10 +93,9 @@
     creates: "{{ldap_cert_alias}}_imported"
   register: ldap_cert_import
   failed_when: ldap_cert_import.rc != 0
-  no_log: true
   when:
-    - inventory_hostname == groups['cdap-management-nodes'][0]
-    - is_security_authentication_handler_useLdaps == true
+    - inventory_hostname in groups['cdap-master-nodes']
+    - is_security_authentication_handler_ldapsVerifyCertificate == true
     - ldap_ssl_connection.rc == 0
 
 - name: Checking yarn queue exists

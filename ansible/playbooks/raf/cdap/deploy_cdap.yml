@@ -69,15 +69,15 @@
       when: inventory_hostname in groups['loadbalancer-nodes']
 
 - name: "Include playbook only if the condition is true"
-  include: cdap-security-precheck/deploy/main.yml
+  include: ../cdap-security-precheck/deploy/main.yml
   when: is_authentication_enabled | bool
 
 - name: "Include playbook only if the condition is true"
-  include: cdap-perimeter-security/deploy/main.yml
+  include: ../cdap-perimeter-security/deploy/main.yml
   when: is_authentication_enabled | bool
 
 - name: "Include playbook only if the condition is true"
-  include: cdap-ranger-auth/deploy/main.yml
+  include: ../cdap-ranger-auth/deploy/main.yml
   when: 
     - is_authentication_enabled | bool
     - is_authorization_enabled | bool
