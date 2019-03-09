@@ -1,14 +1,6 @@
 {%if install_using_public_repos == 'false' -%}
 [CDAP]
-baseurl = http://{{ site_default_rpm_repo_host }}/cask/centos/6/x86_64/cdap/{{ cdap_version }}/
+baseurl = http://{{ site_default_rpm_repo_host }}/ggn-dev-rpms/cdap-build/{{ cdap_version }}/release/
 enabled = 1
 gpgcheck = 0
 name = CDAP repository
-{% else %}
-[CDAP]
-baseurl = https://repository.cask.co/centos/6/x86_64/cdap/{{ cdap_major_version }}/
-enabled = 1
-gpgcheck = 1
-gpgkey = http://repository.cask.co/centos/6/x86_64/cdap/{{ cdap_major_version }}/pubkey.gpg
-name = CDAP repository
-{%- endif %}
