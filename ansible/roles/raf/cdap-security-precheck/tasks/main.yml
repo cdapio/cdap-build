@@ -79,6 +79,18 @@
   when: inventory_hostname == groups['cdap-management-nodes'][0] and (check_keystore_truststore|lower)|bool and (use_default_store|lower == false)
   no_log: true
 
+- name: Copying keystore and truststore to cdap nodes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "{{security_auth_server_ssl_truststore_path}}", dest: "{{security_auth_server_ssl_truststore_path}}" }
+    - { src: "{{security_auth_server_ssl_keystore_path}}", dest: "{{security_auth_server_ssl_keystore_path}}" }
+    - { src: "{{router_ssl_keystore_path}}", dest: "{{router_ssl_keystore_path}}" }
+    - { src: "{{dashboard_ssl_cert}}", dest: "{{dashboard_ssl_cert}}" }
+    - { src: "{{dashboard_ssl_key}}", dest: "{{dashboard_ssl_key}}" }
+  when: inventory_hostname in groups['cdap-master-nodes']
+
 - name: Verifying ldap package exists
   shell: which ldapsearch
   register: pkg
@@ -102,6 +114,7 @@
   failed_when: ldap_connection.rc != 0
   when: 
     - inventory_hostname in groups['cdap-management-nodes']
+    - is_security_authentication_handler_useLdaps == false
     - is_security_authentication_handler_ldapsVerifyCertificate == false
     - check_ldap_connection |bool
 
@@ -116,18 +129,6 @@
     - inventory_hostname in groups['cdap-management-nodes']
     - is_security_authentication_handler_ldapsVerifyCertificate == true
     - hostvars[groups["cdap-master-nodes"][0]].ldap_ssl_connection.rc == 0
-
-- name: Copying keystore and truststore to cdap nodes
-  copy:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-  with_items:
-    - { src: "{{security_auth_server_ssl_truststore_path}}", dest: "{{security_auth_server_ssl_truststore_path}}" }
-    - { src: "{{security_auth_server_ssl_keystore_path}}", dest: "{{security_auth_server_ssl_keystore_path}}" }
-    - { src: "{{router_ssl_keystore_path}}", dest: "{{router_ssl_keystore_path}}" }
-    - { src: "{{dashboard_ssl_cert}}", dest: "{{dashboard_ssl_cert}}" }
-    - { src: "{{dashboard_ssl_key}}", dest: "{{dashboard_ssl_key}}" }
-  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Checking yarn queue exists
   uri:
