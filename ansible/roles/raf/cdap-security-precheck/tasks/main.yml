@@ -28,6 +28,25 @@
   failed_when: hdfs_test.stderr != ""
   when: inventory_hostname == groups['cdap-master-nodes'][0] and kerberos_ticket.stderr == ""
 
+- name: Use Default SSL cert and key
+  copy:
+    src: "{{item | basename}}"
+    dest: "{{ item }}"
+  with_items:
+    - "{{dashboard_ssl_cert}}"
+    - "{{dashboard_ssl_key}}"
+  when: use_default_ssl_cert == true and inventory_hostname in groups['cdap-management-nodes']
+
+- name: Use Default JKS keystore & truststore
+  copy:
+    src: "{{item | basename}}"
+    dest: "{{ item }}"
+  with_items:
+    - "{{security_auth_server_ssl_truststore_path}}"
+    - "{{security_auth_server_ssl_keystore_path}}"
+    - "{{router_ssl_keystore_path}}"
+  when: use_default_store == true and inventory_hostname in groups['cdap-management-nodes']
+
 - name: Checking existence of keystore and truststore
   stat:
     path: "{{ item }}"
@@ -65,7 +84,7 @@
   register: pkg
   failed_when: pkg.rc == 1
   when:
-    - inventory_hostname == groups['cdap-master-nodes'][0]
+    - inventory_hostname in groups['cdap-master-nodes']
     - check_ldap_connection |bool
 
 - name: Checking ldap connection using SSL
@@ -73,7 +92,7 @@
   register: ldap_ssl_connection
   failed_when: ldap_ssl_connection.rc != 0
   when: 
-    - inventory_hostname == groups['cdap-master-nodes'][0]
+    - inventory_hostname in groups['cdap-master-nodes']
     - is_security_authentication_handler_ldapsVerifyCertificate |bool 
     - check_ldap_connection |bool
 
@@ -82,21 +101,33 @@
   register: ldap_connection
   failed_when: ldap_connection.rc != 0
   when: 
-    - inventory_hostname == groups['cdap-master-nodes'][0]
+    - inventory_hostname in groups['cdap-management-nodes']
     - is_security_authentication_handler_ldapsVerifyCertificate == false
     - check_ldap_connection |bool
 
 - name: Import ldap cert to truststore
-  shell: "keytool -importcert -v -trustcacerts -file {{ ldap_cert_path}}/{{ ldap_cert_name }} -keystore {{ security_auth_server_ssl_truststore_path }} -alias {{ ldap_cert_alias }}"
+  shell: "keytool -noprompt -importcert -v -trustcacerts -file {{ ldap_cert_path}}/{{ ldap_cert_name }} -keystore {{ security_auth_server_ssl_truststore_path }} -alias {{ ldap_cert_alias }} -storepass {{ security_auth_server_ssl_truststore_password }} && touch /tmp/{{ldap_cert_alias}}_imported"
   args:
     chdir: /tmp/
     creates: "{{ldap_cert_alias}}_imported"
   register: ldap_cert_import
   failed_when: ldap_cert_import.rc != 0
   when:
-    - inventory_hostname in groups['cdap-master-nodes']
+    - inventory_hostname in groups['cdap-management-nodes']
     - is_security_authentication_handler_ldapsVerifyCertificate == true
-    - ldap_ssl_connection.rc == 0
+    - hostvars[groups["cdap-master-nodes"][0]].ldap_ssl_connection.rc == 0
+
+- name: Copying keystore and truststore to cdap nodes
+  copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  with_items:
+    - { src: "{{security_auth_server_ssl_truststore_path}}", dest: "{{security_auth_server_ssl_truststore_path}}" }
+    - { src: "{{security_auth_server_ssl_keystore_path}}", dest: "{{security_auth_server_ssl_keystore_path}}" }
+    - { src: "{{router_ssl_keystore_path}}", dest: "{{router_ssl_keystore_path}}" }
+    - { src: "{{dashboard_ssl_cert}}", dest: "{{dashboard_ssl_cert}}" }
+    - { src: "{{dashboard_ssl_key}}", dest: "{{dashboard_ssl_key}}" }
+  when: inventory_hostname in groups['cdap-master-nodes']
 
 - name: Checking yarn queue exists
   uri:

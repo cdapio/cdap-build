@@ -6,7 +6,7 @@ kerberos_keytab_path: '/etc/security/keytabs'
 kerberos_keytab_filename: 'hdfs.headless.keytab'
 ldap_cert_path: '/etc/openldap/certs/'
 ldap_cert_name: 'default.crt'
-ldap_cert_alias: 'default'
+ldap_cert_alias: "{{ansible_fqdn}}"
 yarn_queue_name: 'default'
 
 #-----------------
