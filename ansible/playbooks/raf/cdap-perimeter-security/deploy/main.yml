@@ -15,8 +15,6 @@
   tags:
     - always
   tasks:
-    - debug:
-        msg: "Environment should be kerberos for enabling CDAP security and kerberos is {{is_kerberos_auth_enabled}}"
     - set_fact:
         site_floating_ip:
           ip: "{{ hostvars[groups['management-nodes'][0]]['ansible_default_ipv4']['address'] }}"
@@ -30,4 +28,4 @@
     - all:loadbalancer-nodes
   any_errors_fatal: true
   roles:
-    - {role: raf/cdap-perimeter-security/deploy, when: is_kerberos_auth_enabled == true}
+    - raf/cdap-perimeter-security/deploy
