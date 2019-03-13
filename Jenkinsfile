@@ -6,7 +6,7 @@ pipeline {
 	DEB_ARCH = 'amd64'
 	DEB_POOL = 'gvs-dev-debian/pool/c'
 	ARTIFACT_SRC1 = './cdap/**/target'
-	ARTIFACT_SRC2 = './cdap-ambari-service/**/target'
+	ARTIFACT_SRC2 = './cdap-ambari-service/target'
 	ARTIFACT_DEST1 = 'gvs-dev-debian/pool/c'
 	}
   stages {
