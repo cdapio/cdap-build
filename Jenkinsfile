@@ -1,7 +1,14 @@
 @Library('jenkins_lib')_
 pipeline {
   agent {label 'slave'}
-	
+  environment { 
+   	DEB_COMPONENT = 'cdap'
+	DEB_ARCH = 'amd64'
+	DEB_POOL = 'gvs-dev-debian/pool/c'
+	ARTIFACT_SRC1 = './cdap/**/target'
+	ARTIFACT_SRC2 = './cdap-ambari-service/**/target'
+	ARTIFACT_DEST1 = 'gvs-dev-debian/pool/c'
+	}
   stages {
     stage("Define Release version"){
       steps {
@@ -61,6 +68,8 @@ pipeline {
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap-ambari-service/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}', 'ggn-dev-rpms/cdap-build' )
+	  deb_push(env.buildType, env.ARTIFACT_SRC1, env.ARTIFACT_DEST1 )
+          deb_push(env.buildType, env.ARTIFACT_SRC2, env.ARTIFACT_DEST1 ) 
     }}}
   }
 	
