@@ -31,6 +31,7 @@
     <module>app-artifacts/hydrator-plugins</module>
     <module>app-artifacts/mmds</module>
     <module>security-extensions/cdap-security-extn</module>
+    <module>app-artifacts/cdap-mrds</module>
     <module>cdap</module>
   </modules>
 

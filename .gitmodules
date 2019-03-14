@@ -26,3 +26,7 @@
 	path = sentry
 	url = https://github.com/Guavus/sentry
 	branch = build_guavus_1.7.0_5.1.202
+[submodule "app-artifacts/cdap-mrds"]
+  	path = app-artifacts/cdap-mrds
+  	url = https://github.com/Guavus/cdap-mrds.git
+  	branch = master
