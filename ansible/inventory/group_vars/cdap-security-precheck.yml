@@ -1,21 +1,23 @@
 ---
-#----------------
+#----------------------------------------
 # Common Config
-#----------------
-kerberos_keytab_path: '/etc/security/keytabs'
-kerberos_keytab_filename: 'hdfs.headless.keytab'
-ldap_cert_path: '/etc/openldap/certs/'
-ldap_cert_name: 'default.crt'
-ldap_cert_alias: "{{ansible_fqdn}}"
-yarn_queue_name: 'default'
+# Below Configs are required to validate 
+# pr-requisites for CDAP security.
+#----------------------------------------
+kerberos_keytab_path: '/etc/security/keytabs'                           # keytab path 
+kerberos_keytab_filename: 'hdfs.headless.keytab'                        # hdfs keytab filename
+ldap_cert_path: '/etc/openldap/certs/'                                  # LDAP certificate path
+ldap_cert_name: 'default.crt'                                           # LDAP certificate name
+ldap_cert_alias: "{{ansible_fqdn}}"                                     # LDAP certificate alias if any else leave as it is.
+yarn_queue_name: 'default'                                              # Name of yarn queue that should exists.
 
 #-----------------
 # Validation Flags
 #-----------------
-check_kerberos: true
-check_store_path: true
-check_ssl_path: true
-check_keystore_truststore: true
-check_ldap_connection: true
-check_yarn_queue: true
-check_services: true
+check_kerberos: true                                                    # Enable this flag to test kerberos 
+check_store_path: true                                                  # Enable this flag to check existence of path
+check_ssl_path: true                                                    # Enable this flag to check existence of path
+check_keystore_truststore: true                                         # Enable this flag to verify keystore and trustore are valid
+check_ldap_connection: true                                             # Enable this flag to check verify LDAP connection
+check_yarn_queue: true                                                  # Enable this flag to check if queue name exists in yarn
+check_services: true                                                    # Enable this flag to check to required services are running
