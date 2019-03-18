@@ -21,7 +21,7 @@
 [submodule "cdap-ambari-service"]
 	path = cdap-ambari-service
 	url = https://github.com/Guavus/cdap-ambari-service.git
-        branch = build_guavus_5.1_5.1.202 
+  branch = build_guavus_5.1_5.1.202 
 [submodule "sentry"]
 	path = sentry
 	url = https://github.com/Guavus/sentry
@@ -30,3 +30,7 @@
 	path = app-artifacts/auto-feature-engineering
 	url = https://github.com/Guavus/auto-feature-engineering.git
         branch = 1.0.1
+[submodule "app-artifacts/cdap-mrds"]
+	path = app-artifacts/cdap-mrds
+	url = https://github.com/Guavus/cdap-mrds.git
+	branch = build_guavus_1.0_5.1.202_latest
