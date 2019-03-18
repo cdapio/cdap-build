@@ -1,6 +1,0 @@
----
-
-retry_stagger: 6
-
-hdp_services:
-  - CDAP

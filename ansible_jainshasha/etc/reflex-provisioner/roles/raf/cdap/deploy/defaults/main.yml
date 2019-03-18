@@ -1,9 +1,0 @@
----
-
-cdap_major_version: '4.3'
-cdap_version: '4.3.4'
-cdap_properties_dir: "/opt/guavus/ambari-api/cdap/properties"
-postgres_port: 5432
-mysql_port: 3306
-
-
