@@ -16,6 +16,13 @@ cdap_major_version: '5.1.202'
 spark2_2_home: "/usr/hdp/{{ hdp_version }}/spark2"
 install_guavus_accelerator: true
 
+#------------------------
+# kerberos Config
+#------------------------
+krb_admin_principal: "admin/admin@GVS.GGN"
+krb_admin_password: "changeit"
+
+
 #-------------------------
 # Enable Security For CDAP
 #-------------------------
