@@ -8,6 +8,7 @@ pipeline {
 	ARTIFACT_SRC1 = './cdap/**/target'
 	ARTIFACT_SRC2 = './cdap-ambari-service/target'
 	ARTIFACT_DEST1 = 'gvs-dev-debian/pool/c'
+	SONAR_PATH = './cdap'
 	}
   stages {
     stage("Define Release version"){
@@ -52,21 +53,20 @@ pipeline {
 		"""
 	}}}
 	  
-	stage('SonarQube analysis') {
-	  steps {
-	    script {
-	      def scannerHome = tool 'sonar';
-		withSonarQubeEnv('sonar') {
-		echo "sonar"
-		sh 'cd ${WORKSPACE}/cdap && mvn sonar:sonar'
-		timeout(time: 1, unit: 'HOURS') {
-		def qg = waitForQualityGate()
-		if (qg.status != 'OK') {
-		error "Pipeline aborted due to quality gate failure: ${qg.status}"
-		}
-		}
-            }}}}
-	  
+stage('SonarQube analysis') {
+steps {
+script {
+sonarqube(env.SONAR_PATH)
+timeout(time: 1, unit: 'HOURS') {
+def qg = waitForQualityGate()
+if (qg.status != 'OK') {
+error "Pipeline aborted due to quality gate failure: ${qg.status}"
+}
+}
+}
+}
+}
+
 	stage("RPM PUSH"){
 	  steps{
 	    script{
