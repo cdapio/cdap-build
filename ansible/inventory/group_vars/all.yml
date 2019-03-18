@@ -22,3 +22,13 @@ install_guavus_accelerator: true
 
 is_authentication_enabled: true
 is_authorization_enabled: true
+
+#-----------------------------------------
+# Enable Guavus Analytics Engine Services
+#-----------------------------------------
+
+cdap__ui_theme_name: 'afe'
+cdap__ui_theme_file: 'ui/server/config/themes/{{cdap__ui_theme_name}}.json'
+cdap__data_tx_max_timeout: 3600
+cdap__data_tx_timeout: 3600
+
