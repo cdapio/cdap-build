@@ -96,6 +96,16 @@
   register: createconfig
   when: inventory_hostname == groups[cdap_management_nodes][0] and cdap_install_status.status != 409
 
+- name: Setting cdap ui theme (cdap-site)
+  shell: "/var/lib/ambari-server/resources/scripts/configs.py -a set -u {{ ambari_admin_user }} -p {{ ambari_admin_password }} -l {{ cdap_loadbalancer_vip }} -n {{ cluster_name }} -c {{ item.config }} -k {{ item.key }} -v {{ item.value }}"
+  with_items:
+    - { config: 'cdap-site', key: 'ui.theme.file', value: '{{cdap__ui_theme_file}}' }
+    - { config: 'cdap-site', key: 'data.tx.max.timeout', value: '{{cdap__data_tx_max_timeout}}'}
+    - { config: 'cdap-site', key: 'data.tx.timeout', value: '{{cdap__data_tx_timeout}}'}
+  when:
+    - inventory_hostname == groups[cdap_management_nodes][0]
+    - (analytics_engine|lower)|bool
+
 - name: Create facts for config name and version
   set_fact:
         configname: "{{ item.item }}"
