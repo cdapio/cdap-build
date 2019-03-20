@@ -183,6 +183,15 @@
   when: inventory_hostname == groups[cdap_management_nodes][0]
 
 - name: Generating keytab and principal for CDAP
+  vars:
+    url_body:
+      Credential:
+        principal: "{{krb_admin_principal}}"
+        key: "{{krb_admin_password}}"
+        type: "temporary"
+    url_body2:
+      Clusters:
+        security_type: "KERBEROS"
   block:
     - name: Temporary KDC credentials FOR CDAP
       uri:
@@ -192,8 +201,9 @@
         user: "{{ ambari_admin_user }}"
         password: "{{ ambari_admin_password }}"
         headers: '{"X-Requested-By":"ambari"}'
-        body: '{"Credential":{"principal":"{{krb_admin_principal}}","key":"{{krb_admin_password}}","type":"temporary"}}'
-        status_code: 200,201,202,404
+        body: "'{{ url_body | to_json }}'"
+        body_format: json
+        status_code: 200,201,202,404,500
         return_content: yes
       register: cdap_krb_info
       when: 
@@ -208,7 +218,8 @@
         user: "{{ ambari_admin_user }}"
         password: "{{ ambari_admin_password }}"
         headers: '{"X-Requested-By":"ambari"}'
-        body: '{ "Clusters" : { "security_type" : "KERBEROS" }}'
+        body: "'{{ url_body2 | to_json }}'"
+        body_format: json
         status_code: 200,201,202,404
         return_content: yes
       register: cdap_krb_result
