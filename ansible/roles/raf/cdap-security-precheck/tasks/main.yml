@@ -2,7 +2,7 @@
 # tasks file for cdap-security-precheck
 
 - name: Getting kerberos principal using keytab
-  shell: "klist -tke {{kerberos_keytab_path}}/{{kerberos_keytab_filename}} |grep '@' |awk -F' ' '{print $4}'|head -1"
+  shell: "klist -tke {{hdfs__kerberos_keytab_path}}/{{hdfs__kerberos_keytab_filename}} |grep '@' |awk -F' ' '{print $4}'|head -1"
   become: true
   become_user: hdfs
   become_method: su
@@ -11,7 +11,7 @@
   when: inventory_hostname == groups['cdap-master-nodes'][0] and (check_kerberos|lower)|bool
 
 - name: Getting kerberos ticket using keytab
-  shell: "kinit -kt {{kerberos_keytab_path}}/{{kerberos_keytab_filename}} {{kerberos_keytab_principal.stdout}}"
+  shell: "kinit -kt {{hdfs__kerberos_keytab_path}}/{{hdfs__kerberos_keytab_filename}} {{kerberos_keytab_principal.stdout}}"
   become: true
   become_user: hdfs
   become_method: su

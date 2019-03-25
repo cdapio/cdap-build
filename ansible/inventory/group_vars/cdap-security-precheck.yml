@@ -4,8 +4,8 @@
 # Below Configs are required to validate 
 # pr-requisites for CDAP security.
 #----------------------------------------
-kerberos_keytab_path: '/etc/security/keytabs'                           # keytab path 
-kerberos_keytab_filename: 'hdfs.headless.keytab'                        # hdfs keytab filename
+hdfs__kerberos_keytab_path: '/etc/security/keytabs'                           # keytab path 
+hdfs__kerberos_keytab_filename: 'hdfs.headless.keytab'                        # hdfs keytab filename
 ldap_cert_path: '/etc/openldap/certs/'                                  # LDAP certificate path
 ldap_cert_name: 'default.crt'                                           # LDAP certificate name
 ldap_cert_alias: "{{ansible_fqdn}}"                                     # LDAP certificate alias if any else leave as it is.
