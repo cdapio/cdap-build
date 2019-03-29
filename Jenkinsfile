@@ -41,11 +41,11 @@ pipeline {
 		cd cdap && \
 		mvn clean install -DskipTests -Dcheckstyle.skip && \
 		cd .. && \
-		mvn install -DskipTests -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
-		mvn install -DskipTests -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
+		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
+		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
 		rm -rf ${env.WORKSPACE}/ansible_rpm/*.rpm  && \
-		mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
+		mvn clean deploy -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
 		-DskipTests \
 		-Dcheckstyle.skip=true \
 		-Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
