@@ -27,9 +27,9 @@
   <name>Cask Data Application Platform (CDAP) build</name>
 
   <modules>
-    <module>app-artifacts/dre</module>
+    <!-- <module>app-artifacts/dre</module> -->
     <module>app-artifacts/hydrator-plugins</module>
-    <module>app-artifacts/mmds</module>
+    <!-- <module>app-artifacts/mmds</module> -->
     <module>security-extensions/cdap-security-extn</module>
     <module>cdap</module>
   </modules>
