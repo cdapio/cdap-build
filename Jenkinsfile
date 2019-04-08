@@ -78,7 +78,11 @@ error "Pipeline aborted due to quality gate failure: ${qg.status}"
 }
 }
 }
-
+	stage("ZIP PUSH"){
+	  steps{
+	    script{
+	    tar_push ( env.buildType, '${WORKSPACE}/cdap/cdap-standalone/target', 'ggn-archive/cdap-build' )
+    }}}
 	stage("RPM PUSH"){
 	  steps{
 	    script{
