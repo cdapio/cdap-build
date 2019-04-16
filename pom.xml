@@ -33,6 +33,7 @@
     <module>security-extensions/cdap-security-extn</module>
     <module>app-artifacts/auto-feature-engineering</module>
     <module>app-artifacts/cdap-mrds</module>
+    <module>app-artifacts/auto-metadata-service</module>
     <module>cdap</module>
   </modules>
 
