@@ -88,12 +88,12 @@ cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_MRDS, env.branchVersion, 'MRDS')
 cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_MMDS, env.branchVersion, 'MMDS')
 cdap_sonar(env.SONAR_PATH_APP_ARTIFACTS_AFE, env.branchVersion, 'AFE')
 cdap_sonar(env.SONAR_PATH_SECURITY_EXTN, env.branchVersion, 'SECURITY-EXTENSION')
-timeout(time: 2, unit: 'HOURS') {
+/*timeout(time: 2, unit: 'HOURS') {
 def qg = waitForQualityGate()
 if (qg.status != 'OK') {
 error "Pipeline aborted due to quality gate failure: ${qg.status}"
 }
-}
+}*/
 }
 }
 
