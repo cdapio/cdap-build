@@ -52,7 +52,7 @@ pipeline {
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
 		rm -rf ${env.WORKSPACE}/ansible_rpm/*.rpm
 		"""
-		    if (env.BRANCH_NAME ==~ 'release/guavus_.*') {
+		    if (env.BRANCH_NAME ==~ 'release1/guavus_.*') {
 		    sh"""
 		    mvn clean deploy -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
 		    -DskipTests \
