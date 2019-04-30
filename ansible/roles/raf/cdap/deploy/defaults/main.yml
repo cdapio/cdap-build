@@ -6,6 +6,47 @@ mysql_port: 3306
 rangeradmin_username: "admin"
 rangeradmin_password: "Sbe7UGkRBMF8"
 
+cdap_user_policy_config: |
+  {
+   "name":"cdap_user",
+   "service": "{{ cdap_cluster_name }}_yarn",
+   "isEnabled": true,
+   "isAuditEnabled": true,
+   "resources": {
+        "queue": {
+            "values": [
+                "default"
+            ],
+            "isExcludes": false,
+            "isRecursive": true
+        }
+    },
+    "policyItems": [
+        {
+            "accesses": [
+                {
+                    "type": "submit-app",
+                    "isAllowed": true
+                },
+                {
+                    "type": "admin-queue",
+                    "isAllowed": true
+                }
+            ],
+            "users": [
+                "cdap"
+            ],
+            "groups": [],
+            "conditions": [],
+            "delegateAdmin": false
+        }
+    ],
+    "denyPolicyItems": [],
+    "allowExceptions": [],
+    "denyExceptions": [],
+    "dataMaskPolicyItems": [],
+    "rowFilterPolicyItems": []
+  }
 cdap_path_policy_config: |
   {
    "name":"cdap_path",

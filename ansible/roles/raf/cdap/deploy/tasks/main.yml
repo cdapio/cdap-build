@@ -177,6 +177,7 @@
     status_code: 200,201,202,400
     return_content: yes
   with_items:
+    - "{{ cdap_user_policy_config }}"
     - "{{ cdap_path_policy_config }}"
     - "{{ yarn_path_policy_config }}"
     - "{{ hbase_all_policy_config }}"
