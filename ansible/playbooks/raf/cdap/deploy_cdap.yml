@@ -69,6 +69,10 @@
       when: inventory_hostname in groups['loadbalancer-nodes']
 
 - name: "Include playbook only if the condition is true"
+  include: ../guavus_cdap_plugins/deploy.yml
+  when: install_guavus_accelerator | bool
+
+- name: "Include playbook only if the condition is true"
   include: ../cdap-security-precheck/deploy/main.yml
   when: is_authentication_enabled | bool
 
