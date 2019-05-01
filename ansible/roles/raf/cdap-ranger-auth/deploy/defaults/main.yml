@@ -7,7 +7,7 @@
 cdap__security_authorization_enabled: "{{is_security_authorization_enabled|lower}}"
 cdap__security_authorization_extension_jar_path: "/opt/cdap/master/ext/security/cdap-ranger-binding-0.1.4.jar"
 cdap__security_authorization_extension_extra_classpath: "/usr/local/ranger-cdap-conf/"
-
+cdap_cluster_name: "{{ cluster_name  }}"
 #-----------------------
 #  cdap ranger jar
 #-----------------------
@@ -15,6 +15,546 @@ cdap__ranger_lookup_jar: cdap-ranger-lookup-0.1.4-jar-with-dependencies.jar
 
 rangeradmin_username: "admin"
 rangeradmin_password: "Sbe7UGkRBMF8"
+
+
+cdap__config: |
+  {
+   "name": "{{ cdap_cluster_name }}_cdap",
+   "type": "cdap",
+   "description": "cdap",
+   "isEnabled": true,
+   "configs": {
+        "policy.download.auth.users": "cdap",
+        "policy.grantrevoke.auth.users": "cdap",
+        {% if is_security_enabled %} 
+        "cdap.instance.url": "https://{{ cdap_loadbalancer_vip }}:9443",
+        {%- else %}
+        "cdap.instance.url": "http://{{ cdap_loadbalancer_vip }}:11011",
+        {%- endif %}
+        "cdap.password": "cdap",
+        "cdap.username": "cdap"
+    }
+  }
+
+cdap__principal_policy_config: |
+  {
+      "name": "all - instance, principal",
+      "service": "{{ cdap_cluster_name }}_cdap",
+      "isEnabled": true,
+      "isAuditEnabled": true,
+      "resources": {
+          "principal": {
+              "values": [
+                  "*"
+              ],
+              "isExcludes": false,
+              "isRecursive": false
+          },
+          "instance": {
+              "values": [
+                  "cdap"
+              ],
+              "isExcludes": false,
+              "isRecursive": false
+          }
+      },
+      "policyItems": [
+          {
+              "accesses": [
+                  {
+                      "type": "read",
+                      "isAllowed": true
+                  },
+                  {
+                      "type": "write",
+                      "isAllowed": true
+                  },
+                  {
+                      "type": "execute",
+                      "isAllowed": true
+                  },
+                  {
+                      "type": "admin",
+                      "isAllowed": true
+                  }
+              ],
+              "users": [
+                  "cdap"
+              ],
+              "groups": [],
+              "conditions": [],
+              "delegateAdmin": false
+          }
+      ],
+      "denyPolicyItems": [],
+      "allowExceptions": [],
+      "denyExceptions": [],
+      "dataMaskPolicyItems": [],
+      "rowFilterPolicyItems": [],
+      "serviceType": "cdap"
+  }
+
+cdap__dataset_policy_config: |
+   {
+       "name": "all - instance, namespace, dataset",
+       "service": "{{ cdap_cluster_name }}_cdap",
+       "isEnabled": true,
+       "isAuditEnabled": true,
+       "resources": {
+           "instance": {
+               "values": [
+                   "cdap"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "namespace": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "dataset": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           }
+       },
+       "policyItems": [
+           {
+               "accesses": [
+                   {
+                       "type": "read",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "write",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "execute",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "admin",
+                       "isAllowed": true
+                   }
+               ],
+               "users": [
+                   "cdap"
+               ],
+               "groups": [],
+               "conditions": [],
+               "delegateAdmin": false
+           }
+       ],
+       "denyPolicyItems": [],
+       "allowExceptions": [],
+       "denyExceptions": [],
+       "dataMaskPolicyItems": [],
+       "rowFilterPolicyItems": [],
+       "serviceType": "cdap"
+   }
+
+cdap__stream_policy_config: |
+   {
+       "name": "all - instance, namespace, stream",
+       "service": "{{ cdap_cluster_name }}_cdap",
+       "isEnabled": true,
+       "isAuditEnabled": true,
+       "resources": {
+           "instance": {
+               "values": [
+                   "cdap"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "stream": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "namespace": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           }
+       },
+       "policyItems": [
+           {
+               "accesses": [
+                   {
+                       "type": "read",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "write",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "execute",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "admin",
+                       "isAllowed": true
+                   }
+               ],
+               "users": [
+                   "cdap"
+               ],
+               "groups": [],
+               "conditions": [],
+               "delegateAdmin": false
+           }
+       ],
+       "denyPolicyItems": [],
+       "allowExceptions": [],
+       "denyExceptions": [],
+       "dataMaskPolicyItems": [],
+       "rowFilterPolicyItems": [],
+       "serviceType": "cdap"
+   }
+
+cdap__dataset_module_policy_config: |
+   {
+       "name": "all - instance, namespace, dataset_module",
+       "service": "{{ cdap_cluster_name }}_cdap",
+       "isEnabled": true,
+       "isAuditEnabled": true,
+       "resources": {
+           "instance": {
+               "values": [
+                   "cdap"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "dataset_module": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "namespace": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           }
+       },
+       "policyItems": [
+           {
+               "accesses": [
+                   {
+                       "type": "read",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "write",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "execute",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "admin",
+                       "isAllowed": true
+                   }
+               ],
+               "users": [
+                   "cdap"
+               ],
+               "groups": [],
+               "conditions": [],
+               "delegateAdmin": false
+           }
+       ],
+       "denyPolicyItems": [],
+       "allowExceptions": [],
+       "denyExceptions": [],
+       "dataMaskPolicyItems": [],
+       "rowFilterPolicyItems": [],
+       "serviceType": "cdap"
+   }
+
+cdap__program_policy_config: |
+   {
+       "name": "all - instance, namespace, application, program",
+       "service": "{{ cdap_cluster_name }}_cdap",
+       "isEnabled": true,
+       "isAuditEnabled": true,
+       "resources": {
+           "instance": {
+               "values": [
+                   "cdap"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "application": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "namespace": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "program": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           }
+       },
+       "policyItems": [
+           {
+               "accesses": [
+                   {
+                       "type": "read",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "write",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "execute",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "admin",
+                       "isAllowed": true
+                   }
+               ],
+               "users": [
+                   "cdap"
+               ],
+               "groups": [],
+               "conditions": [],
+               "delegateAdmin": false
+           }
+       ],
+       "denyPolicyItems": [],
+       "allowExceptions": [],
+       "denyExceptions": [],
+       "dataMaskPolicyItems": [],
+       "rowFilterPolicyItems": [],
+       "serviceType": "cdap"
+   }
+
+cdap__dataset_type_policy_config: |
+   {
+       "name": "all - instance, namespace, dataset_type",
+       "service": "{{ cdap_cluster_name }}_cdap",
+       "isEnabled": true,
+       "isAuditEnabled": true,
+       "resources": {
+           "dataset_type": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "instance": {
+               "values": [
+                   "cdap"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "namespace": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           }
+       },
+       "policyItems": [
+           {
+               "accesses": [
+                   {
+                       "type": "read",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "write",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "execute",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "admin",
+                       "isAllowed": true
+                   }
+               ],
+               "users": [
+                   "cdap"
+               ],
+               "groups": [],
+               "conditions": [],
+               "delegateAdmin": false
+           }
+       ],
+       "denyPolicyItems": [],
+       "allowExceptions": [],
+       "denyExceptions": [],
+       "dataMaskPolicyItems": [],
+       "rowFilterPolicyItems": [],
+       "serviceType": "cdap"
+   }
+
+cdap__secure_key_policy_config: |
+   {
+       "name": "all - instance, namespace, secure_key",
+       "service": "{{ cdap_cluster_name }}_cdap",
+       "isEnabled": true,
+       "isAuditEnabled": true,
+       "resources": {
+           "instance": {
+               "values": [
+                   "cdap"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "namespace": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "secure_key": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           }
+       },
+       "policyItems": [
+           {
+               "accesses": [
+                   {
+                       "type": "read",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "write",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "execute",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "admin",
+                       "isAllowed": true
+                   }
+               ],
+               "users": [
+                   "cdap"
+               ],
+               "groups": [],
+               "conditions": [],
+               "delegateAdmin": false
+           }
+       ],
+       "denyPolicyItems": [],
+       "allowExceptions": [],
+       "denyExceptions": [],
+       "dataMaskPolicyItems": [],
+       "rowFilterPolicyItems": [],
+       "serviceType": "cdap"
+   }
+
+cdap__artifact_policy_config: |
+   {
+       "name": "all - instance, namespace, artifact",
+       "service": "{{ cdap_cluster_name }}_cdap",
+       "isEnabled": true,
+       "isAuditEnabled": true,
+       "resources": {
+           "artifact": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "instance": {
+               "values": [
+                   "cdap"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           },
+           "namespace": {
+               "values": [
+                   "*"
+               ],
+               "isExcludes": false,
+               "isRecursive": false
+           }
+       },
+       "policyItems": [
+           {
+               "accesses": [
+                   {
+                       "type": "read",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "write",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "execute",
+                       "isAllowed": true
+                   },
+                   {
+                       "type": "admin",
+                       "isAllowed": true
+                   }
+               ],
+               "users": [
+                   "cdap"
+               ],
+               "groups": [],
+               "conditions": [],
+               "delegateAdmin": false
+           }
+       ],
+       "denyPolicyItems": [],
+       "allowExceptions": [],
+       "denyExceptions": [],
+       "dataMaskPolicyItems": [],
+       "rowFilterPolicyItems": [],
+       "serviceType": "cdap"
+   }
 
 cdap__ranger_servicedef_cdap: |
   {
