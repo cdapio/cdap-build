@@ -198,6 +198,18 @@
          {% else %}  check
          {% endif -%}
          {% endfor %}
+
+       listen CDAP_10443
+         bind {{ cdap_loadbalancer_vip }}:10443
+         mode  tcp
+         balance  roundrobin
+         appsession JSESSIONID len 1024 timeout 1h request-learn
+         option forwardfor
+         {% for host in groups['cdap-master-nodes'] %}server {{ hostvars[host]['ansible_hostname'] }} {{ hostvars[host]['ansible_default_ipv4']['address'] }}:10443
+         {%- if loop.first %} check
+         {% else %}  check
+         {% endif -%}
+         {% endfor %}
   notify:
       - restart haproxy
   when: inventory_hostname in groups['loadbalancer-nodes']
