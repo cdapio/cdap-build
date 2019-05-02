@@ -34,3 +34,7 @@
 	path = app-artifacts/cdap-mrds
 	url = https://github.com/Guavus/cdap-mrds.git
 	branch = dev/build_guavus_5.1.203
+[submodule "app-artifacts/auto-metadata-service"]
+	path = app-artifacts/auto-metadata-service
+	url = https://github.com/Guavus/auto-metadata-service.git
+	branch = dev/build_guavus_5.1.203
