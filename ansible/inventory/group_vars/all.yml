@@ -21,7 +21,7 @@ install_guavus_accelerator: true
 # Below information is required for cdap 
 # keytab and principal generation.
 #----------------------------------------
-krb_admin_principal: "admin/admin@GVS.GGN"
+krb_admin_principal: "changeit"
 krb_admin_password: "changeit"
 
 #-------------------------
