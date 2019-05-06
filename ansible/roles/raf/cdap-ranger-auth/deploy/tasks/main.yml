@@ -51,6 +51,97 @@
     - "{{ cdap__ranger_servicedef_cdap }}"
   when: inventory_hostname == groups['ranger-nodes'][0]
 
+- name: Update CDAP configs in ranger
+  uri:
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/public/v2/api/service"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
+    body: "{{ item }}"
+    body_format: json
+    status_code: 200,201,202,400
+    return_content: no
+  with_items:
+    - "{{ cdap__config }}"
+  when: inventory_hostname == groups['ranger-nodes'][0]
+
+- name: Delete cdap ranger policy
+  uri:
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/public/v2/api/policy?servicename={{ cdap_cluster_name }}_cdap&policyname={{item}}"
+    method: DELETE
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"X-Xsrf-Header":"valid"}'
+    status_code: 204,404
+    return_content: no
+  with_items:
+    - "all+-+instance,+principal"
+    - "all+-+instance,+namespace,+stream"
+    - "all+-+instance,+namespace,+dataset"
+    - "all+-+instance,+namespace,+artifact"
+    - "all+-+instance,+namespace,+secure_key"
+    - "all+-+instance,+namespace,+dataset_type"
+    - "all+-+instance,+namespace,+dataset_module"
+    - "all+-+instance,+namespace,+application,+program"
+  when: inventory_hostname == groups['ranger-nodes'][0]
+  tags: cdap_policy
+
+- name: GET group id for group hadoop
+  uri:
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/xusers/groups/groupName/hadoop"
+    method: GET
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json","X-Xsrf-Header":"valid","Accept":"application/json"}'
+    status_code: 200,201,202,400
+    return_content: yes
+  register: cdap__ranger_group_hadoop
+  when: inventory_hostname == groups['ranger-nodes'][0]
+  tags: cdap_policy
+
+- name: Create CDAP user under ranger
+  uri:
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/xusers/secure/users"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
+    body: ' {"name":"cdap","firstName":"cdap","lastName": "","loginId": "cdap","emailAddress" : null,"description" : "cdap","password" : "cdap@123","groupIdList":[{{ cdap__ranger_group_hadoop.json.id }}],"status":1,"isVisible":1,"userRoleList": [ "ROLE_USER" ],"userSource": 0}'
+    body_format: json
+    status_code: 200,201,202,400
+    return_content: yes
+  when: inventory_hostname == groups['ranger-nodes'][0]
+  tags: cdap_policy
+
+- name: Add/Update Ranger cdap policies
+  uri:
+    url: "http://{{ hostvars[groups['ranger-nodes'][0]]['ansible_hostname'] }}:6080/service/public/v2/api/policy"
+    method: POST
+    force_basic_auth: yes
+    user: "{{ rangeradmin_username }}"
+    password: "{{ rangeradmin_password }}"
+    headers: '{"Content-Type":"application/json", "X-Xsrf-Header":"valid"}'
+    body: "{{ item }}"
+    body_format: json
+    status_code: 200,201,202,400
+    return_content: yes
+  with_items:
+    - "{{ cdap__principal_policy_config }}"
+    - "{{ cdap__dataset_policy_config }}"
+    - "{{ cdap__stream_policy_config }}"
+    - "{{ cdap__dataset_module_policy_config }}"
+    - "{{ cdap__program_policy_config }}"
+    - "{{ cdap__dataset_type_policy_config }}"
+    - "{{ cdap__secure_key_policy_config }}"
+    - "{{ cdap__artifact_policy_config }}"
+  when: inventory_hostname == groups['ranger-nodes'][0]
+  tags: cdap_policy
+
 - name: Installing CDAP Authorization Binding for Enforcement
   file:
     path: "/usr/local/ranger-cdap-conf"
