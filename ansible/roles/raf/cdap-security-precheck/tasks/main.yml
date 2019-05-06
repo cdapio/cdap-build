@@ -17,7 +17,7 @@
   become_method: su
   register: kerberos_ticket
   failed_when: kerberos_ticket.stderr != ""
-  when: inventory_hostname == groups['cdap-master-nodes'][0] and (kerberos_keytab_principal.stderr == "")
+  when: inventory_hostname == groups['cdap-master-nodes'][0] and (kerberos_keytab_principal.stderr == "") and (check_kerberos|lower)|bool
 
 - name: Testing hdfs connection using generated ticket
   shell: "hdfs dfs -test -d /"
@@ -26,7 +26,7 @@
   become_method: su
   register: hdfs_test
   failed_when: hdfs_test.stderr != ""
-  when: inventory_hostname == groups['cdap-master-nodes'][0] and kerberos_ticket.stderr == ""
+  when: inventory_hostname == groups['cdap-master-nodes'][0] and kerberos_ticket.stderr == "" and (check_kerberos|lower)|bool
 
 - name: Use Default SSL cert and key
   copy:
@@ -143,6 +143,7 @@
   when:
     - inventory_hostname == groups['cdap-management-nodes'][0]
     - queue.status == 200
+    - (check_yarn_queue|lower) | bool
 
 - fail:
     msg: "{{ yarn_queue_name }} yarn queue does not exist."
@@ -150,6 +151,7 @@
     - inventory_hostname == groups['cdap-management-nodes'][0]
     - yarn_queue_name not in (queues|map(attribute='queueName')|list)
     - queue.status == 200
+    - (check_yarn_queue|lower) | bool
 
 - name: Checking Required Services
   uri:
