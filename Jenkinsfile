@@ -47,6 +47,13 @@ pipeline {
 		cd cdap && \
 		mvn clean install -DskipTests -Dcheckstyle.skip && \
 		cd .. && \
+                cd ${env.WORKSPACE}/app-artifacts/auto-metadata-service && \
+                mvn clean install -Dcheckstyle.skip=true && \
+                mkdir -p build && \
+                cd build && \
+                cmake .. && \
+                make metadatasync_rpm && \
+                cd ../../../ && \
 		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
 		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
@@ -70,10 +77,7 @@ pipeline {
 		    }
 		sh"""
 		mvn org.owasp:dependency-check-maven:check -DskipSystemScope=true \
-        	-Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts && \
-                cd ${env.WORKSPACE}/app-artifacts/auto-metadata-service && \
-                mvn clean install -Dcheckstyle.skip=true && \
-                mkdir -p build;cd build;cmake ..;make metadatasync_rpm; cd ../
+        	-Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
 		"""
 	}}}
 	  
