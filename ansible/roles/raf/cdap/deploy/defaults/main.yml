@@ -34,7 +34,8 @@ cdap_user_policy_config: |
                 }
             ],
             "users": [
-                "cdap"
+                "cdap",
+                "hbase"
             ],
             "groups": [],
             "conditions": [],
@@ -57,7 +58,9 @@ cdap_path_policy_config: |
         "path": {
             "values": [
                 "/user/cdap",
-                "/cdap/tx.snapshot"
+                "/cdap/tx.snapshot",
+                "/apps/hive/",
+                "/cdap/"
             ],
             "isExcludes": false,
             "isRecursive": true
