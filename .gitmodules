@@ -1,8 +1,8 @@
 [submodule "cdap"]
 	path = cdap
-	url = https://github.com/caskdata/cdap.git
+	url = https://github.com/cdapio/cdap.git
 	branch = release/3.3
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
-	url = https://github.com/caskdata/hydrator-plugins.git
+	url = https://github.com/cdapio/hydrator-plugins.git
 	branch = release/1.2
