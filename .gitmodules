@@ -1,4 +1,4 @@
 [submodule "cdap"]
 	path = cdap
-	url = git@github.com:caskdata/cdap.git
+	url = git@github.com:cdapio/cdap.git
 	branch = release/3.2
