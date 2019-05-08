@@ -47,6 +47,13 @@ pipeline {
 		cd cdap && \
 		mvn clean install -DskipTests -Dcheckstyle.skip && \
 		cd .. && \
+                cd ${env.WORKSPACE}/app-artifacts/auto-metadata-service && \
+                mvn clean install -Dcheckstyle.skip=true && \
+                mkdir -p build && \
+                cd build && \
+                cmake .. && \
+                make metadatasync_rpm && \
+                cd ../../../ && \
 		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -pl cdap/cdap-api -P templates && \
 		mvn clean install -DskipTests -Dcheckstyle.skip=true -B -am -f cdap/cdap-app-templates -P templates && \
 		rm -rf ${env.WORKSPACE}/cdap/*/target/*.rpm  && \
@@ -68,10 +75,6 @@ pipeline {
 		    -Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
 		    -Dsecurity.extensions.dir=${env.WORKSPACE}/security-extensions -DbuildNumber=${env.RELEASE}"""
 		    }
-		sh"""
-		mvn org.owasp:dependency-check-maven:check -DskipSystemScope=true \
-        	-Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
-		"""
 	}}}
 	  
 stage('SonarQube analysis') {
@@ -112,6 +115,7 @@ error "Pipeline aborted due to quality gate failure: ${qg.status}"
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap/**/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}/cdap-ambari-service/target', 'ggn-dev-rpms/cdap-build' )
 	  rpm_push( env.buildType, '${WORKSPACE}', 'ggn-dev-rpms/cdap-build' )
+	  rpm_push( env.buildType, '${WORKSPACE}/app-artifacts/auto-metadata-service/', 'ggn-dev-rpms/metadatasync/' )
 	  deb_push(env.buildType, env.ARTIFACT_SRC1, env.ARTIFACT_DEST1 )
           deb_push(env.buildType, env.ARTIFACT_SRC2, env.ARTIFACT_DEST1 ) 
     }}}
