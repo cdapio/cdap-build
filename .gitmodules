@@ -1,40 +1,40 @@
 [submodule "cdap"]
 	path = cdap
 	url = https://github.com/Guavus/cdap.git
-	branch = release/build_guavus_5.1.2_5.1.203
+	branch = dev/build_guavus_5.1.2_5.1.204
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = https://github.com/Guavus/hydrator-plugins.git
-	branch = release/build_guavus_2.1_5.1.203
+	branch = dev/build_guavus_2.1_5.1.204
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = https://github.com/Guavus/cdap-security-extn.git
-	branch = release/build_guavus_0.8_5.1.203
+	branch = dev/build_guavus_0.8_5.1.204
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
 	url = https://github.com/Guavus/mmds.git
-	branch = release/build_guavus_1.1_5.1.203
+	branch = dev/build_guavus_1.1_5.1.204
 [submodule "app-artifacts/dre"]
 	path = app-artifacts/dre
 	url = https://github.com/Guavus/dre.git
-	branch = release/build_guavus_1.1_5.1.203
+	branch = dev/build_guavus_1.1_5.1.204
 [submodule "cdap-ambari-service"]
 	path = cdap-ambari-service
 	url = https://github.com/Guavus/cdap-ambari-service.git
-  	branch = release/build_guavus_5.1_5.1.203 
+  	branch = dev/build_guavus_5.1_5.1.204 
 [submodule "sentry"]
 	path = sentry
 	url = https://github.com/Guavus/sentry
-	branch = release/build_guavus_1.7.0_5.1.203
+	branch = dev/build_guavus_1.7.0_5.1.204
 [submodule "app-artifacts/auto-feature-engineering"]
 	path = app-artifacts/auto-feature-engineering
 	url = https://github.com/Guavus/auto-feature-engineering.git
-        branch = release/build_guavus_5.1.203
+        branch = dev/build_guavus_5.1.204
 [submodule "app-artifacts/cdap-mrds"]
 	path = app-artifacts/cdap-mrds
 	url = https://github.com/Guavus/cdap-mrds.git
-	branch = release/build_guavus_5.1.203
+	branch = dev/build_guavus_5.1.204
 [submodule "app-artifacts/auto-metadata-service"]
 	path = app-artifacts/auto-metadata-service
 	url = https://github.com/Guavus/auto-metadata-service.git
-	branch = release/build_guavus_1.0.0_5.1.203
+	branch = dev/build_guavus_1.0.0_5.1.204
