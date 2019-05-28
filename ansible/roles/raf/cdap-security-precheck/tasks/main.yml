@@ -114,6 +114,7 @@
   when:
     - inventory_hostname in groups['cdap-management-nodes']
     - (is_security_authentication_handler_ldapsVerifyCertificate|lower)|bool
+    - (is_security_authentication_handler_useLdaps|lower)| bool
     - hostvars[groups["cdap-master-nodes"][0]].ldap_ssl_connection.rc == 0
 
 - name: Copying keystore and truststore to cdap nodes
