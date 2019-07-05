@@ -69,8 +69,8 @@ pipeline {
 		    } 
 		    else {
 		    sh"""
-		    mvn clean deploy -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
-		    -DskipTests \
+		    mvn clean install -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb \
+		    -Dmaven.test.skip=true \
 		    -Dcheckstyle.skip=true \
 		    -Dadditional.artifacts.dir=${env.WORKSPACE}/app-artifacts \
 		    -Dsecurity.extensions.dir=${env.WORKSPACE}/security-extensions -DbuildNumber=${env.RELEASE}"""
