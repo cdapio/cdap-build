@@ -1,24 +1,20 @@
 [submodule "cdap"]
 	path = cdap
-	url = https://github.com/cdapio/cdap.git
+	url = ../cdap.git
 	branch = develop
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
-	url = https://github.com/cdapio/hydrator-plugins.git
+	url = ../hydrator-plugins.git
 	branch = develop
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
-	url = https://github.com/cdapio/cdap-security-extn.git
+	url = ../cdap-security-extn.git
 	branch = develop
-[submodule "apache-sentry"]
-	path = apache-sentry
-	url = https://gitbox.apache.org/repos/asf/sentry.git
-	branch = branch-1.7.0
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
-	url = https://github.com/cdap-solutions/mmds.git
+	url = ../../cdap-solutions/mmds.git
 	branch = develop
 [submodule "app-artifacts/dre"]
 	path = app-artifacts/dre
-	url = https://github.com/cdap-solutions/dre.git
+	url = ../../cdap-solutions/dre.git
 	branch = develop
