@@ -9,7 +9,7 @@
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
-	branch = release/0.10.0
+	branch = release/0.10
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
 	url = ../../cdap-solutions/mmds.git
