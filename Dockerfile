@@ -43,6 +43,8 @@ RUN apt-get update && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgres-socket-factory-1.0.12-jar-with-dependencies.jar https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.12/postgres-socket-factory-1.0.12-jar-with-dependencies.jar && \
   tar -xzf /opt/hadoop/hadoop-2.9.2.tar.gz -C /opt/hadoop && \
+  curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/hadoop-aws-2.9.2.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.9.2/hadoop-aws-2.9.2.jar && \
+  curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/aws-java-sdk-bundle-1.11.199.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.199/aws-java-sdk-bundle-1.11.199.jar && \
   tar -xzf /opt/spark/spark-2.3.3-bin-without-hadoop.tgz -C /opt/spark
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
