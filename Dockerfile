@@ -30,6 +30,7 @@ RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
 FROM openjdk:8-jdk AS run
 WORKDIR /
 COPY --from=build /cdap/build/cdap/cdap-master/target/stage-packaging/opt/cdap/master /opt/cdap/master
+COPY --from=build /cdap/build/cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /opt/cdap/ui
 COPY --from=build /cdap/build/cdap/cdap-distributions/src/etc/cdap/conf.dist/logback*.xml /opt/cdap/master/conf/
 
 RUN apt-get update && \
