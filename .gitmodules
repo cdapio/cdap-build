@@ -26,10 +26,6 @@
 	path = app-artifacts/delta
 	url = ../../data-integrations/delta.git
 	branch = develop
-[submodule "app-artifacts/database-delta-plugins"]
-	path = app-artifacts/database-delta-plugins
-	url = ../../data-integrations/database-delta-plugins.git
-	branch = develop
 [submodule "app-artifacts/bigquery-delta-plugins"]
 	path = app-artifacts/bigquery-delta-plugins
 	url = ../../data-integrations/bigquery-delta-plugins.git
