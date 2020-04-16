@@ -1,19 +1,19 @@
 [submodule "cdap"]
 	path = cdap
 	url = ../cdap.git
-	branch = develop
+	branch = release/6.2
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = ../hydrator-plugins.git
-	branch = develop
+	branch = release/2.4
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
-	branch = develop
+	branch = release/0.11
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
 	url = ../../cdap-solutions/mmds.git
-	branch = develop
+	branch = release/1.5
 [submodule "app-artifacts/sql-pipelines"]
 	path = app-artifacts/sql-pipelines
 	url = ../sql-pipelines.git
@@ -21,12 +21,12 @@
 [submodule "app-artifacts/delta"]
 	path = app-artifacts/delta
 	url = ../../data-integrations/delta.git
-	branch = develop
+	branch = release/0.1
 [submodule "app-artifacts/bigquery-delta-plugins"]
 	path = app-artifacts/bigquery-delta-plugins
 	url = ../../data-integrations/bigquery-delta-plugins.git
-	branch = develop
+	branch = release/0.1
 [submodule "app-artifacts/database-delta-plugins"]
 	path = app-artifacts/database-delta-plugins
 	url = ../../data-integrations/database-delta-plugins.git
-	branch = develop
+	branch = release/0.1
