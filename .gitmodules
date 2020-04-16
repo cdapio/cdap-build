@@ -14,10 +14,6 @@
 	path = app-artifacts/mmds
 	url = ../../cdap-solutions/mmds.git
 	branch = develop
-[submodule "app-artifacts/dre"]
-	path = app-artifacts/dre
-	url = ../../cdap-solutions/dre.git
-	branch = develop
 [submodule "app-artifacts/sql-pipelines"]
 	path = app-artifacts/sql-pipelines
 	url = ../sql-pipelines.git

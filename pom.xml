@@ -30,7 +30,6 @@
     <module>app-artifacts/bigquery-delta-plugins</module>
     <module>app-artifacts/database-delta-plugins</module>
     <module>app-artifacts/delta</module>
-    <module>app-artifacts/dre</module>
     <module>app-artifacts/hydrator-plugins</module>
     <module>app-artifacts/mmds</module>
     <module>cdap</module>
