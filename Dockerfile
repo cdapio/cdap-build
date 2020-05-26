@@ -18,7 +18,7 @@ ENV DIR /cdap/build
 ENV MAVEN_OPTS -Xmx2048m
 WORKDIR $DIR/
 COPY . $DIR/
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
   apt-get update && \
   apt-get -y install nodejs && \
   mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P templates,!unit-tests && \
