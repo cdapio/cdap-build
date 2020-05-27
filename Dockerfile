@@ -47,7 +47,11 @@ RUN apt-get update && \
   tar -xzf /opt/hadoop/hadoop-2.9.2.tar.gz -C /opt/hadoop && \
   curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/hadoop-aws-2.9.2.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.9.2/hadoop-aws-2.9.2.jar && \
   curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/aws-java-sdk-bundle-1.11.199.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.199/aws-java-sdk-bundle-1.11.199.jar && \
-  tar -xzf /opt/spark/spark-2.3.3-bin-without-hadoop.tgz -C /opt/spark
+  tar -xzf /opt/spark/spark-2.3.3-bin-without-hadoop.tgz -C /opt/spark && \
+  mv /opt/cdap/ui/server_dist/index.js /opt/cdap/ui/ && \
+  mv /opt/cdap/ui/server_dist/graphql /opt/cdap/ui/ && \
+  mv /opt/cdap/ui/server_dist/server /opt/cdap/ui/ && \
+  find /opt/cdap/ui/ -maxdepth 1 -mindepth 1 -exec ln -s {} /opt/cdap/ \;
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
 ENV HADOOP_HOME=/opt/hadoop/hadoop-2.9.2
