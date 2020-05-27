@@ -16,13 +16,14 @@
 FROM gcr.io/cdapio/cdap-build:latest AS build
 ENV DIR /cdap/build
 ENV MAVEN_OPTS -Xmx2048m
+ENV NODE_OPTIONS --max-old-space-size=8192
 WORKDIR $DIR/
 COPY . $DIR/
-RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
   apt-get update && \
   apt-get -y install nodejs && \
-  mvn install -f cdap -B -V -DskipTests -P templates,!unit-tests && \
-  mvn install -B -V -DskipTests -P templates,dist,k8s,!unit-tests \
+  mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P templates,!unit-tests && \
+  mvn install -B -V -Ddocker.skip=true -DskipTests -P templates,dist,k8s,!unit-tests \
     -Dadditional.artifacts.dir=$DIR/app-artifacts \
     -Dsecurity.extensions.dir=$DIR/security-extensions \
     -Dui.build.name=cdap-non-optimized-full-build
