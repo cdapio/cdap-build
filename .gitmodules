@@ -1,11 +1,11 @@
 [submodule "cdap"]
 	path = cdap
 	url = ../cdap.git
-	branch = dep-test
+	branch = develop
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = ../hydrator-plugins.git
-	branch = develop
+	branch = feature/fix-cassandra-dep
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
