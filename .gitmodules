@@ -14,10 +14,6 @@
 	path = app-artifacts/mmds
 	url = ../../cdap-solutions/mmds.git
 	branch = develop
-[submodule "app-artifacts/sql-pipelines"]
-	path = app-artifacts/sql-pipelines
-	url = ../sql-pipelines.git
-	branch = develop
 [submodule "app-artifacts/delta"]
 	path = app-artifacts/delta
 	url = ../../data-integrations/delta.git
