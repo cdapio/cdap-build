@@ -39,7 +39,7 @@ RUN apt-get update && \
   mkdir -p /opt/spark && \
   mkdir -p /opt/hadoop && \
   mkdir -p /opt/cdap/master/ext/jdbc/postgresql && \
-  curl -L -o /opt/hadoop/hadoop-2.9.2.tar.gz https://www-us.apache.org/dist/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz && \
+  curl -L -o /opt/hadoop/hadoop-2.9.2.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz && \
   curl -L -o /opt/spark/spark-2.3.3-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-2.3.3/spark-2.3.3-bin-without-hadoop.tgz && \
   curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop2-latest.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-latest.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
