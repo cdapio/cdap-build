@@ -16,7 +16,7 @@
 # Dockerfile for building container for building CDAP.
 # It populate maven cache with dependencies needed for building CDAP.
 FROM maven:3-jdk-8 AS build
-ENV MAVEN_OPTS -Xmx4096m
+ENV MAVEN_OPTS -Xmx4096m -Dhttp.keepAlive=false
 WORKDIR /cdap/maven/
 COPY . /cdap/maven/
 RUN mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.1:go-offline -B -V -P template,dist,k8s

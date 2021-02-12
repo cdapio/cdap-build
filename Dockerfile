@@ -15,7 +15,7 @@
 
 FROM gcr.io/cdapio/cdap-build:latest AS build
 ENV DIR /cdap/build
-ENV MAVEN_OPTS -Xmx2048m
+ENV MAVEN_OPTS -Xmx2048m -Dhttp.keepAlive=false
 ENV NODE_OPTIONS --max-old-space-size=8192
 WORKDIR $DIR/
 COPY . $DIR/
