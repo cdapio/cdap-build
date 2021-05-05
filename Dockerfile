@@ -1,5 +1,5 @@
 #
-# Copyright © 2016-2018 Cask Data, Inc.
+# Copyright © 2016-2021 Cask Data, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License. You may obtain a copy of
@@ -40,22 +40,23 @@ RUN apt-get update && \
   mkdir -p /opt/hadoop && \
   mkdir -p /opt/cdap/master/ext/jdbc/postgresql && \
   curl -L -o /opt/hadoop/hadoop-2.9.2.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz && \
-  curl -L -o /opt/spark/spark-2.3.3-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-2.3.3/spark-2.3.3-bin-without-hadoop.tgz && \
+  curl -L -o /opt/spark/spark-3.1.1-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.1.1/spark-3.1.1-bin-without-hadoop.tgz && \
   curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop2-latest.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-latest.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgres-socket-factory-1.0.12-jar-with-dependencies.jar https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.12/postgres-socket-factory-1.0.12-jar-with-dependencies.jar && \
   tar -xzf /opt/hadoop/hadoop-2.9.2.tar.gz -C /opt/hadoop && \
   curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/hadoop-aws-2.9.2.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.9.2/hadoop-aws-2.9.2.jar && \
   curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/aws-java-sdk-bundle-1.11.199.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.199/aws-java-sdk-bundle-1.11.199.jar && \
-  tar -xzf /opt/spark/spark-2.3.3-bin-without-hadoop.tgz -C /opt/spark && \
+  tar -xzf /opt/spark/spark-3.1.1-bin-without-hadoop.tgz -C /opt/spark && \
   mv /opt/cdap/ui/server_dist/index.js /opt/cdap/ui/ && \
   mv /opt/cdap/ui/server_dist/graphql /opt/cdap/ui/ && \
   mv /opt/cdap/ui/server_dist/server /opt/cdap/ui/ && \
+  find /opt/hadoop -name 'paranamer-2.3.jar' -exec rm {} + && \
   find /opt/cdap/ui/ -maxdepth 1 -mindepth 1 -exec ln -s {} /opt/cdap/ \;
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
 ENV HADOOP_HOME=/opt/hadoop/hadoop-2.9.2
-ENV SPARK_HOME=/opt/spark/spark-2.3.3-bin-without-hadoop
-ENV SPARK_COMPAT=spark2_2.11
+ENV SPARK_HOME=/opt/spark/spark-3.1.1-bin-without-hadoop
+ENV SPARK_COMPAT=spark3_2.12
 ENV HBASE_VERSION=1.2
 ENTRYPOINT ["/opt/cdap/master/bin/cdap", "run"]
