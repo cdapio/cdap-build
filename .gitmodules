@@ -26,3 +26,7 @@
 	path = app-artifacts/database-delta-plugins
 	url = ../../data-integrations/database-delta-plugins.git
 	branch = develop
+[submodule "app-artifacts/datastream-delta-plugins"]
+	path = app-artifacts/datastream-delta-plugins
+	url = ../../data-integrations/datastream-delta-plugins.git
+	branch = develop
