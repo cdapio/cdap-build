@@ -30,10 +30,7 @@
     <module>app-artifacts/bigquery-delta-plugins</module>
     <module>app-artifacts/database-delta-plugins</module>
     <module>app-artifacts/datastream-delta-plugins</module>
-    <module>app-artifacts/database-plugins/mysql-plugin</module>
-    <module>app-artifacts/database-plugins/mssql-plugin</module>
-    <module>app-artifacts/database-plugins/oracle-plugin</module>
-    <module>app-artifacts/database-plugins/postgresql-plugin</module>
+    <module>app-artifacts/database-plugins</module>
     <module>app-artifacts/delta</module>
     <module>app-artifacts/hydrator-plugins</module>
     <module>app-artifacts/mmds</module>
