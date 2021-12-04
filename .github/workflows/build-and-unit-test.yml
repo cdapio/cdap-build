@@ -41,7 +41,6 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
-          cache: maven
 
       - name: Build Apache Sentry
         working-directory: ./cdap
@@ -50,12 +49,12 @@ jobs:
       - name: Installing CDAP API JARs
         working-directory: ./cdap
         run: | 
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am --update-snapshots -pl cdap/cdap-api -P templates
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am --update-snapshots -f cdap/cdap-app-templates -P templates
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am  -pl cdap/cdap-api -P templates
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am  -f cdap/cdap-app-templates -P templates
 
       #  Missing Build Plugins
       - name: Build Standalone
         working-directory: ./cdap/cdap
-        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ../mvn -T2C --update-snapshots clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
+        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ../mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
 
