@@ -36,6 +36,13 @@ jobs:
           ln -s apache-maven-3.6.3/bin/mvn mvn
           cd ..
 
+      - name: Create dirs
+        working-directory: ./cdap
+        run: |
+          mkdir -p app-artifacts
+          mkdir -p security-extensions
+          mkdir -p cdap/cdap-distributions/target
+
       - name: Set Up Java 8
         uses: actions/setup-java@v2
         with:
