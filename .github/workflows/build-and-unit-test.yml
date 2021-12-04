@@ -16,10 +16,11 @@ jobs:
           path: cdap
       - name: Checkout Apache Sentry
         uses: actions/checkout@v2
-        path: cdap/apache-sentry
         with:
           repository: apache/sentry
           ref: 'release-1.7.0'
+          path: cdap/apache-sentry
+
 
       - name: Set up Maven
         run: |
