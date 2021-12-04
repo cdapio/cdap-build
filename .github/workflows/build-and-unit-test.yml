@@ -34,7 +34,7 @@ jobs:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
           path: cdap.tar
       - name: Untar files
-        run: tar -xvf cdap.jar --directory ./cdap
+        run: tar -xvf cdap.tar --directory ./cdap
       - name: Set Up Java 8
         uses: actions/setup-java@v2
         with:
@@ -56,7 +56,7 @@ jobs:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
           path: cdap.tar
       - name: Untar files
-        run: tar -xvf cdap.jar --directory ./cdap
+        run: tar -xvf cdap.tar --directory ./cdap
       - name: Set Up Java 8
         uses: actions/setup-java@v2
         with:
@@ -85,7 +85,7 @@ jobs:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
           path: cdap.tar
       - name: Untar files
-        run: tar -xvf cdap.jar --directory ./cdap  
+        run: tar -xvf cdap.tar --directory ./cdap  
       - name: Set Up Java 8
         uses: actions/setup-java@v2
         with:
