@@ -16,6 +16,7 @@ jobs:
           path: cdap
 
       - name: Update Submodules
+        working-directory: ./cdap
         run: git submodule update --init --recursive
 
       - name: Checkout Apache Sentry
