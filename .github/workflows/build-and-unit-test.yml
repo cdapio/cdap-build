@@ -74,12 +74,12 @@ jobs:
           mkdir -p security-extensions
           mkdir -p cdap/cdap-distributions/target
       - name: Install JARs to local Maven repository (cdap)
-        working-directory: ./cdap
+        working-directory: ./cdap/cdap
         run: MAVEN_OPTS="-Xmx4096m  -XX:MaxPermSize=256m" ./mvn install -DskipTests -B -P templates -V -U
       # Missing Deployment steps
 
 
-  Build-Cdap-Standalone:
+  Build-CDAP:
     runs-on: ubuntu-latest
     needs: Checkout-Code
     steps:
@@ -94,13 +94,19 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
-      - name: Install JARs to local Maven repository (cdap)
+      - name: Build Apache Sentry
         working-directory: ./cdap
-        run: ./mvn clean install -DskipTests
-      
+        run: ./mvn clean install -DskipTests -f apache-sentry
+
+      - name: Installing CDAP API JARs
+        working-directory: ./cdap
+        run: | 
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am -f cdap/cdap-app-templates -P templates
+
       #  Missing Build Plugins
       - name: Build Standalone
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ./mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests
-        #-Dadditional.artifacts.dir=$HYDRATOR_PLUGINS`
+        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ./mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
+
 
