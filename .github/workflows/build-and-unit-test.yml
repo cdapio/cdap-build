@@ -20,9 +20,11 @@ jobs:
         run: |
           git submodule update --init --recursive --remote 
           cd cdap
+          git fetch
           git checkout fix/test-new-node-version
           git pull
           cd cdap-ui
+          git fetch
           git checkout podesta/node-updates
           git pull
           cd ..
