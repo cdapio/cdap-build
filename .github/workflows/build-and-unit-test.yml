@@ -125,8 +125,6 @@ jobs:
           git config $_GIT_GLOBAL_OPTION user.email "${INPUT_EMAIL}"
           git config $_GIT_GLOBAL_OPTION user.name "${INPUT_NAME}"
           git config $_GIT_GLOBAL_OPTION user.password ${INPUT_TOKEN}
-          echo "GIT_USER=${INPUT_ACTOR}:${INPUT_TOKEN}" >> $GITHUB_ENV
-
 
       #  Missing Build Plugins
       - name: Build Standalone
