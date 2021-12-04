@@ -39,6 +39,10 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.6.3
       - name: Run Unit Tests
         working-directory: ./cdap
         run: mvn test -fae -P examples,templates,unit-tests -U -V
@@ -59,7 +63,10 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
-          
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.6.3          
       - name: Create dirs
         working-directory: ./cdap
         run: |
@@ -87,6 +94,10 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v4.2
+        with:
+          maven-version: 3.6.3            
       - name: Install JARs to local Maven repository (cdap)
         working-directory: ./cdap
         run: mvn clean install -DskipTests
