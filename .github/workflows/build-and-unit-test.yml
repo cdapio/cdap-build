@@ -14,6 +14,11 @@ jobs:
         with:
           submodules: recursive
           path: cdap
+      - name: Set up Maven
+        run: |
+          wget -O- https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xzv
+          mv apache-maven-3.6.3 cdap/
+          ln -s cdap/apache-maven-3.6.3/bin/mvn cdap/mvn
       - name: Tar files
         run: tar -cvf cdap.tar ./cdap  
       - name: Upload Recursively Checkout REpository
@@ -39,13 +44,10 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.2
-        with:
-          maven-version: 3.6.3
+        
       - name: Run Unit Tests
         working-directory: ./cdap
-        run: mvn test -fae -P examples,templates,unit-tests -U -V
+        run: ./mvn test -fae -P examples,templates,unit-tests -U -V
     
   # From Current CI
   Build-Maven-Artifacts:
@@ -63,10 +65,6 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.2
-        with:
-          maven-version: 3.6.3          
       - name: Create dirs
         working-directory: ./cdap
         run: |
@@ -75,7 +73,7 @@ jobs:
           mkdir -p cdap/cdap-distributions/target
       - name: Install JARs to local Maven repository (cdap)
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx4096m  -XX:MaxPermSize=256m" mvn install -DskipTests -B -P templates -V -U
+        run: MAVEN_OPTS="-Xmx4096m  -XX:MaxPermSize=256m" ./mvn install -DskipTests -B -P templates -V -U
       # Missing Deployment steps
 
 
@@ -94,17 +92,13 @@ jobs:
         with:
           distribution: 'adopt'
           java-version: '8'
-      - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.2
-        with:
-          maven-version: 3.6.3            
       - name: Install JARs to local Maven repository (cdap)
         working-directory: ./cdap
-        run: mvn clean install -DskipTests
+        run: ./mvn clean install -DskipTests
       
       #  Missing Build Plugins
       - name: Build Standalone
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests
+        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ./mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests
         #-Dadditional.artifacts.dir=$HYDRATOR_PLUGINS`
 
