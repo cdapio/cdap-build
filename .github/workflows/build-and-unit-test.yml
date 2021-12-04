@@ -35,79 +35,14 @@ jobs:
           cd cdap
           ln -s apache-maven-3.6.3/bin/mvn mvn
           cd ..
-      - name: Tar files
-        run: tar -cvf cdap.tar ./cdap  
-      - name: Upload Recursively Checkout Repository
-        uses: actions/upload-artifact@v2
-        with:
-          name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap.tar
-          retention-days: 1
-  
-  # From Current CI
-  Unit-Tests:
-    runs-on: ubuntu-latest
-    needs: Checkout-Code
-    steps:
-      - name: Download Recursively Checkout REpository
-        uses: actions/download-artifact@v2
-        with:
-          name: updated-sources-${{env.GITHUB_RUN_ID}}
-      - name: Untar files
-        run: tar -xvf cdap.tar
-      - name: Set Up Java 8
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '8'
-        
-      - name: Run Unit Tests
-        working-directory: ./cdap
-        run: ./mvn test -fae -P examples,templates,unit-tests -U -V
-    
-  # From Current CI
-  Build-Maven-Artifacts:
-    runs-on: ubuntu-latest
-    needs: Checkout-Code
-    steps:
-      - name: Download Recursively Checkout Repository
-        uses: actions/download-artifact@v2
-        with:
-          name: updated-sources-${{env.GITHUB_RUN_ID}}
-      - name: Untar files
-        run: tar -xvf cdap.tar
-      - name: Set Up Java 8
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '8'
-      - name: Create dirs
-        working-directory: ./cdap
-        run: |
-          mkdir -p app-artifacts
-          mkdir -p security-extensions
-          mkdir -p cdap/cdap-distributions/target
-      - name: Install JARs to local Maven repository (cdap)
-        working-directory: ./cdap/cdap
-        run: MAVEN_OPTS="-Xmx4096m  -XX:MaxPermSize=256m" ../mvn install -DskipTests -B -P templates -V -U
-      # Missing Deployment steps
 
-
-  Build-CDAP:
-    runs-on: ubuntu-latest
-    needs: Checkout-Code
-    steps:
-      - name: Download Recursively Checkout Repository
-        uses: actions/download-artifact@v2
-        with:
-          name: updated-sources-${{env.GITHUB_RUN_ID}}
-      - name: Untar files
-        run: tar -xvf cdap.tar
       - name: Set Up Java 8
         uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
           java-version: '8'
+          cache: maven
+
       - name: Build Apache Sentry
         working-directory: ./cdap
         run: ./mvn clean install -DskipTests -f apache-sentry
@@ -115,17 +50,12 @@ jobs:
       - name: Installing CDAP API JARs
         working-directory: ./cdap
         run: | 
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am -f cdap/cdap-app-templates -P templates
-
-      - name: Set Github Credentials for Bower install
-        run: |
-          git config --global user.email "github-action@users.noreply.github.com"
-          git config --global user.name "Github Actions"
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am --update-snapshots -pl cdap/cdap-api -P templates
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am --update-snapshots -f cdap/cdap-app-templates -P templates
 
       #  Missing Build Plugins
       - name: Build Standalone
         working-directory: ./cdap/cdap
-        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ../mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
+        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ../mvn -T2C --update-snapshots clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
 
