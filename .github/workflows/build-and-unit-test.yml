@@ -35,7 +35,7 @@ jobs:
       - name: Untar files
         run: tar -xvf cdap.jar --directory ./cdap
       - name: Set Up Java 8
-        uses: actions/setup-java@2
+        uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
           java-version: '8'
@@ -56,7 +56,7 @@ jobs:
       - name: Untar files
         run: tar -xvf cdap.jar --directory ./cdap
       - name: Set Up Java 8
-        uses: actions/setup-java@2
+        uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
           java-version: '8'
@@ -84,7 +84,7 @@ jobs:
       - name: Untar files
         run: tar -xvf cdap.jar --directory ./cdap  
       - name: Set Up Java 8
-        uses: actions/setup-java@2
+        uses: actions/setup-java@v2
         with:
           distribution: 'adopt'
           java-version: '8'
