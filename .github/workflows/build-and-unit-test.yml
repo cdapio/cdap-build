@@ -12,6 +12,7 @@ jobs:
       - name: Recursively Checkout Repository
         uses: actions/checkout@v2
         with:
+          fetch-depth: 0
           submodules: recursive
           path: cdap
 
@@ -19,16 +20,6 @@ jobs:
         working-directory: ./cdap
         run: |
           git submodule update --init --recursive --remote 
-          cd cdap
-          git fetch
-          git checkout fix/test-new-node-version
-          git pull
-          cd cdap-ui
-          git fetch
-          git checkout podesta/node-updates
-          git pull
-          cd ..
-          cd ..
 
       - name: Checkout Apache Sentry
         uses: actions/checkout@v2
