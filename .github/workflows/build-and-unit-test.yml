@@ -17,7 +17,7 @@ jobs:
 
       - name: Update Submodules
         working-directory: ./cdap
-        run: git submodule update --init --recursive
+        run: git submodule update --init --recursive --remote 
 
       - name: Checkout Apache Sentry
         uses: actions/checkout@v2
