@@ -18,7 +18,9 @@ jobs:
         run: |
           wget -O- https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xzv
           mv apache-maven-3.6.3 cdap/
-          ln -s cdap/apache-maven-3.6.3/bin/mvn cdap/mvn
+          cd cdap
+          ln -s apache-maven-3.6.3/bin/mvn mvn
+          cd ..
       - name: Tar files
         run: tar -cvf cdap.tar ./cdap  
       - name: Upload Recursively Checkout REpository
