@@ -40,6 +40,7 @@ jobs:
           distribution: 'adopt'
           java-version: '8'
       - name: Run Unit Tests
+        working-directory: ./cdap
         run: mvn test -fae -P examples,templates,unit-tests -U -V
     
   # From Current CI
@@ -60,14 +61,14 @@ jobs:
           java-version: '8'
           
       - name: Create dirs
-        working-directory: ./
+        working-directory: ./cdap
         run: |
           mkdir -p app-artifacts
           mkdir -p security-extensions
           mkdir -p cdap/cdap-distributions/target
       - name: Install JARs to local Maven repository (cdap)
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx4096m  -XX:MaxPermSize=256m" install -DskipTests -B -P templates -V -U
+        run: MAVEN_OPTS="-Xmx4096m  -XX:MaxPermSize=256m" mvn install -DskipTests -B -P templates -V -U
       # Missing Deployment steps
 
 
@@ -92,7 +93,7 @@ jobs:
       
       #  Missing Build Plugins
       - name: Build Standalone
-        working-directory: ./
+        working-directory: ./cdap
         run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests
         #-Dadditional.artifacts.dir=$HYDRATOR_PLUGINS`
 
