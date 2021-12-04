@@ -16,7 +16,7 @@ jobs:
           path: cdap
       - name: Checkout Apache Sentry
         uses: actions/checkout@v2
-        working-directory: ./cdap
+        path: cdap/apache-sentry
         with:
           repository: apache/sentry
           ref: 'release-1.7.0'
