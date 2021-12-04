@@ -21,7 +21,6 @@ jobs:
           ref: 'release-1.7.0'
           path: cdap/apache-sentry
 
-
       - name: Set up Maven
         run: |
           wget -O- https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xzv
@@ -31,7 +30,7 @@ jobs:
           cd ..
       - name: Tar files
         run: tar -cvf cdap.tar ./cdap  
-      - name: Upload Recursively Checkout REpository
+      - name: Upload Recursively Checkout Repository
         uses: actions/upload-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
@@ -114,7 +113,7 @@ jobs:
 
       #  Missing Build Plugins
       - name: Build Standalone
-        working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ./mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
+        working-directory: ./cdap/cdap
+        run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ../mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
 
