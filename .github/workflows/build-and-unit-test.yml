@@ -18,8 +18,15 @@ jobs:
       - name: Update Submodules
         working-directory: ./cdap
         run: |
-          git pull --recurse-submodules
           git submodule update --init --recursive --remote 
+          cd cdap
+          git checkout fix/test-new-node-version
+          git pull
+          cd cdap-ui
+          git checkout podesta/node-updates
+          git pull
+          cd ..
+          cd ..
 
       - name: Checkout Apache Sentry
         uses: actions/checkout@v2
