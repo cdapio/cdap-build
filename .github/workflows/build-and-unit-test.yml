@@ -14,11 +14,13 @@ jobs:
         with:
           submodules: recursive
           path: cdap
+      - name: Tar files
+        run: tar -cvf cdap.tar ./cdap  
       - name: Upload Recursively Checkout REpository
         uses: actions/upload-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap
+          path: cdap.tar
           retention-days: 1
   
   # From Current CI
@@ -30,7 +32,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap
+      - name: Untar files
+        run: tar -xvf cdap.jar --directory ./cdap
       - name: Set Up Java 8
         uses: actions/setup-java@2
         with:
@@ -50,7 +53,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap
+      - name: Untar files
+        run: tar -xvf cdap.jar --directory ./cdap
       - name: Set Up Java 8
         uses: actions/setup-java@2
         with:
@@ -77,7 +81,8 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap
+      - name: Untar files
+        run: tar -xvf cdap.jar --directory ./cdap  
       - name: Set Up Java 8
         uses: actions/setup-java@2
         with:
