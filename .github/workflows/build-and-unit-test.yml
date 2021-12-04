@@ -32,7 +32,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap.tar
       - name: Untar files
         run: tar -xvf cdap.tar --directory ./cdap
       - name: Set Up Java 8
@@ -54,7 +53,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap.tar
       - name: Untar files
         run: tar -xvf cdap.tar --directory ./cdap
       - name: Set Up Java 8
@@ -83,7 +81,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: updated-sources-${{env.GITHUB_RUN_ID}}
-          path: cdap.tar
       - name: Untar files
         run: tar -xvf cdap.tar --directory ./cdap  
       - name: Set Up Java 8
