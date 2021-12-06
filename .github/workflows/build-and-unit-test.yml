@@ -59,7 +59,7 @@ jobs:
           MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ../mvn clean install -DskipTests -B -am 
 
       - name: Build Plugins
-        working-dir: ./cdap/app-artifacts/hydrator-plugins
+        working-directory: ./cdap/app-artifacts/hydrator-plugins
         run: ../../mvn clean package -T2C -DskipTests
 
       - name: Build Standalone
