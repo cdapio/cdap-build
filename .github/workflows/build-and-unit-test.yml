@@ -51,17 +51,33 @@ jobs:
 
       - name: Build Apache Sentry
         working-directory: ./cdap
-        run: ./mvn clean install -DskipTests -f apache-sentry
+        run: ./mvn install -T2C -DskipTests -f apache-sentry
 
       - name: Installing CDAP API JARs
-        working-directory: ./cdap
+        working-directory: ./cdap/cdap
         run: | 
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am  -pl cdap/cdap-api -P templates
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ./mvn install -DskipTests -B -am  -f cdap/cdap-app-templates -P templates
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ../mvn clean install -DskipTests -B -am 
 
-      #  Missing Build Plugins
+      - name: Build Plugins
+        working-dir: ./cdap/app-artifacts/hydrator-plugins
+        run: ../../mvn clean package -T2C -DskipTests
+
       - name: Build Standalone
         working-directory: ./cdap/cdap
         run: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=128m" ../mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/../app-artifacts -Dsecurity.extensions.dir=$(pwd)/../security-extensions
+
+      - name: Find Build Version 
+        working-directory: ./cdap/cdap
+        run:  |
+          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
+          echo "CDAP_VERSION=${VERSION}"
+          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Upload CDAP Standalone
+        uses: actions/upload-artifact@v2
+        with:
+          name: CDAP-Standalone-${{env.CDAP_VERSION}}
+          path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+
 
 
