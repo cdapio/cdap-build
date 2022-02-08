@@ -37,6 +37,8 @@
     <module>app-artifacts/database-plugins/mssql-plugin</module>
     <module>app-artifacts/database-plugins/oracle-plugin</module>
     <module>app-artifacts/database-plugins/postgresql-plugin</module>
+    <module>app-artifacts/database-plugins/cloudsql-mysql-plugin</module>
+    <module>app-artifacts/database-plugins/cloudsql-postgresql-plugin</module>
     <module>app-artifacts/mmds</module>
     <module>cdap</module>
   </modules>
