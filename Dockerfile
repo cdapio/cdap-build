@@ -33,6 +33,7 @@ WORKDIR /
 COPY --from=build /cdap/build/cdap/cdap-master/target/stage-packaging/opt/cdap/master /opt/cdap/master
 COPY --from=build /cdap/build/cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /opt/cdap/ui
 COPY --from=build /cdap/build/cdap/cdap-distributions/src/etc/cdap/conf.dist/logback*.xml /opt/cdap/master/conf/
+COPY metrics-writer-extension/target/libexec/* /opt/cdap/master/ext/metricswriters/google_cloud_monitoring_writer/
 
 RUN apt-get update && \
   apt-get -y install libxml2-utils && \
