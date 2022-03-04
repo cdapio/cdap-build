@@ -31,6 +31,7 @@
     <module>app-artifacts/database-delta-plugins</module>
     <module>app-artifacts/datastream-delta-plugins</module>
     <module>app-artifacts/delta</module>
+    <module>app-artifacts/delta-transformation</module>
     <module>app-artifacts/hydrator-plugins</module>
     <module>app-artifacts/database-plugins/database-commons</module>
     <module>app-artifacts/database-plugins/mysql-plugin</module>

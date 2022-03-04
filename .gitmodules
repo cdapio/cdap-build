@@ -34,3 +34,7 @@
 	path = app-artifacts/database-plugins
 	url = ../../data-integrations/database-plugins.git
 	branch = develop
+[submodule "app-artifacts/delta-transformation"]
+	path = app-artifacts/delta-transformation
+	url = ../../data-integrations/delta-transformation.git
+	branch = develop
