@@ -38,3 +38,8 @@
 	path = app-artifacts/delta-transformation
 	url = ../../data-integrations/delta-transformation.git
 	branch = develop
+[submodule "metricswriters-extensions/metrics-writer-extension"]
+	path = metricswriters-extensions/metrics-writer-extension
+	url = ../metrics-writer-extension.git
+        branch = develop
+

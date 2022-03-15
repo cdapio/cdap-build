@@ -26,6 +26,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
   mvn install -B -V -Ddocker.skip=true -DskipTests -P templates,dist,k8s,!unit-tests \
     -Dadditional.artifacts.dir=$DIR/app-artifacts \
     -Dsecurity.extensions.dir=$DIR/security-extensions \
+    -Dmetricswriters.extensions.dir=$DIR/metricswriters-extensions \
     -Dui.build.name=cdap-non-optimized-full-build
 
 FROM openjdk:8-jdk AS run
