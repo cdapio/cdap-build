@@ -41,8 +41,8 @@
     <module>app-artifacts/database-plugins/cloudsql-mysql-plugin</module>
     <module>app-artifacts/database-plugins/cloudsql-postgresql-plugin</module>
     <module>app-artifacts/mmds</module>
-    <module>cdap</module>
     <module>metricswriters-extensions/metrics-writer-extension</module>
+    <module>cdap</module>
   </modules>
 
   <build>
