@@ -27,6 +27,7 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
     -Dadditional.artifacts.dir=$DIR/app-artifacts \
     -Dsecurity.extensions.dir=$DIR/security-extensions \
     -Dmetricswriters.extensions.dir=$DIR/metricswriters-extensions \
+    -Deventwriters.extensions.dir=$DIR/eventwriters-extensions \
     -Dui.build.name=cdap-non-optimized-full-build
 
 FROM openjdk:8-jdk AS run
