@@ -41,5 +41,8 @@
 [submodule "metricswriters-extensions/metrics-writer-extension"]
 	path = metricswriters-extensions/metrics-writer-extension
 	url = ../metrics-writer-extension.git
-    branch = release/1.0
-
+        branch = release/1.0
+[submodule "eventwriters-extensions/events-writer-extension"]
+	path = eventwriters-extensions/events-writer-extension
+	url = ../events-writer-extension.git
+	branch = release/1.0
