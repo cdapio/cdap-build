@@ -58,7 +58,7 @@ RUN apt-get update && \
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
 ENV HADOOP_HOME=/opt/hadoop/hadoop-2.9.2
 ENV SPARK_HOME=/opt/spark/spark-3.1.1-bin-without-hadoop
-ENV SPARK_COMPAT=spark2_2.11
+ENV SPARK_COMPAT=spark3_2.12
 ENV HBASE_VERSION=1.2
 
 RUN groupadd -g 1000 cdap
