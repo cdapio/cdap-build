@@ -64,15 +64,15 @@ jobs:
       - name: Installing CDAP API JARs
         working-directory: ./cdap/cdap
         run: | 
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ../mvn clean install -DskipTests -B -am 
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn clean install -DskipTests -B -am 
 
       - name: Build Plugins
         working-directory: ./cdap/app-artifacts/hydrator-plugins
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ../../mvn clean package -T2C -DskipTests
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn clean package -T2C -DskipTests
 
       - name: Build Standalone
         working-directory: ./cdap/cdap
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" ../mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/../app-artifacts -Dsecurity.extensions.dir=$(pwd)/../security-extensions
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -T2C clean  package -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -DskipTests -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/../app-artifacts -Dsecurity.extensions.dir=$(pwd)/../security-extensions
 
       - name: Find Build Version 
         working-directory: ./cdap/cdap
