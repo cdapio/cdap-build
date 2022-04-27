@@ -10,7 +10,7 @@ jobs:
     runs-on: k8s-runner-build
     steps:
       - name: Recursively Checkout Repository
-        uses: haya14busa/action-workflow_run-status@967ed83efa565c257675ed70cfe5231f062ddd94
+        # uses: haya14busa/action-workflow_run-status@967ed83efa565c257675ed70cfe5231f062ddd94
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
