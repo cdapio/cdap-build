@@ -1,7 +1,7 @@
 [submodule "cdap"]
 	path = cdap
 	url = ../cdap.git
-	branch = fix/test-new-node-version
+	branch = develop
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = ../hydrator-plugins.git
