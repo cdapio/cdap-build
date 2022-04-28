@@ -26,6 +26,8 @@ RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
   mvn install -B -V -Ddocker.skip=true -DskipTests -P templates,dist,k8s,!unit-tests \
     -Dadditional.artifacts.dir=$DIR/app-artifacts \
     -Dsecurity.extensions.dir=$DIR/security-extensions \
+    -Dmetricswriters.extensions.dir=$DIR/metricswriters-extensions \
+    -Deventwriters.extensions.dir=$DIR/eventwriters-extensions \
     -Dui.build.name=cdap-non-optimized-full-build
 
 FROM openjdk:8-jdk AS run
@@ -57,7 +59,7 @@ RUN apt-get update && \
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
 ENV HADOOP_HOME=/opt/hadoop/hadoop-2.9.2
 ENV SPARK_HOME=/opt/spark/spark-3.1.1-bin-without-hadoop
-ENV SPARK_COMPAT=spark2_2.11
+ENV SPARK_COMPAT=spark3_2.12
 ENV HBASE_VERSION=1.2
 
 RUN groupadd -g 1000 cdap

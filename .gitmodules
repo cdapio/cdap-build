@@ -34,3 +34,15 @@
 	path = app-artifacts/database-plugins
 	url = ../../data-integrations/database-plugins.git
 	branch = develop
+[submodule "app-artifacts/delta-transformation"]
+	path = app-artifacts/delta-transformation
+	url = ../../data-integrations/delta-transformation.git
+	branch = develop
+[submodule "metricswriters-extensions/metrics-writer-extension"]
+	path = metricswriters-extensions/metrics-writer-extension
+	url = ../metrics-writer-extension.git
+	branch = develop
+[submodule "eventwriters-extensions/events-writer-extension"]
+	path = eventwriters-extensions/events-writer-extension
+	url = ../events-writer-extension.git
+	branch = develop
