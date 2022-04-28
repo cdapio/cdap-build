@@ -21,13 +21,13 @@ jobs:
         run: |
           git submodule update --init --recursive --remote
 
-      # - name: Cache
-      #   uses: actions/cache@v2.1.3
-      #   with:
-      #     path: ~/.m2/repository
-      #     key: ${{ runner.os }}-maven-${{ github.workflow }}-${{ hashFiles('**/pom.xml') }}
-      #     restore-keys: |
-      #       ${{ runner.os }}-maven-${{ github.workflow }}
+      - name: Cache
+        uses: actions/cache@v2.1.3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ github.workflow }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ github.workflow }}
 
       # - name: Checkout Apache Sentry
       #   uses: actions/checkout@v2
