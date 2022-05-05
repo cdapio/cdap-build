@@ -68,7 +68,16 @@ jobs:
 
       - name: Build Plugins
         working-directory: ./cdap/app-artifacts/hydrator-plugins
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e clean install -U -T2C
+        run: mvn clean test -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2.2.2
+        if: always()
+        with:
+          name: Build debug files
+          path: |
+            **/target/rat.txt
+            **/target/surefire-reports/*
 
       - name: Build Standalone
         working-directory: ./cdap/cdap
