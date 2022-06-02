@@ -10,11 +10,12 @@ jobs:
     runs-on: k8s-runner-build
     steps:
       - name: Recursively Checkout Repository
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
           submodules: recursive
           path: cdap
+          ref: 6.7
 
       - name: Update Submodules
         working-directory: ./cdap
@@ -68,7 +69,7 @@ jobs:
 
       - name: Build Plugins
         working-directory: ./cdap/app-artifacts/hydrator-plugins
-        run: mvn clean test -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+        run: mvn clean package -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
