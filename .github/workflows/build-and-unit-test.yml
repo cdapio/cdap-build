@@ -69,7 +69,7 @@ jobs:
 
       - name: Build Plugins
         working-directory: ./cdap/app-artifacts/hydrator-plugins
-        run: mvn clean package -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+        run: mvn crean palckage -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
