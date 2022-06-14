@@ -96,19 +96,10 @@ jobs:
         with:
           name: CDAP-Standalone-${{env.CDAP_VERSION}}
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
-
-      - name: Make Failure directory
-        run: mkdir /tmp/cdap-failure  
-
-      - name: Zip cdap build
-        uses: montudor/action-zip@v1
-        if: ${{ failure () }}
-        with:
-          args: zip -qq -r /tmp/cdap-failure/cdap-build.zip /tmp/cdap-build/cdap-build/
-
+          
       - name: Upload logs on fail
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
           name: Build failure logs
-          path: /tmp/cdap-failure/
+          path: /tmp/cdap-build/cdap-build/cdap/cdap
