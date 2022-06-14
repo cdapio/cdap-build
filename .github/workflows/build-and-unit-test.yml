@@ -98,7 +98,7 @@ jobs:
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Make Failure directory
-        runs: mkdir /tmp/cdap-failure  
+        run: mkdir /tmp/cdap-failure  
 
       - name: Zip cdap build
         uses: montudor/action-zip@v1
