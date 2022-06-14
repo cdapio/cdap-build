@@ -98,6 +98,7 @@ jobs:
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Make failure directory and tar
+        if: ${{ failure() }}
         run: |
           mkdir /tmp/cdap-failure
           tar -czvf /tmp/cdap-failure/build.gz /tmp/cdap-build/cdap-build/
@@ -107,4 +108,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Build failure logs
-          path: /tmp/cdap-build/cdap-build/
+          path: /tmp/cdap-failure
