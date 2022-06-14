@@ -9,9 +9,6 @@ jobs:
   build:
     runs-on: k8s-runner-build
     steps:
-      - name: install zip
-        run: |
-          apt install zip
       - name: Recursively Checkout Repository
         uses: actions/checkout@v3
         with:
@@ -100,10 +97,10 @@ jobs:
           name: CDAP-Standalone-${{env.CDAP_VERSION}}
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
-      - name: Make failure directory and zip
+      - name: Make failure directory and tar
         run: |
           mkdir /tmp/cdap-failure
-          zip -r /tmp/cdap-failure/build.zip /tmp/cdap-build/cdap-build/
+          tar -czvf /tmp/cdap-failure/build.gz /tmp/cdap-build/cdap-build/
 
       - name: Upload logs on fail
         if: ${{ failure() }}
