@@ -100,7 +100,7 @@ jobs:
       - name: Make failure directory and tar
         if: ${{ failure() }}
         run: |
-          mkdir /tmp/cdap-failure
+          mkdir -p /tmp/cdap-failure
           tar -czvf /tmp/cdap-failure/build.gz /tmp/cdap-build/cdap-build/
 
       - name: Upload logs on fail
