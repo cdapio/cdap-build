@@ -65,11 +65,11 @@ jobs:
       - name: Installing CDAP API JARs
         working-directory: ./cdap/cdap
         run: | 
-          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e clean install -U -B -am 
+          MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e clefan instaall -U -B -am 
 
       - name: Build Plugins
         working-directory: ./cdap/app-artifacts/hydrator-plugins
-        run: mvn crean palckage -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
+        run: mvn clean package -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
