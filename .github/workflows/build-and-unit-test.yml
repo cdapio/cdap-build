@@ -97,9 +97,15 @@ jobs:
           name: CDAP-Standalone-${{env.CDAP_VERSION}}
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
           
+      - name: Zip cdap build
+        if: ${{ failure () }}
+        run: |
+          mkdir /tmp/cdap-failure
+          zip /tmp/cdap-failure/cdap-build.zip /tmp/cdap-build/cdap-build/ -r
+
       - name: Upload logs on fail
         if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
           name: Build failure logs
-          path: /tmp/cdap-build/cdap-build/
+          path: /tmp/cdap-failure/
