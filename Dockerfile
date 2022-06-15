@@ -58,7 +58,7 @@ RUN apt-get update && \
   # Copy downloaded JAR licenses to COPYRIGHT folder
   mkdir /opt/cdap/LICENSES/hadoop-2.9.2 && cp /opt/hadoop/hadoop-2.9.2/*.txt /opt/cdap/LICENSES/hadoop-2.9.2 && \
   mkdir /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && cp /opt/spark/spark-3.1.1-bin-without-hadoop/LICENSE /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && cp /opt/spark/spark-3.1.1-bin-without-hadoop/NOTICE /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && \
-  mkdir /opt/cdap/LICENSES/gcs-connctor-hadoop2-2.2.5 && curl -L -o /opt/cdap/LICENSES/gcs-connctor-hadoop2-2.2.5/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.5/LICENSE && \
+  mkdir /opt/cdap/LICENSES/gcs-connector-hadoop2-2.2.5 && curl -L -o /opt/cdap/LICENSES/gcs-connector-hadoop2-2.2.5/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.5/LICENSE && \
   mkdir /opt/cdap/LICENSES/postgresql-42.2.5 && jar xvf /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar META-INF/LICENSE && cp ./META-INF/LICENSE /opt/cdap/LICENSES/postgresql-42.2.5 && rm -r ./META-INF && \
   mkdir /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies && curl -L -o /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies/LICENSE https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/v1.0.12/LICENSE && \
   mkdir /opt/cdap/LICENSES/hadoop-aws-2.9.2 && jar xvf /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/hadoop-aws-2.9.2.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/hadoop-aws-2.9.2 && rm -r ./META-INF && \
