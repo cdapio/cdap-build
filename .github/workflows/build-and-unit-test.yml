@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: k8s-runner-build
+    runs-on: k8s-runner-e2e
     steps:
       - name: Recursively Checkout Repository
         uses: actions/checkout@v3
