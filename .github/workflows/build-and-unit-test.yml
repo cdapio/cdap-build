@@ -82,7 +82,7 @@ jobs:
 
       - name: Build Standalone
         working-directory: ./cdap/cdap
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn "-Dtest=!%regex[AutoJoiner], !%regex[DataPipeline]" -Dsurefire.failIfNoSpecifiedTests=false -Drat.skip=true -e -T2C clean package -U -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/../app-artifacts -Dsecurity.extensions.dir=$(pwd)/../security-extensions --fail-never -Dmaven.test.failure.ignore=true
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -U -pl cdap-standalone,cdap-app-templates/cdap-etl -am -amd -P templates,dist,release,unit-tests -Dadditional.artifacts.dir=$(pwd)/../app-artifacts -Dsecurity.extensions.dir=$(pwd)/../security-extensions
 
       - name: Find Build Version 
         working-directory: ./cdap/cdap
