@@ -78,7 +78,7 @@ jobs:
 
       - name: Build Standalone
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean install -DskipTests -Dgpg.skip -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/../app-artifacts -Dsecurity.extensions.dir=$(pwd)/../security-extensions
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean install -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/../app-artifacts -Dsecurity.extensions.dir=$(pwd)/../security-extensions
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
