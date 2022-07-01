@@ -17,6 +17,8 @@ FROM gcr.io/cdapio/cdap-build:latest AS build
 ENV DIR /cdap/build
 ENV MAVEN_OPTS -Xmx2048m -Dhttp.keepAlive=false
 ENV NODE_OPTIONS --max-old-space-size=8192
+ARG EXTEND_DEFAULT_CONFIGS=false
+ARG CONFIG_FILE_NAME
 WORKDIR $DIR/
 COPY . $DIR/
 RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_modules' --exclude='target' --exclude-vcs \
@@ -31,6 +33,7 @@ RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_module
     -Dsecurity.extensions.dir="$DIR/security-extensions" \
     -Dmetricswriters.extensions.dir="$DIR/metricswriters-extensions" \
     -Deventwriters.extensions.dir="$DIR/eventwriters-extensions" \
+    -Dextend-default-configs="$EXTEND_DEFAULT_CONFIGS" -Dconfig-path="$DIR/$CONFIG_FILE_NAME" \
     -Dui.build.name=cdap-non-optimized-full-build
 
 FROM openjdk:8-jdk AS run
