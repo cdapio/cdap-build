@@ -29,6 +29,11 @@ jobs:
           key: ${{ runner.os }}-maven-${{ github.workflow }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
+      # this needs a service account json secret uploaded to github actions secrets
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v0
+        with:
+          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
       - name: Get gpg key
         id: secrets
@@ -38,15 +43,11 @@ jobs:
             gpg-key:cdap-gcp-project/cdap-gpg-key-private
             gpg-key-password:cdap-gcp-project/cdap-gpg-key-password
 
-      - name: Import GPG key
-        id: import_gpg
-        run: gpg --import ${{ steps.secrets.output.gpg-key }}
-        # with:
-        #   gpg_private_key: ${{ steps.secrets.output.gpg-key }}
-        #   passphrase: ${{ steps.secrets.output.gpg-key-password }}
-      -
-        name: List keys
+      - name: List keys
         run: gpg -K
+
+      - name: Import GPG key
+        run: gpg --import ${{ steps.secrets.output.gpg-key }}
 
       # - name: Checkout Apache Sentry
       #   uses: actions/checkout@v2
@@ -90,6 +91,9 @@ jobs:
       #  run: mvn clean package -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
 
 
+      # ---- here on woked ----
+
+
       # - name: Run Tests
       #   working-directory: ./cdap
       #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
@@ -119,3 +123,8 @@ jobs:
       #   with:
       #     name: CDAP-Standalone-${{env.CDAP_VERSION}}
       #     path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+
+      # ---- this didn't work yet ----
+      
+      # - name: Deploy Maven
+      #   run: -gs /home/bamboo/.m2/settings.xml deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=${{steps.secrets.output.gpg-key-password}} -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
