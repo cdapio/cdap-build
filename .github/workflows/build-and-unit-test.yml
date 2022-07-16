@@ -30,24 +30,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
       # this needs a service account json secret uploaded to github actions secrets
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v0
-        with:
-          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+      # - name: Authenticate to Google Cloud
+      #   uses: google-github-actions/auth@v0
+      #   with:
+      #     service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
+      # - name: Get gpg key
+      #   id: secrets
+      #   run: gcloud secrets versions access version-id --secret="secret-id"
+      #   uses: google-github-actions/get-secretmanager-secrets@v0.5.0
+      #   with:
+      #     secrets: |-
+      #       gpg-key:cdap-gcp-project/cdap-gpg-key-private
+      #       gpg-key-password:cdap-gcp-project/cdap-gpg-key-password
       - name: Get gpg key
-        id: secrets
-        uses: google-github-actions/get-secretmanager-secrets@v0.5.0
-        with:
-          secrets: |-
-            gpg-key:cdap-gcp-project/cdap-gpg-key-private
-            gpg-key-password:cdap-gcp-project/cdap-gpg-key-password
+        run: cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private") && cdap-gpg-key-password=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-password")
+
+      - name: Import GPG key
+        run: gpg --import $cdap-gpg-key
 
       - name: List keys
         run: gpg -K
-
-      - name: Import GPG key
-        run: gpg --import ${{ steps.secrets.output.gpg-key }}
 
       # - name: Checkout Apache Sentry
       #   uses: actions/checkout@v2
@@ -90,41 +93,36 @@ jobs:
       #  working-directory: ./cdap/app-artifacts/hydrator-plugins
       #  run: mvn clean package -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
 
+      - name: Run Tests
+        working-directory: ./cdap
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
 
-      # ---- here on woked ----
+      - name: Build Standalone
+        working-directory: ./cdap
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2.2.2
+        if: always()
+        with:
+          name: Build debug files
+          path: |
+            **/target/rat.txt
+            **/target/surefire-reports/*
 
-      # - name: Run Tests
-      #   working-directory: ./cdap
-      #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
+      - name: Find Build Version 
+        working-directory: ./cdap/cdap
+        run:  |
+          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
+          echo "CDAP_VERSION=${VERSION}"
+          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
-      # - name: Build Standalone
-      #   working-directory: ./cdap
-      #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
+      - name: Upload CDAP Standalone
+        uses: actions/upload-artifact@v2
+        with:
+          name: CDAP-Standalone-${{env.CDAP_VERSION}}
+          path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
-      # - name: Archive build artifacts
-      #   uses: actions/upload-artifact@v2.2.2
-      #   if: always()
-      #   with:
-      #     name: Build debug files
-      #     path: |
-      #       **/target/rat.txt
-      #       **/target/surefire-reports/*
-
-      # - name: Find Build Version 
-      #   working-directory: ./cdap/cdap
-      #   run:  |
-      #     export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
-      #     echo "CDAP_VERSION=${VERSION}"
-      #     echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
-
-      # - name: Upload CDAP Standalone
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: CDAP-Standalone-${{env.CDAP_VERSION}}
-      #     path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
-
-      # ---- this didn't work yet ----
       
-      # - name: Deploy Maven
-      #   run: -gs /home/bamboo/.m2/settings.xml deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=${{steps.secrets.output.gpg-key-password}} -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+      - name: Deploy Maven
+        run: -gs /home/bamboo/.m2/settings.xml deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=$cdap-gpg-key-password -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
