@@ -44,7 +44,8 @@ jobs:
       #       gpg-key:cdap-gcp-project/cdap-gpg-key-private
       #       gpg-key-password:cdap-gcp-project/cdap-gpg-key-password
       - name: Get gpg key
-        run: export cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private") && cdap-gpg-key-password=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-password")
+        run: export cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private")
+             export cdap-gpg-key-password=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-password")
 
       - name: Import GPG key
         run: gpg --import $cdap-gpg-key
