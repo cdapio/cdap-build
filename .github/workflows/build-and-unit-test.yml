@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: k8s-runner-e2e
+    runs-on: cdapio-hub-k8-runner
     steps:
       - name: Get Secrets from GCP Secret Manager
         id: 'secrets'
