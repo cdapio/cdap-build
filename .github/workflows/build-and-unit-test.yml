@@ -104,9 +104,9 @@ jobs:
       #  working-directory: ./cdap/app-artifacts/hydrator-plugins
       #  run: mvn clean package -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
 
-      - name: Run Tests
-        working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
+      # - name: Run Tests
+      #   working-directory: ./cdap
+      #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
 
       - name: Build Standalone
         working-directory: ./cdap
