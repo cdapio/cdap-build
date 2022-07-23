@@ -9,6 +9,15 @@ jobs:
   build:
     runs-on: k8s-runner-e2e
     steps:
+      - name: Get Secrets from GCP Secret Manager
+        id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v0'
+        with:
+          secrets: |-
+            CDAP_OSSRH_USERNAME:cdapio-github-builds/CDAP_OSSRH_USERNAME
+            CDAP_OSSRH_PASSWORD:cdapio-github-builds/CDAP_OSSRH_PASSWORD
+            CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
+
       - name: Recursively Checkout Repository
         uses: actions/checkout@v3
         with:
@@ -43,15 +52,13 @@ jobs:
       #     secrets: |-
       #       gpg-key:cdap-gcp-project/cdap-gpg-key-private
       #       gpg-key-password:cdap-gcp-project/cdap-gpg-key-password
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
 
-      - name: Get gpg key
-        run: export cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private")
-             export cdap-gpg-key-password=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-password")
+      # - name: Get gpg key
+      #   run: export cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private")
+      #        export cdap-gpg-key-password=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-password")
 
       - name: Import GPG key
-        run: gpg --import $cdap-gpg-key
+        run: gpg --import ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
 
       - name: List keys
         run: gpg -K
