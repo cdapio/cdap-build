@@ -57,11 +57,11 @@ jobs:
       #   run: export cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private")
       #        export cdap-gpg-key-password=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-password")
 
-      - name: Import GPG key
-        run: gpg --import ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
+      # - name: Import GPG key
+      #   run: gpg --import ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
 
-      - name: List keys
-        run: gpg -K
+      # - name: List keys
+      #   run: gpg -K
 
       # - name: Checkout Apache Sentry
       #   uses: actions/checkout@v2
@@ -136,4 +136,4 @@ jobs:
 
       
       - name: Deploy Maven
-        run: -gs /home/bamboo/.m2/settings.xml deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=$cdap-gpg-key-password -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+        run: -gs /home/bamboo/.m2/settings.xml deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }} -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
