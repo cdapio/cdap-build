@@ -75,13 +75,13 @@ jobs:
       #     ref: 'release-1.7.0'
       #     path: cdap/apache-sentry
 
-      # - name: Set up Maven
-      #   run: |
-      #     wget -O- https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xzv
-      #     mv apache-maven-3.6.3 cdap/
-      #     cd cdap
-      #     ln -s apache-maven-3.6.3/bin/mvn mvn
-      #     cd ..
+      - name: Set up Maven
+        run: |
+          wget -O- https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xzv
+          mv apache-maven-3.6.3 cdap/
+          cd cdap
+          ln -s apache-maven-3.6.3/bin/mvn mvn
+          cd ..
 
       #- name: Create dirs
       #  working-directory: ./cdap
@@ -90,11 +90,11 @@ jobs:
       #    mkdir -p security-extensions
       #    mkdir -p cdap/cdap-distributions/target
 
-      # - name: Set Up Java 8
-      #   uses: actions/setup-java@v2
-      #   with:
-      #     distribution: 'adopt'
-      #     java-version: '8'
+      - name: Set Up Java 8
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'adopt'
+          java-version: '8'
 
       # - name: Build Apache Sentry
       #   working-directory: ./cdap
