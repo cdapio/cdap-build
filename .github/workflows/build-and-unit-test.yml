@@ -139,17 +139,19 @@ jobs:
       #     name: CDAP-Standalone-${{env.CDAP_VERSION}}
       #     path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
-      - name: Install CDAP API JARs
-        working-directory: ./cdap
-        run:  |
-            mvn install -DskipTests -B -am -pl cdap-api -P templates
-            mvn install -DskipTests -B -am -f cdap-app-templates -P templates
+      # - name: Install CDAP API JARs
+      #   working-directory: ./cdap
+      #   run:  |
+      #       mvn install -DskipTests -B -am -pl cdap-api -P templates
+      #       mvn install -DskipTests -B -am -f cdap-app-templates -P templates
 
       - name: Build with Maven
+        working-directory: ./cdap
         run: mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests \
               -Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }} -Dgpg.useagent=false \
               -Dadditional.artifacts.dir=$(pwd)/app-artifacts \
               -Dsecurity.extensions.dir=$(pwd)/security-extensions
       
       - name: Deploy Maven
+        working-directory: ./cdap
         run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }} -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
