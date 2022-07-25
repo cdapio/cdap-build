@@ -42,6 +42,10 @@ jobs:
           key: ${{ runner.os }}-maven-${{ github.workflow }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
+
+      - name: Install JARs to local Maven repository (cdap)
+        working-directory: ./cdap
+        run: MAVEN_OPTS="-Xmx4096m  -XX:MaxPermSize=256m" mvn install -DskipTests -B -P templates -V -U -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
       # this needs a service account json secret uploaded to github actions secrets
       # - name: Authenticate to Google Cloud
       #   uses: google-github-actions/auth@v0
@@ -140,5 +144,4 @@ jobs:
 
       
       - name: Deploy Maven
-        working-directory: .
-        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true "-Ddocker.skip=true" -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests "-Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}" "-Dgpg.useagent=false" "-Dadditional.artifacts.dir=$(pwd)/app-artifacts" "-Dsecurity.extensions.dir=$(pwd)/security-extensions" "-Dmaven.wagon.http.retryHandler.count=5" "-Dmaven.wagon.httpconnectionManager.ttlSeconds=60"
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }} -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
