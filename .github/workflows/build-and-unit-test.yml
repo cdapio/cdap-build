@@ -9,6 +9,10 @@ jobs:
   build:
     runs-on: cdapio-hub-k8-runner
     steps:
+      - name: list files
+        working-directory: .
+        run: ls
+
       - name: Get Secrets from GCP Secret Manager
         id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v0'
@@ -137,5 +141,4 @@ jobs:
       
       - name: Deploy Maven
         working-directory: .
-        run: ls 
-              mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }} -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }} -Dgpg.useagent=false -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
