@@ -141,8 +141,8 @@ jobs:
 
       - name: Install CDAP API JARs
         run:  |
-            mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates
-            mvn install -DskipTests -B -am -f cdap/cdap-app-templates -P templates
+            mvn install -DskipTests -B -am -pl ./cdap/cdap-api -P templates
+            mvn install -DskipTests -B -am -f ./cdap/cdap-app-templates -P templates
 
       - name: Build with Maven
         run: mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests \
