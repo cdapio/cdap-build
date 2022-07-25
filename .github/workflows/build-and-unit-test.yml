@@ -145,7 +145,7 @@ jobs:
 
       - name: Build with Maven
         run: mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests \
-              -Dgpg.passphrase=${GPG_PASSPHRASE} -Dgpg.useagent=false \
+              -Dgpg.passphrase=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }} -Dgpg.useagent=false \
               -Dadditional.artifacts.dir=$(pwd)/app-artifacts \
               -Dsecurity.extensions.dir=$(pwd)/security-extensions
       
