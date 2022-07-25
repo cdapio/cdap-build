@@ -139,9 +139,10 @@ jobs:
       #     name: CDAP-Standalone-${{env.CDAP_VERSION}}
       #     path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
-      # - name: Install CDAP API JARs
-      #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates &&
-      #        MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn install -DskipTests -B -am -f cdap/cdap-app-templates -P templates
+      - name: Install CDAP API JARs
+        run:  |
+            mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates
+            mvn install -DskipTests -B -am -f cdap/cdap-app-templates -P templates
 
       - name: Build with Maven
         run: mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests \
