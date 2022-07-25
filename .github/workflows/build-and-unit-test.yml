@@ -113,31 +113,31 @@ jobs:
       #   working-directory: ./cdap
       #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
 
-      - name: Build Standalone
-        working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
+      # - name: Build Standalone
+      #   working-directory: ./cdap
+      #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v2.2.2
-        if: always()
-        with:
-          name: Build debug files
-          path: |
-            **/target/rat.txt
-            **/target/surefire-reports/*
+      # - name: Archive build artifacts
+      #   uses: actions/upload-artifact@v2.2.2
+      #   if: always()
+      #   with:
+      #     name: Build debug files
+      #     path: |
+      #       **/target/rat.txt
+      #       **/target/surefire-reports/*
 
-      - name: Find Build Version 
-        working-directory: ./cdap/cdap
-        run:  |
-          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
-          echo "CDAP_VERSION=${VERSION}"
-          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
+      # - name: Find Build Version 
+      #   working-directory: ./cdap/cdap
+      #   run:  |
+      #     export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
+      #     echo "CDAP_VERSION=${VERSION}"
+      #     echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: Upload CDAP Standalone
-        uses: actions/upload-artifact@v2
-        with:
-          name: CDAP-Standalone-${{env.CDAP_VERSION}}
-          path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+      # - name: Upload CDAP Standalone
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: CDAP-Standalone-${{env.CDAP_VERSION}}
+      #     path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Install CDAP API JARs
         run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn install -DskipTests -B -am -pl cdap/cdap-api -P templates &&
