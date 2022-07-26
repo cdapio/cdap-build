@@ -40,118 +40,36 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
 
-      # this needs a service account json secret uploaded to github actions secrets
-      # - name: Authenticate to Google Cloud
-      #   uses: google-github-actions/auth@v0
-      #   with:
-      #     service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+      - name: Run Tests
+        working-directory: ./cdap
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
 
-      # - name: Get gpg key
-      #   id: secrets
-      #   run: gcloud secrets versions access version-id --secret="secret-id"
-      #   uses: google-github-actions/get-secretmanager-secrets@v0.5.0
-      #   with:
-      #     secrets: |-
-      #       gpg-key:cdap-gcp-project/cdap-gpg-key-private
-      #       gpg-key-password:cdap-gcp-project/cdap-gpg-key-password
+      - name: Build Standalone
+        working-directory: ./cdap
+        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
-      # - name: Get gpg key
-      #   run: export cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private")
-      #        export cdap-gpg-key-password=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2.2.2
+        if: always()
+        with:
+          name: Build debug files
+          path: |
+            **/target/rat.txt
+            **/target/surefire-reports/*
 
-      # - name: Import GPG key
-      #   run: gpg --import ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
+      - name: Find Build Version 
+        working-directory: ./cdap/cdap
+        run:  |
+          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
+          echo "CDAP_VERSION=${VERSION}"
+          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
-      # - name: List keys
-      #   run: gpg -K
+      - name: Upload CDAP Standalone
+        uses: actions/upload-artifact@v2
+        with:
+          name: CDAP-Standalone-${{env.CDAP_VERSION}}
+          path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
-      # - name: Checkout Apache Sentry
-      #   uses: actions/checkout@v2
-      #   with:
-      #     repository: apache/sentry
-      #     ref: 'release-1.7.0'
-      #     path: cdap/apache-sentry
-
-      # - name: Set up Maven
-      #   run: |
-      #     wget -O- https://archive.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz | tar -xzv
-      #     mv apache-maven-3.6.3 cdap/
-      #     cd cdap
-      #     ln -s apache-maven-3.6.3/bin/mvn mvn
-      #     cd ..
-
-      #- name: Create dirs
-      #  working-directory: ./cdap
-      #  run: |
-      #    mkdir -p app-artifacts
-      #    mkdir -p security-extensions
-      #    mkdir -p cdap/cdap-distributions/target
-
-      # - name: Set Up Java 8
-      #   uses: actions/setup-java@v2
-      #   with:
-      #     distribution: 'adopt'
-      #     java-version: '8'
-
-      # - name: Build Apache Sentry
-      #   working-directory: ./cdap
-      #   run: ./mvn install -T2C -DskipTests -f apache-sentry
-
-      #- name: Installing CDAP API JARs
-      #  working-directory: ./cdap/cdap
-      #  run: | 
-      #    MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e clean install -U -B -am 
-
-      #- name: Build Plugins
-      #  working-directory: ./cdap/app-artifacts/hydrator-plugins
-      #  run: mvn clean package -fae -T 2 -B -V -DcloudBuild -Dmaven.wagon.http.retryHandler.count=3 -Drat.skip=true -Dmaven.wagon.httpconnectionManager.ttlSeconds=25
-
-      # - name: Run Tests
-      #   working-directory: ./cdap
-      #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
-
-      # - name: Build Standalone
-      #   working-directory: ./cdap
-      #   run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
-
-      # - name: Archive build artifacts
-      #   uses: actions/upload-artifact@v2.2.2
-      #   if: always()
-      #   with:
-      #     name: Build debug files
-      #     path: |
-      #       **/target/rat.txt
-      #       **/target/surefire-reports/*
-
-      # - name: Find Build Version 
-      #   working-directory: ./cdap/cdap
-      #   run:  |
-      #     export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
-      #     echo "CDAP_VERSION=${VERSION}"
-      #     echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
-
-      # - name: Upload CDAP Standalone
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: CDAP-Standalone-${{env.CDAP_VERSION}}
-      #     path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
-
-      # - name: Install CDAP API JARs
-      #   working-directory: ./cdap
-      #   run:  |
-      #       mvn install -DskipTests -B -am -pl cdap-api -P templates
-      #       mvn install -DskipTests -B -am -f cdap-app-templates -P templates
-
-      # - name: Build with Maven
-      #   working-directory: ./cdap
-      #   run: mvn package -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests \
-      #         -"Dgpg.passphrase"="${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}" -"Dgpg.useagent"="false" \
-      #         -"Dadditional.artifacts.dir"="$(pwd)/app-artifacts" \
-      #         -"Dsecurity.extensions.dir"="$(pwd)/security-extensions"
-      #   env: 
-      #     CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
-      #     CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
-      #     CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
       - name: Set up Maven Deploy Server in settings.xml
         uses: actions/setup-java@v1
         with: # running setup-java again overwrites the settings.xml
@@ -164,7 +82,7 @@ jobs:
       
       - name: Deploy Maven
         working-directory: ./cdap
-        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true 
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
         env:
           CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
           CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
