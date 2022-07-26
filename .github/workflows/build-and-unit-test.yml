@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: cdap
-          ref: release/6.7
+          ref: develop
 
       - name: Update Submodules
         working-directory: cdap
@@ -83,10 +83,15 @@ jobs:
       - name: Set up Maven Deploy Server
         uses: s4u/maven-settings-action@326c8f3f4bf3c7b17c99a748fdc6d722bcd86da7
         with: 
-          override: false
           githubServer: false
           servers: |
             [
+              {
+                "id": "sonatype.snapshots",
+                "username": "${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}",
+                "password": "${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}",
+                "passphrase": "${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}"
+              },
               {
                 "id": "sonatype.release",
                 "username": "${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}",
