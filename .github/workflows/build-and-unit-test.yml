@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: cdap
-          ref: release/6.7
+          ref: develop
 
       - name: Update Submodules
         working-directory: cdap
