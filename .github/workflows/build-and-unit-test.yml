@@ -160,7 +160,7 @@ jobs:
           server-username: CDAP_OSSRH_USERNAME
           server-password: CDAP_OSSRH_PASSWORD
           gpg-passphrase: CDAP_GPG_PASSPHRASE
-          gpg-private-key: CDAP_GPG_PRIVATE_KEY
+          gpg-private-key: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
       
       - name: Deploy Maven
         working-directory: ./cdap
