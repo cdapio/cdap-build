@@ -21,6 +21,7 @@ jobs:
             CDAP_OSSRH_USERNAME:cdapio-github-builds/CDAP_OSSRH_USERNAME
             CDAP_OSSRH_PASSWORD:cdapio-github-builds/CDAP_OSSRH_PASSWORD
             CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
+            CDAP_GPG_PRIVATE_KEY:cdapio-github-builds/CDAP_GPG_PRIVATE_KEY
 
       - name: Export GPG Passphrase
         run: export GPG_PASSPHRASE=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
@@ -166,6 +167,7 @@ jobs:
           server-username: CDAP_OSSRH_USERNAME
           server-password: CDAP_OSSRH_PASSWORD
           gpg-passphrase: CDAP_GPG_PASSPHRASE
+          gpg-private-key: CDAP_GPG_PRIVATE_KEY
       
       - name: Deploy Maven
         working-directory: ./cdap
