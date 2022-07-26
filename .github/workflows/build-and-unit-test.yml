@@ -71,7 +71,7 @@ jobs:
       #     path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Set up Maven Deploy Server
-        uses: s4u/maven-settings-action@v2.6.0
+        uses: s4u/maven-settings-action@326c8f3f4bf3c7b17c99a748fdc6d722bcd86da7
         with: 
           servers: |
             [
