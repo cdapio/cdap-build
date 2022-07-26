@@ -9,10 +9,6 @@ jobs:
   build:
     runs-on: cdapio-hub-k8-runner
     steps:
-      - name: list files
-        working-directory: .
-        run: ls
-
       - name: Get Secrets from GCP Secret Manager
         id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v0'
@@ -22,9 +18,6 @@ jobs:
             CDAP_OSSRH_PASSWORD:cdapio-github-builds/CDAP_OSSRH_PASSWORD
             CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
             CDAP_GPG_PRIVATE_KEY:cdapio-github-builds/CDAP_GPG_PRIVATE_KEY
-
-      - name: Export GPG Passphrase
-        run: export GPG_PASSPHRASE=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
 
       - name: Recursively Checkout Repository
         uses: actions/checkout@v3
