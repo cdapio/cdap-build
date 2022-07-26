@@ -77,17 +77,17 @@ jobs:
             [
               {
                 "id": "sonatype.snapshots",
-                "username": ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }},
-                "password": ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
+                "username": "${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}",
+                "password": "${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}"
               },
               {
                 "id": "sonatype.release",
-                "username": ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }},
-                "password": ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
+                "username": "${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}",
+                "password": "${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}"
               },
               {
                 "id": "gpg.passphrase",
-                "passphrase": ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
+                "passphrase": "${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}"
               }
             ]
       
