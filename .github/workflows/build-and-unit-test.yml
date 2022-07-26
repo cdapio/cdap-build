@@ -28,7 +28,6 @@ jobs:
           ref: release/6.7
 
       - name: Update Submodules
-        working-directory: ./cdap
         run: |
           git submodule update --init --recursive --remote
 
@@ -57,7 +56,7 @@ jobs:
 
       # - name: Get gpg key
       #   run: export cdap-gpg-key=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-private")
-      #        export cdap-gpg-key-password=$(gcloud secrets versions access 1 --secret="cdap-gpg-key-password")
+      #        export cdap-gpg-key-password=${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
 
       # - name: Import GPG key
       #   run: gpg --import ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
