@@ -91,7 +91,9 @@ jobs:
             ]
       
       - name: Import GPG Private Key
-        run: gpg --import "${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}"
+        run: |
+          printf "${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}" > private.key
+          gpg --import private.key
 
       # - name: Set up Maven Deploy Server in settings.xml
       #   uses: actions/setup-java@v1
