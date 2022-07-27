@@ -74,7 +74,6 @@ jobs:
         uses: actions/setup-java@v1
         with: # running setup-java again overwrites the settings.xml
           java-version: 1.8
-          gpg-passphrase: CDAP_GPG_PASSPHRASE
           gpg-private-key: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
       - name: Print settings.xml
@@ -101,9 +100,9 @@ jobs:
       - name: Print settings.xml (2)
         run: cat ~/.m2/settings.xml
       
-      # - name: Deploy Maven
-      #   working-directory: ./cdap
-      #   run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60
-      #   env:
-      #     CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
-      #     MAVEN_OPTS: "-Xmx4096m  -XX:MaxPermSize=256m"
+      - name: Deploy Maven
+        working-directory: ./cdap
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60 -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
+        env:
+          CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
+          MAVEN_OPTS: "-Xmx4096m  -XX:MaxPermSize=256m"
