@@ -81,7 +81,6 @@ jobs:
         uses: s4u/maven-settings-action@326c8f3f4bf3c7b17c99a748fdc6d722bcd86da7
         with: 
           githubServer: false
-          override: false
           servers: |
             [
               {
