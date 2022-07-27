@@ -76,9 +76,6 @@ jobs:
 #           java-version: 1.8
 #           gpg-private-key: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
-      - name: Print settings.xml
-        run: cat ~/.m2/settings.xml
-
       - name: Set up Maven Deploy Servers in settings.xml
         uses: s4u/maven-settings-action@326c8f3f4bf3c7b17c99a748fdc6d722bcd86da7
         with: 
@@ -101,7 +98,7 @@ jobs:
               }
             ]
 
-      - name: Print settings.xml (2)
+      - name: Print settings.xml
         run: cat ~/.m2/settings.xml
       
       - name: Deploy Maven
