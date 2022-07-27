@@ -19,18 +19,18 @@ jobs:
             CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
             CDAP_GPG_PRIVATE_KEY:cdapio-github-builds/CDAP_GPG_PRIVATE_KEY
 
-      # - name: Recursively Checkout Repository
-      #   uses: actions/checkout@v3
-      #   with:
-      #     fetch-depth: 0
-      #     submodules: recursive
-      #     path: cdap
-      #     ref: release/6.7
+      - name: Recursively Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: recursive
+          path: cdap
+          ref: release/6.7
 
-      # - name: Update Submodules
-      #   working-directory: cdap
-      #   run: |
-      #     git submodule update --init --recursive --remote
+      - name: Update Submodules
+        working-directory: cdap
+        run: |
+          git submodule update --init --recursive --remote
 
       # - name: Cache
       #   uses: actions/cache@v2.1.3
