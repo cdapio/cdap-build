@@ -101,10 +101,7 @@ jobs:
       
       - name: Deploy Maven
         working-directory: cdap
-        run: |
-          GPG_TTY=$(tty)
-          export GPG_TTY
-          mvn deploy -P release -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60 -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE -Dgpg.skip=false
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60 -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE -Dgpg.skip=false
         env:
           CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
           MAVEN_OPTS: "-Xmx4096m  -XX:MaxPermSize=256m"
