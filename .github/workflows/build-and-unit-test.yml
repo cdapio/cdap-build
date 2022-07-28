@@ -42,11 +42,11 @@ jobs:
 
       - name: Run Tests
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true
+        run: MAVEN_OPTS="-Xmx6000m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Build Standalone
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx3056m -XX:MaxPermSize=128m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
+        run: MAVEN_OPTS="-Xmx3056m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
@@ -70,13 +70,13 @@ jobs:
           name: CDAP-Standalone-${{env.CDAP_VERSION}}
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
-      - name: Set up GPG secrets in settings.xml
+      - name: Import GPG key
         uses: actions/setup-java@v1
         with: # running setup-java again overwrites the settings.xml
           java-version: 1.8
           gpg-private-key: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
-      - name: Set GPG conf
+      - name: Set up GPG conf
         run: |
           echo "export GPG_TTY=/dev/tty" >> ~/.bashrc
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
@@ -105,7 +105,7 @@ jobs:
 
       - name: Deploy Maven
         working-directory: cdap
-        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=60 -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
         env:
           CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
-          MAVEN_OPTS: "-Xmx4096m  -XX:MaxPermSize=256m"
+          MAVEN_OPTS: "-Xmx6000m"
