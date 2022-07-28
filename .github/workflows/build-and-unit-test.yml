@@ -70,36 +70,17 @@ jobs:
           name: CDAP-Standalone-${{env.CDAP_VERSION}}
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
-      - name: Import GPG key
-        uses: actions/setup-java@v1
-        with: # running setup-java again overwrites the settings.xml
-          java-version: 1.8
-          gpg-private-key: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
-
       - name: Set up GPG conf
         run: |
-          echo "export GPG_TTY=/dev/tty" >> ~/.bashrc
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-          source ~/.bashrc
-
-      - name: Set up Maven Deploy Servers in settings.xml
-        uses: s4u/maven-settings-action@326c8f3f4bf3c7b17c99a748fdc6d722bcd86da7
-        with: 
-          githubServer: false
-          servers: |
-            [
-              {
-                "id": "sonatype.snapshots",
-                "username": "${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}",
-                "password": "${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}"
-              },
-              {
-                "id": "sonatype.release",
-                "username": "${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}",
-                "password": "${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}"
-              }
-            ]
+      
+      - name: Import GPG key
+        run: |
+          echo "$GPG_PRIVATE_KEY" > private.key
+          gpg --import --batch private.key
+        env:
+          GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
       - name: Deploy Maven
         working-directory: cdap
