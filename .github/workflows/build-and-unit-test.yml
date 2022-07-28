@@ -44,10 +44,6 @@ jobs:
         working-directory: ./cdap
         run: MAVEN_OPTS="-Xmx6000m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-never -Dmaven.test.failure.ignore=true -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
-      - name: Build Standalone
-        working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx3056m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
-
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
         if: always()
@@ -56,6 +52,10 @@ jobs:
           path: |
             **/target/rat.txt
             **/target/surefire-reports/*
+
+      - name: Build Standalone
+        working-directory: ./cdap
+        run: MAVEN_OPTS="-Xmx3056m" mvn -Drat.skip=true -e -T2C clean package -DskipTests -Dgpg.skip -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions
 
       - name: Find Build Version 
         working-directory: ./cdap/cdap
