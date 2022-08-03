@@ -17,7 +17,7 @@
 [submodule "app-artifacts/delta"]
 	path = app-artifacts/delta
 	url = ../../data-integrations/delta.git
-	branch = develop
+	branch = gitaction_flakkytest
 [submodule "app-artifacts/bigquery-delta-plugins"]
 	path = app-artifacts/bigquery-delta-plugins
 	url = ../../data-integrations/bigquery-delta-plugins.git
