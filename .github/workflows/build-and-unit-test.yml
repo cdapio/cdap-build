@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: cdap
-          ref: develop
+          ref: gitaction_flakkytest
 
       - name: Update Submodules
         working-directory: cdap
@@ -42,7 +42,7 @@ jobs:
 
       - name: Run Tests
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx6000m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+        run: MAVEN_OPTS="-Xmx6000m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dtest="io.cdap.delta.app.PipelineDBStoreTest" -DfailIfNoTests=false
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
