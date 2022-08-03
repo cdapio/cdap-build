@@ -42,7 +42,7 @@ jobs:
 
       - name: Run Tests
         working-directory: ./cdap
-        run: MAVEN_OPTS="-Xmx6000m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-at-end -Dmaven.test.failure.ignore=true -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+        run: MAVEN_OPTS="-Xmx6000m" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
