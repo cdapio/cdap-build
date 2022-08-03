@@ -80,7 +80,7 @@ jobs:
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Update nightly release
-        uses: eine/tip@master
+        uses: pyTooling/Actions/releaser@r0
         with:
           tag: nightly-feature-test
           rm: true
