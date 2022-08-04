@@ -80,11 +80,10 @@ jobs:
           path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Update nightly release
-        uses: pyTooling/Actions/releaser@r0
+        uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
         with:
+          repo_token: ${{secrets.GITHUB_TOKEN}}
           tag: nightly-feature-test
-          rm: true
-          token: ${{secrets.GITHUB_TOKEN}}
           files: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       # - name: Set up GPG conf
