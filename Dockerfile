@@ -24,17 +24,20 @@ COPY . $DIR/
 RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_modules' --exclude='target' --exclude-vcs \
         --exclude-vcs-ignores app-artifacts cdap eventwriters-extensions metricswriters-extensions security-extensions \
         Dockerfile LICENSE.txt README.md && \
-  curl -sL https://deb.nodesource.com/setup_10.x | bash - && \
-  apt-get update && \
-  apt-get -y install nodejs && \
-  mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P 'templates,!unit-tests' && \
-  mvn install -B -V -Ddocker.skip=true -DskipTests -P 'templates,dist,k8s,!unit-tests' \
-    -Dadditional.artifacts.dir="$DIR/app-artifacts" \
-    -Dsecurity.extensions.dir="$DIR/security-extensions" \
-    -Dmetricswriters.extensions.dir="$DIR/metricswriters-extensions" \
-    -Deventwriters.extensions.dir="$DIR/eventwriters-extensions" \
-    -Dextend-default-configs="$EXTEND_DEFAULT_CONFIGS" -Dconfig-path="$DIR/$CONFIG_FILE_NAME" \
-    -Dui.build.name=cdap-non-optimized-full-build
+    apt-get update && apt-get install -y lsb-release && apt-get install -y apt-transport-https && \
+    DISTRO="$(lsb_release -s -c)" && \
+    echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_10.x ${DISTRO} main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
+    curl https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key --keyring /usr/share/keyrings/nodesource.gpg add - && \
+    # installation of nodejs expects /bin/bash instead of /bin/sh
+    apt-get update && /bin/bash -c 'apt-get -y install nodejs' && \
+    mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P 'templates,!unit-tests' && \
+    mvn install -B -V -Ddocker.skip=true -DskipTests -P 'templates,dist,k8s,!unit-tests' \
+      -Dadditional.artifacts.dir="$DIR/app-artifacts" \
+      -Dsecurity.extensions.dir="$DIR/security-extensions" \
+      -Dmetricswriters.extensions.dir="$DIR/metricswriters-extensions" \
+      -Deventwriters.extensions.dir="$DIR/eventwriters-extensions" \
+      -Dextend-default-configs="$EXTEND_DEFAULT_CONFIGS" -Dconfig-path="$DIR/$CONFIG_FILE_NAME" \
+      -Dui.build.name=cdap-non-optimized-full-build
 
 FROM openjdk:8-jdk AS run
 WORKDIR /
