@@ -2,8 +2,7 @@ name: Build and Unit Test
 on: 
   schedule:
     - cron: '0 8 * * *'
-  # Delete once testec
-  push:
+  workflow_dispatch:
 
 jobs:
   build:
