@@ -4,6 +4,9 @@ on:
     - cron: '0 8 * * *'
   workflow_dispatch:
 
+env:
+  TAG_NAME: latest
+
 jobs:
   build:
     runs-on: cdapio-hub-k8-runner
@@ -17,6 +20,11 @@ jobs:
             CDAP_OSSRH_PASSWORD:cdapio-github-builds/CDAP_OSSRH_PASSWORD
             CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
             CDAP_GPG_PRIVATE_KEY:cdapio-github-builds/CDAP_GPG_PRIVATE_KEY
+    
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
 
       - name: Recursively Checkout Repository
         uses: actions/checkout@v3
@@ -24,7 +32,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: cdap
-          ref: develop
+          ref: ${{steps.extract_branch.outputs.branch}}
 
       - name: Update Submodules
         working-directory: cdap
@@ -72,11 +80,17 @@ jobs:
           echo "CDAP_VERSION=${VERSION}"
           echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
+      - name: Set up tag name
+        if: ${{ steps.extract_branch.outputs.branch }} != 'develop' 
+        run: |
+          echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
+      
       - name: Upload CDAP Standalone
-        uses: actions/upload-artifact@v2
+        uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
         with:
-          name: CDAP-Standalone-${{env.CDAP_VERSION}}
-          path: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+          repo_token: ${{secrets.GITHUB_TOKEN}}
+          automatic_release_tag: ${{env.TAG_NAME}}
+          files: ./cdap/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Set up GPG conf
         run: |
