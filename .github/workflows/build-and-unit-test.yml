@@ -71,12 +71,14 @@ jobs:
           export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
           echo "CDAP_VERSION=${VERSION}"
           echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
+          cd cdap-build/cdap/cdap-standalone/target/
+          unzip cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Upload CDAP Standalone
         uses: actions/upload-artifact@v2
         with:
           name: CDAP-Standalone-${{env.CDAP_VERSION}}
-          path: cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+          path: cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}
 
       - name: Set up GPG conf
         run: |
@@ -105,10 +107,9 @@ jobs:
             mkdir -p cdap-distributions/target/deb-bundle-tmp
             cd cdap-distributions/target/deb-bundle-tmp
             cp ../../../*/target/*.deb .
-            tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
 
       - name: Upload CDAP DEB Bundle
         uses: actions/upload-artifact@v2
         with:
-          name: CDAP-DISTRIBUTED-${{env.CDAP_VERSION}}
-          path: cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
+          name: cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}
+          path: cdap-build/cdap/cdap-distributions/target/deb-bundle-tmp
