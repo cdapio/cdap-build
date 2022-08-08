@@ -39,27 +39,28 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
 
-#      - name: Run Tests
-#        working-directory: cdap-build
-#        run: MAVEN_OPTS="-Xmx16G" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-#
-#      - name: Archive build artifacts
-#        uses: actions/upload-artifact@v2.2.2
-#        if: always()
-#        with:
-#          name: Build debug files
-#          path: |
-#            **/target/rat.txt
-#            **/target/surefire-reports/*
-#
-#      - name: Surefire Report
-#        # Pinned 1.0.5 version
-#        uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
-#        if: always()
-#        with:
-#          # GITHUB_TOKEN
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          commit: ${{ github.sha }}
+      - name: Run Tests
+        working-directory: cdap-build
+        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+
+      - name: Archive build artifacts
+        uses: actions/upload-artifact@v2.2.2
+        if: always()
+        with:
+          name: Build debug files
+          path: |
+            **/target/rat.txt
+            **/target/surefire-reports/*
+            /cdap-build/oom.bin
+
+      - name: Surefire Report
+        # Pinned 1.0.5 version
+        uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
+        if: always()
+        with:
+          # GITHUB_TOKEN
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.sha }}
 
       - name: Build Standalone
         working-directory: cdap-build
@@ -76,7 +77,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: CDAP-Standalone-${{env.CDAP_VERSION}}
-          path: .cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+          path: cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Set up GPG conf
         run: |
@@ -105,10 +106,10 @@ jobs:
           mkdir -p cdap-distributions/target/deb-bundle-tmp
           cd cdap-distributions/target/deb-bundle-tmp
           cp ../../../*/target/*.deb .
-          tar zcf ../cdap-distributed-deb-bundle-${env.CDAP_VERSION}.tgz *.deb
+          tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
 
       - name: Upload CDAP DEB Bundle
         uses: actions/upload-artifact@v2
         with:
           name: CDAP-DISTRIBUTED-DEB-${{env.CDAP_VERSION}}
-          path: cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${env.CDAP_VERSION}.tgz
+          path: cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
