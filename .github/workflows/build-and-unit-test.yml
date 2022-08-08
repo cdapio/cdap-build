@@ -1,8 +1,11 @@
 name: Build and Unit Test
-on: 
+on:
   schedule:
     - cron: '0 8 * * *'
   workflow_dispatch:
+
+env:
+  TAG_NAME: latest
 
 jobs:
   build:
@@ -73,12 +76,6 @@ jobs:
           echo "CDAP_VERSION=${VERSION}"
           echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
-      - name: Upload CDAP Standalone
-        uses: actions/upload-artifact@v2
-        with:
-          name: CDAP-Standalone-${{env.CDAP_VERSION}}
-          path: cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
-
       - name: Set up GPG conf
         run: |
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
@@ -108,8 +105,11 @@ jobs:
           cp ../../../*/target/*.deb .
           tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
 
-      - name: Upload CDAP DEB Bundle
-        uses: actions/upload-artifact@v2
+      - name: Upload CDAP Standalone and CDAP DEB Bundle
+        uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
         with:
-          name: CDAP-DISTRIBUTED-DEB-${{env.CDAP_VERSION}}
-          path: cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
+          repo_token: ${{secrets.GITHUB_TOKEN}}
+          automatic_release_tag: ${{env.TAG_NAME}}
+          files: |
+            cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+            cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
