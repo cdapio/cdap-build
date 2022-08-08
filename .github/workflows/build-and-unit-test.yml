@@ -6,6 +6,7 @@ on:
 
 env:
   TAG_NAME: latest
+  BRANCH_NAME: develop
 
 jobs:
   build:
@@ -20,11 +21,6 @@ jobs:
             CDAP_OSSRH_PASSWORD:cdapio-github-builds/CDAP_OSSRH_PASSWORD
             CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
             CDAP_GPG_PRIVATE_KEY:cdapio-github-builds/CDAP_GPG_PRIVATE_KEY
-    
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
 
       - name: Recursively Checkout Repository
         uses: actions/checkout@v3
@@ -32,7 +28,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: cdap
-          ref: ${{steps.extract_branch.outputs.branch}}
+          ref: ${{env.BRANCH_NAME}}
 
       - name: Update Submodules
         working-directory: cdap
@@ -81,7 +77,7 @@ jobs:
           echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Set up tag name
-        if: ${{ steps.extract_branch.outputs.branch }} != 'develop' 
+        if: ${{ env.BRANCH_NAME != 'develop' }}
         run: |
           echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
       
