@@ -10,6 +10,12 @@ env:
 jobs:
   build:
     runs-on: cdapio-hub-k8-runner
+
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: [ develop, release/6.7, release/6.6 ]
+
     steps:
       - name: Get Secrets from GCP Secret Manager
         id: 'secrets'
@@ -27,7 +33,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: cdap-build
-          ref: develop
+          ref: ${{ matrix.branch }}
 
       - name: Update Submodules
         working-directory: cdap-build
@@ -104,6 +110,11 @@ jobs:
           cd cdap-distributions/target/deb-bundle-tmp
           cp ../../../*/target/*.deb .
           tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
+
+      - name: Set up tag name
+        if: ${{ matrix.branch }} != 'develop'
+        run: |
+          echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
 
       - name: Upload CDAP Standalone and CDAP DEB Bundle
         uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
