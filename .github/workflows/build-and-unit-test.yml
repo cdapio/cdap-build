@@ -6,7 +6,7 @@ on:
     # workaround to run manual trigger for a particular branch
     inputs:
       branch:
-        description: "name of the branch on which workflow will run"
+        description: "branch name on which workflow will be triggered"
         required: true
         default: "develop"
 
@@ -22,7 +22,7 @@ jobs:
       - name: set-matrix on schedule run
         id: set-matrix-on-schedule-run
         if: github.event_name != 'workflow_dispatch'
-        run: echo "::set-output name=matrix::{\"include\":[{\"branch\":\"develop\"},{\"branch\":\"release/6.7\"}, {\"branch\":\"release/6.6\"}]}"
+        run: echo "::set-output name=matrix::{\"include\":[{\"branch\":\"develop\"},{\"branch\":\"release/6.6\"}, {\"branch\":\"release/6.7\"}]}"
 
       - name: set-matrix on manual trigger
         id: set-matrix-on-manual-trigger
@@ -85,15 +85,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
 
+      - name: Set up Artifact Name
+        run: |
+          name=$(echo -n "${{ matrix.branch }}" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
+          echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
+
       - name: Run Tests
         working-directory: cdap-build
-        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,examples,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v2.2.2
         if: always()
         with:
-          name: Build debug files - ${{ matrix.branch }}
+          name: Build debug files - ${{ env.ARTIFACT_NAME }}
           path: |
             **/target/rat.txt
             **/target/surefire-reports/*
@@ -106,14 +111,13 @@ jobs:
         with:
           # GITHUB_TOKEN
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          commit: ${{ github.sha }}
-          check_name: Test Report - ${{ matrix.branch }}
+          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
       - name: Build Standalone
         working-directory: cdap-build
         run: MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2C clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
-      - name: Find Build Version 
+      - name: Find Build Version
         working-directory: cdap-build/cdap
         run:  |
           export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
@@ -124,7 +128,7 @@ jobs:
         run: |
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-      
+
       - name: Import GPG key
         run: |
           echo "$GPG_PRIVATE_KEY" > private.key
@@ -134,7 +138,7 @@ jobs:
 
       - name: Deploy Maven
         working-directory: cdap-build
-        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P examples,templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
         env:
           CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
           CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
