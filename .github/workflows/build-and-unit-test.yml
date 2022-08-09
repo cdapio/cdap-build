@@ -155,15 +155,19 @@ jobs:
           tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
 
       - name: Set up tag name
-        if: ${{ matrix.branch }} != 'develop'
+        if: ${{ matrix.branch  != 'develop' }}
         run: |
           echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
 
       - name: Upload CDAP Standalone and CDAP DEB Bundle
-        uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
+        uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
         with:
-          repo_token: ${{secrets.GITHUB_TOKEN}}
-          automatic_release_tag: ${{env.TAG_NAME}}
-          files: |
+          allowUpdates: true
+          prerelease: true
+          replacesArtifacts: true
+          commit: ${{ matrix.branch }}
+          token: ${{secrets.GITHUB_TOKEN}}
+          tag: ${{env.TAG_NAME}}
+          artifacts: |
             cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
             cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
