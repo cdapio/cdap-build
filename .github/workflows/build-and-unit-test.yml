@@ -85,6 +85,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
 
+      - name: Set up tag name
+        if: ${{ matrix.branch }} != 'develop'
+        run: |
+          echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
+
       - name: Run Tests
         working-directory: cdap-build
         run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
@@ -93,7 +98,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.2
         if: always()
         with:
-          name: Build debug files - ${{ matrix.branch }}
+          name: Build debug files - ${{ env.TAG_NAME }}
           path: |
             **/target/rat.txt
             **/target/surefire-reports/*
@@ -107,7 +112,7 @@ jobs:
           # GITHUB_TOKEN
           github_token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.sha }}
-          check_name: Test Report - ${{ matrix.branch }}
+          check_name: Test Report - ${{ env.TAG_NAME }}
 
       - name: Build Standalone
         working-directory: cdap-build
@@ -148,11 +153,6 @@ jobs:
           cd cdap-distributions/target/deb-bundle-tmp
           cp ../../../*/target/*.deb .
           tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
-
-      - name: Set up tag name
-        if: ${{ matrix.branch }} != 'develop'
-        run: |
-          echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
 
       - name: Upload CDAP Standalone and CDAP DEB Bundle
         uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
