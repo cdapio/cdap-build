@@ -85,33 +85,33 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
 
-      - name: Set up Artifact Name
-        run: |
-          name=$(echo -n "${{ matrix.branch }}" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
-          echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
-
-      - name: Run Tests
-        working-directory: cdap-build
-        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v2.2.2
-        if: always()
-        with:
-          name: Build debug files - ${{ env.ARTIFACT_NAME }}
-          path: |
-            **/target/rat.txt
-            **/target/surefire-reports/*
-            /cdap-build/oom.bin
-
-      - name: Surefire Report
-        # Pinned 1.0.5 version
-        uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
-        if: always()
-        with:
-          # GITHUB_TOKEN
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
+#      - name: Set up Artifact Name
+#        run: |
+#          name=$(echo -n "${{ matrix.branch }}" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
+#          echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
+#
+#      - name: Run Tests
+#        working-directory: cdap-build
+#        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+#
+#      - name: Archive build artifacts
+#        uses: actions/upload-artifact@v2.2.2
+#        if: always()
+#        with:
+#          name: Build debug files - ${{ env.ARTIFACT_NAME }}
+#          path: |
+#            **/target/rat.txt
+#            **/target/surefire-reports/*
+#            /cdap-build/oom.bin
+#
+#      - name: Surefire Report
+#        # Pinned 1.0.5 version
+#        uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
+#        if: always()
+#        with:
+#          # GITHUB_TOKEN
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
       - name: Build Standalone
         working-directory: cdap-build
@@ -138,7 +138,7 @@ jobs:
 
       - name: Deploy Maven
         working-directory: cdap-build
-        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
+        run: mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
         env:
           CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
           CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
@@ -154,15 +154,25 @@ jobs:
           tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
 
       - name: Set up tag name
-        if: ${{ matrix.branch }} != 'develop'
         run: |
-          echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
+          if [ ${{ matrix.branch }} != "develop" ];
+          then
+            echo "TAG_NAME=$CDAP_VERSION"
+            echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
+          fi
+          git tag -fa $TAG_NAME
+          git push origin --tags
+        env:
+          TAG_NAME: ${{ env.TAG_NAME }}
 
       - name: Upload CDAP Standalone and CDAP DEB Bundle
-        uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
+        uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
         with:
-          repo_token: ${{secrets.GITHUB_TOKEN}}
-          automatic_release_tag: ${{env.TAG_NAME}}
-          files: |
+          allowUpdates: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{secrets.GITHUB_TOKEN}}
+          tag: ${{env.TAG_NAME}}
+          artifacts: |
             cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
             cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
