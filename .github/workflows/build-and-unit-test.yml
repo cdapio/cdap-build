@@ -202,7 +202,7 @@ jobs:
 
   deploy-docker:
     needs: build
-    uses: cdapio/cdap-build/.github/workflows/deploy-docker.yml@feature/github-actions-build-testing5
+    uses: cdapio/cdap-build/.github/workflows/deploy-docker.yml@210089dfcef51a9cb18e726399500af444a5ce9a
     with:
       TAG_NAME: ${{ env.TAG_NAME }}
     secrets:
