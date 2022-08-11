@@ -149,16 +149,27 @@ jobs:
           cp ../../../*/target/*.deb .
           tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
 
-      - name: Set up tag name
-        if: ${{ matrix.branch }} != 'develop'
+      - name: Set up Tag
+        working-directory: cdap-build
         run: |
-          echo "TAG_NAME=$CDAP_VERSION" >> $GITHUB_ENV
+          if [ ${{ matrix.branch }} != "develop" ];
+          then
+            echo "TAG_NAME=v$CDAP_VERSION"
+            echo "TAG_NAME=v$CDAP_VERSION" >> $GITHUB_ENV
+          fi
+        # update the tag
+          git tag -f $TAG_NAME
+          git push -f origin --tags
+        env:
+          TAG_NAME: ${{ env.TAG_NAME }}
 
-      - name: Upload CDAP Standalone and CDAP DEB Bundle
-        uses: marvinpinto/action-automatic-releases@919008cf3f741b179569b7a6fb4d8860689ab7f0
-        with:
-          repo_token: ${{secrets.GITHUB_TOKEN}}
-          automatic_release_tag: ${{env.TAG_NAME}}
-          files: |
-            cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
-            cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
+        - name: Upload CDAP Standalone and CDAP DEB Bundle
+          uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
+          with:
+            allowUpdates: true
+            prerelease: true
+            replacesArtifacts: true
+            token: ${{ secrets.GITHUB_TOKEN }}
+            tag: ${{ env.TAG_NAME }}
+            artifacts: |
+              cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip,cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
