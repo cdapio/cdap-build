@@ -91,39 +91,39 @@ jobs:
           name=$(echo -n "${{ matrix.branch }}" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
           echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
 
-      - name: Run Tests
-        working-directory: cdap-build
-        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-
-      - name: Archive build artifacts
-        uses: actions/upload-artifact@v2.2.2
-        if: always()
-        with:
-          name: Build debug files - ${{ env.ARTIFACT_NAME }}
-          path: |
-            **/target/rat.txt
-            **/target/surefire-reports/*
-            /cdap-build/oom.bin
-
-      - name: Surefire Report
-        # Pinned 1.0.5 version
-        uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
-        if: always()
-        with:
-          # GITHUB_TOKEN
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
-
-      - name: Build Standalone
-        working-directory: cdap-build
-        run: MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2C clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-
-      - name: Find Build Version
-        working-directory: cdap-build/cdap
-        run:  |
-          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
-          echo "CDAP_VERSION=${VERSION}"
-          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
+#      - name: Run Tests
+#        working-directory: cdap-build
+#        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+#
+#      - name: Archive build artifacts
+#        uses: actions/upload-artifact@v2.2.2
+#        if: always()
+#        with:
+#          name: Build debug files - ${{ env.ARTIFACT_NAME }}
+#          path: |
+#            **/target/rat.txt
+#            **/target/surefire-reports/*
+#            /cdap-build/oom.bin
+#
+#      - name: Surefire Report
+#        # Pinned 1.0.5 version
+#        uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
+#        if: always()
+#        with:
+#          # GITHUB_TOKEN
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
+#
+#      - name: Build Standalone
+#        working-directory: cdap-build
+#        run: MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2C clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+#
+#      - name: Find Build Version
+#        working-directory: cdap-build/cdap
+#        run:  |
+#          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
+#          echo "CDAP_VERSION=${VERSION}"
+#          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
       - name: Set up GPG conf
         run: |
