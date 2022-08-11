@@ -115,28 +115,28 @@ jobs:
 #          github_token: ${{ secrets.GITHUB_TOKEN }}
 #          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
-#      - name: Build Standalone
-#        working-directory: cdap-build
-#        run: MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2C clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-#
-#      - name: Find Build Version
-#        working-directory: cdap-build/cdap
-#        run: |
-#          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
-#          echo "CDAP_VERSION=${VERSION}"
-#          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
-#
-#      - name: Set up GPG conf
-#        run: |
-#          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-#          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-#
-#      - name: Import GPG key
-#        run: |
-#          echo "$GPG_PRIVATE_KEY" > private.key
-#          gpg --import --batch private.key
-#        env:
-#          GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
+      - name: Build Standalone
+        working-directory: cdap-build
+        run: MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2C clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+
+      - name: Find Build Version
+        working-directory: cdap-build/cdap
+        run: |
+          export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
+          echo "CDAP_VERSION=${VERSION}"
+          echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
+
+      - name: Set up GPG conf
+        run: |
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+
+      - name: Import GPG key
+        run: |
+          echo "$GPG_PRIVATE_KEY" > private.key
+          gpg --import --batch private.key
+        env:
+          GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
 #      - name: Deploy Maven
 #        working-directory: cdap-build
@@ -155,30 +155,31 @@ jobs:
 #          cp ../../../*/target/*.deb .
 #          tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
 
-#      - name: Set up Tag
-#        working-directory: cdap-build
-#        run: |
-#          if [ ${{ matrix.branch }} != "develop" ];
-#          then
-#            echo "TAG_NAME=v$CDAP_VERSION"
-#            echo "TAG_NAME=v$CDAP_VERSION" >> $GITHUB_ENV
-#          fi
-#          git tag -f $TAG_NAME
-#          git push -f origin --tags
-#        env:
-#          TAG_NAME: ${{ env.TAG_NAME }}
-#
-#      - name: Upload CDAP Standalone and CDAP DEB Bundle
-#        uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
-#        with:
-#          allowUpdates: true
-#          prerelease: true
-#          replacesArtifacts: true
-#          token: ${{secrets.GITHUB_TOKEN}}
-#          tag: ${{env.TAG_NAME}}
-#          artifacts: |
-#            cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
-#           cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
+      - name: Set up Tag
+        working-directory: cdap-build
+        run: |
+          if [ ${{ matrix.branch }} != "develop" ];
+          then
+            echo "TAG_NAME=v$CDAP_VERSION" >> $GITHUB_ENV
+            echo "TAG_NAME=v$CDAP_VERSION"
+            git tag -f $TAG_NAME
+          else
+            git tag -f ${{ env.TAG_NAME }}
+          fi
+          git push -f origin --tags
+
+      - name: Upload CDAP Standalone and CDAP DEB Bundle
+        uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
+        with:
+          allowUpdates: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.TAG_NAME }}
+          body: Cask Data Appplication Platform - Release ${{ env.CDAP_VERSION }}
+          artifacts: |
+            cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
+#            cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
 
 #      - name: Set up Docker Buildx
 #        id: buildx
@@ -199,12 +200,3 @@ jobs:
 #          no-cache: true
 #          file: cdap-build/cdap/cdap-distributions/src/Dockerfile
 #          tags: caskdata/cdap-sandbox:${{env.CDAP_VERSION}}
-
-  deploy-docker:
-    needs: build
-    uses: cdapio/cdap-build/.github/workflows/deploy-docker.yml@210089dfcef51a9cb18e726399500af444a5ce9a
-    with:
-      TAG_NAME: ${{ env.TAG_NAME }}
-    secrets:
-      DOCKER_HUB_USERNAME: ${{ needs.build.steps.secrets.outputs.CASK_DOCKER_HUB_USERNAME }}
-      DOCKER_HUB_PASSWORD: ${{ needs.build.steps.secrets.outputs.CASK_DOCKER_HUB_PASSWORD }}
