@@ -85,6 +85,12 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-maven-${{ github.workflow }}
 
+      - name: Set up Artifact Name
+        # Removes invalid artifact name characters: ",:,<,>,|,*,?,\,/.
+        run: |
+          name=$(echo -n "${{ matrix.branch }}" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
+          echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
+
       - name: Run Tests
         working-directory: cdap-build
         run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2C -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
@@ -93,7 +99,7 @@ jobs:
         uses: actions/upload-artifact@v2.2.2
         if: always()
         with:
-          name: Build debug files - ${{ matrix.branch }}
+          name: Build debug files - ${{ env.ARTIFACT_NAME }}
           path: |
             **/target/rat.txt
             **/target/surefire-reports/*
@@ -106,8 +112,7 @@ jobs:
         with:
           # GITHUB_TOKEN
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          commit: ${{ github.sha }}
-          check_name: Test Report - ${{ matrix.branch }}
+          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
       - name: Build Standalone
         working-directory: cdap-build
