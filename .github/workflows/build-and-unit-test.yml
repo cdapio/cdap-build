@@ -159,22 +159,22 @@ jobs:
         run: |
           if [ ${{ matrix.branch }} != "develop" ];
           then
-            echo "TAG_NAME=v$CDAP_VERSION"
             echo "TAG_NAME=v$CDAP_VERSION" >> $GITHUB_ENV
+            echo "TAG_NAME=v$CDAP_VERSION"
+            git tag -f $TAG_NAME
+          else
+            git tag -f ${{ env.TAG_NAME }}
           fi
-        # update the tag
-          git tag -f $TAG_NAME
           git push -f origin --tags
-        env:
-          TAG_NAME: ${{ env.TAG_NAME }}
 
-        - name: Upload CDAP Standalone and CDAP DEB Bundle
-          uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
-          with:
-            allowUpdates: true
-            prerelease: true
-            replacesArtifacts: true
-            token: ${{ secrets.GITHUB_TOKEN }}
-            tag: ${{ env.TAG_NAME }}
-            artifacts: |
-              cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip,cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
+      - name: Upload CDAP Standalone and CDAP DEB Bundle
+        uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
+        with:
+          allowUpdates: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ env.TAG_NAME }}
+          body: Cask Data Appplication Platform - Release ${{ env.CDAP_VERSION }}
+          artifacts: |
+            cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip,cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
