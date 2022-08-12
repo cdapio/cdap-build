@@ -1,14 +1,12 @@
 name: Docker Deploy
 on:
-  push:
-#  workflow_dispatch:
-#    # workaround to run manual trigger for a particular branch
-#    inputs:
-#      branch:
-#        description: "branch name on which workflow will be triggered"
-#        required: true
-#        default: "develop"
-
+  workflow_dispatch:
+    # workaround to run manual trigger for a particular branch
+    inputs:
+      branch:
+        description: "branch name on which workflow will be triggered"
+        required: true
+        default: "develop"
 
 env:
   TAG_NAME: latest
@@ -32,7 +30,7 @@ jobs:
           fetch-depth: 0
           submodules: recursive
           path: cdap-build
-          ref: feature/github-actions-build-testing5
+          ref: check-docker-poc
 
       - name: Update Submodules
         working-directory: cdap-build
@@ -50,7 +48,7 @@ jobs:
       - name: Trigger Cloud Build
         working-directory: cdap-build
         run: |
-          gcloud builds submit --config cloudbuild.yaml .
+          gcloud builds submit --config cloudbuild.json . --timeout=1200s
           
 
 #      - name: Set up Docker Buildx
