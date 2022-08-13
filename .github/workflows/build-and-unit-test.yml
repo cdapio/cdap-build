@@ -12,6 +12,7 @@ on:
 
 env:
   TAG_NAME: latest
+  PRE_RELEASE: true
 
 jobs:
 
@@ -113,6 +114,7 @@ jobs:
           # GITHUB_TOKEN
           github_token: ${{ secrets.GITHUB_TOKEN }}
           check_name: Test Report - ${{ env.ARTIFACT_NAME }}
+          commit: ${{ github.sha }}
 
       - name: Build Standalone
         working-directory: cdap-build
@@ -124,6 +126,12 @@ jobs:
           export VERSION=$(ls cdap-standalone/target/cdap-sandbox*zip | cut --delimiter=- --fields="-3" --complement | rev | cut --delimiter="." --fields=1 --complement | rev)
           echo "CDAP_VERSION=${VERSION}"
           echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
+          if [[ $VERSION != *-SNAPSHOT ]];
+          then
+            echo "PRE_RELEASE=false" >> $GITHUB_ENV
+          else
+            echo "SNAPSHOT VERSION"
+          fi
 
       - name: Set up GPG conf
         run: |
@@ -161,7 +169,7 @@ jobs:
           then
             echo "TAG_NAME=v$CDAP_VERSION" >> $GITHUB_ENV
             echo "TAG_NAME=v$CDAP_VERSION"
-            git tag -f $TAG_NAME
+            git tag -f v$CDAP_VERSION
           else
             git tag -f ${{ env.TAG_NAME }}
           fi
@@ -171,7 +179,7 @@ jobs:
         uses: ncipollo/release-action@58ae73b360456532aafd58ee170c045abbeaee37
         with:
           allowUpdates: true
-          prerelease: true
+          prerelease: ${{ env.PRE_RELEASE }}
           replacesArtifacts: true
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ env.TAG_NAME }}
