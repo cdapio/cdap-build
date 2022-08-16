@@ -17,6 +17,7 @@ env:
 
 jobs:
   test-logging:
+    runs-on: cdapio-hub-k8-runner
     steps:
       - name: check gcloud installed/authed
         run: gcloud projects list
