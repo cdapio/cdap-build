@@ -1,14 +1,16 @@
 name: Build and Unit Test
 on:
-  schedule:
-    - cron: '0 8 * * *'
-  workflow_dispatch:
-    # workaround to run manual trigger for a particular branch
-    inputs:
-      branch:
-        description: "branch name on which workflow will be triggered"
-        required: true
-        default: "develop"
+  push:
+    branches: [<your branch>]
+  # schedule:
+  #   - cron: '0 8 * * *'
+  # workflow_dispatch:
+  #   # workaround to run manual trigger for a particular branch
+  #   inputs:
+  #     branch:
+  #       description: "branch name on which workflow will be triggered"
+  #       required: true
+  #       default: "develop"
 
 env:
   TAG_NAME: latest
