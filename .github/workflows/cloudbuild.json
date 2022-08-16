@@ -1,0 +1,25 @@
+{
+  "steps": [
+    {
+      "name": "gcr.io/cloud-builders/docker",
+      "entrypoint": "bash",
+      "args": [
+        "-c",
+        "docker build -t caskdata/cdap-sandbox:{{TAG}} cdap/cdap-distributions/src && docker login --username=$$USERNAME --password=$$PASSWORD && docker push caskdata/cdap-sandbox:{{TAG}}"
+      ],
+      "secretEnv": [
+        "USERNAME",
+        "PASSWORD"
+      ]
+    }
+  ],
+  "availableSecrets": {
+    "secretManager": [{
+      "versionName": "projects/cdapio-github-builds/secrets/CASK_DOCKER_HUB_PASSWORD/versions/latest",
+      "env": "PASSWORD"
+    }, {
+      "versionName": "projects/cdapio-github-builds/secrets/CASK_DOCKER_HUB_USERNAME/versions/latest",
+      "env": "USERNAME"
+    }]
+  }
+}
