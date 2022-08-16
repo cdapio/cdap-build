@@ -1,7 +1,6 @@
 name: Build and Unit Test
 on:
   push:
-    branches: [<your branch>]
   # schedule:
   #   - cron: '0 8 * * *'
   # workflow_dispatch:
