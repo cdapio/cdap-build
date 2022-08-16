@@ -20,7 +20,12 @@ jobs:
     runs-on: cdapio-hub-k8-runner
     steps:
       - name: check gcloud installed/authed
-        run: gcloud projects list
+        run: |
+          gcloud logging write cdapio-github-builds-logs '{ "message": "Build failure", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' --payload-type=json --severity=ERROR
+
+      - name: github actions build url
+        run: echo "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
 
   # set-branch-matrix:
   #   runs-on: ubuntu-latest
