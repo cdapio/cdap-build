@@ -27,7 +27,8 @@ RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_module
     apt-get update && apt-get install -y lsb-release && apt-get install -y apt-transport-https && \
     DISTRO="$(lsb_release -s -c)" && \
     echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_10.x ${DISTRO} main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
-    curl https://deb.nodesource.com/gpgkey/nodesource.gpg.key | apt-key --keyring /usr/share/keyrings/nodesource.gpg add - && \
+    curl https://deb.nodesource.com/gpgkey/nodesource.gpg.key -o /usr/share/keyrings/nodesource.gpg.key && \
+    apt-key --keyring /usr/share/keyrings/nodesource.gpg add /usr/share/keyrings/nodesource.gpg.key && \
     # installation of nodejs expects /bin/bash instead of /bin/sh
     apt-get update && /bin/bash -c 'apt-get -y install nodejs' && \
     mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P 'templates,!unit-tests' && \
