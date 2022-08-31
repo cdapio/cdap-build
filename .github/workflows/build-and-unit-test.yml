@@ -197,3 +197,8 @@ jobs:
           body: Cask Data Appplication Platform - Release ${{ env.CDAP_VERSION }}
           artifacts: |
             cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip,cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
+
+      - name: Alert team if build fails
+        if: failure()
+        run: |
+          gcloud logging write cdapio-github-builds-logs '{ "message": "Build failure", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' --payload-type=json --severity=ERROR
