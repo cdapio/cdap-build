@@ -34,7 +34,7 @@ jobs:
       - name: set-matrix on schedule run
         id: set-matrix-on-schedule-run
         if: github.event_name != 'workflow_dispatch'
-        run: echo "::set-output name=matrix::{\"include\":[{\"branch\":\"develop\"},{\"branch\":\"release/6.6\"}, {\"branch\":\"release/6.7\"}]}"
+        run: echo "::set-output name=matrix::{\"include\":[{\"branch\":\"develop\"}, {\"branch\":\"release/6.7\"}, {\"branch\":\"release/6.8\"}]}"
 
       - name: set-matrix on manual trigger
         id: set-matrix-on-manual-trigger
