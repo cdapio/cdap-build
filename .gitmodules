@@ -1,11 +1,11 @@
 [submodule "cdap"]
 	path = cdap
 	url = ../cdap.git
-	branch = develop
+	branch = release/6.8
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = ../hydrator-plugins.git
-	branch = develop
+	branch = release/2.10
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
