@@ -9,40 +9,40 @@
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
-	branch = develop
+	branch = release/0.17
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
 	url = ../../cdap-solutions/mmds.git
-	branch = develop
+	branch = release/1.11
 [submodule "app-artifacts/delta"]
 	path = app-artifacts/delta
 	url = ../../data-integrations/delta.git
-	branch = develop
+	branch = release/0.7
 [submodule "app-artifacts/bigquery-delta-plugins"]
 	path = app-artifacts/bigquery-delta-plugins
 	url = ../../data-integrations/bigquery-delta-plugins.git
-	branch = develop
+	branch = release/0.7
 [submodule "app-artifacts/database-delta-plugins"]
 	path = app-artifacts/database-delta-plugins
 	url = ../../data-integrations/database-delta-plugins.git
-	branch = develop
+	branch = release/0.7
 [submodule "app-artifacts/datastream-delta-plugins"]
 	path = app-artifacts/datastream-delta-plugins
 	url = ../../data-integrations/datastream-delta-plugins.git
-	branch = develop
+	branch = release/0.5
 [submodule "app-artifacts/database-plugins"]
 	path = app-artifacts/database-plugins
 	url = ../../data-integrations/database-plugins.git
-	branch = develop
+	branch = release/1.9
 [submodule "app-artifacts/delta-transformation"]
 	path = app-artifacts/delta-transformation
 	url = ../../data-integrations/delta-transformation.git
-	branch = develop
+	branch = release/0.3
 [submodule "metricswriters-extensions/metrics-writer-extension"]
 	path = metricswriters-extensions/metrics-writer-extension
 	url = ../metrics-writer-extension.git
-	branch = develop
+	branch = release/1.1
 [submodule "eventwriters-extensions/events-writer-extension"]
 	path = eventwriters-extensions/events-writer-extension
 	url = ../events-writer-extension.git
-	branch = develop
+	branch = release/1.1
