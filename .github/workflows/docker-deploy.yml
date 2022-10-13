@@ -68,7 +68,7 @@ jobs:
           git submodule update --init --recursive --remote
 
       - name: Cache
-        uses: actions/cache@v2.1.3
+        uses: actions/cache@v3
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ github.workflow }}-${{ hashFiles('**/pom.xml') }}
@@ -87,7 +87,7 @@ jobs:
         run: |
           if [ ${{ matrix.branch }} != "develop" ];
           then
-            echo "TAG_NAME=v${{ env.CDAP_VERSION }}" >> $GITHUB_ENV  
+            echo "TAG_NAME=v${{ env.CDAP_VERSION }}" >> $GITHUB_ENV
             sed -i -e "s#{{TAG}}#${{ env.CDAP_VERSION }}#g" .github/workflows/cloudbuild.json
           else
             sed -i -e "s#{{TAG}}#${{ env.TAG_NAME }}#g" .github/workflows/cloudbuild.json
