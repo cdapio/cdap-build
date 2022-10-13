@@ -32,31 +32,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: set-matrix on schedule run
-        id: set-matrix-on-schedule-run
-        if: github.event_name != 'workflow_dispatch'
-        run: echo "::set-output name=matrix::{\"include\":[{\"branch\":\"develop\"}]}"
-
-      - name: set-matrix on manual trigger
-        id: set-matrix-on-manual-trigger
-        if: github.event_name == 'workflow_dispatch'
-        run: echo "::set-output name=matrix::{\"include\":[{\"branch\":\"${{ github.event.inputs.branch }}\"}]}"
-
-      - name: set-matrix-output
-        id: set-matrix-output
+      - name: set-matrix
         run: |
-          if [ -z "$MANUAL_TRIGGER_OUTPUT" ];
+          if [ ${{ github.event_name }} != "workflow_dispatch" ];
           then
-            echo "::set-output name=matrix::${SCHEDULE_RUN_OUTPUT}"
+            echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.7"}, {"branch":"release/6.8"}]}' >> $GITHUB_ENV
           else
-            echo "::set-output name=matrix::${MANUAL_TRIGGER_OUTPUT}"
+            echo 'BRANCH_MATRIX={"include":[{"branch":"${{ github.event.inputs.branch }}"}]}' >> $GITHUB_ENV
           fi
-        env:
-          MANUAL_TRIGGER_OUTPUT: ${{ steps.set-matrix-on-manual-trigger.outputs.matrix }}
-          SCHEDULE_RUN_OUTPUT: ${{ steps.set-matrix-on-schedule-run.outputs.matrix }}
 
     outputs:
-      matrix: ${{ steps.set-matrix-output.outputs.matrix }}
+      matrix: ${{ env.BRANCH_MATRIX }}
 
   docker-deploy:
     needs: set-branch-matrix
