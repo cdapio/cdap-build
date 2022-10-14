@@ -94,7 +94,7 @@ jobs:
         run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2 -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Archive build artifacts
-        uses: actions/upload-artifact@v2.2.2
+        uses: actions/upload-artifact@v3
         if: always()
         with:
           name: Build debug files - ${{ env.ARTIFACT_NAME }}
