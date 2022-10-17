@@ -23,11 +23,13 @@ on:
       skip_tests:
         description: "Skip running tests for this build"
         required: true
-        default: "false"
+        type: boolean
+        default: false
       keep_existing_release:
-        description: "Do not overwrite the release for versions without snapshot"
+        description: "Do not overwrite the GitHub release for versions without snapshot"
         required: true
-        default: "true"
+        type: boolean
+        default: true
 
 env:
   TAG_NAME: latest
@@ -65,6 +67,7 @@ jobs:
       - name: Get Secrets from GCP Secret Manager
         id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v0'
+        if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
         with:
           secrets: |-
             CDAP_OSSRH_USERNAME:cdapio-github-builds/CDAP_OSSRH_USERNAME
@@ -94,19 +97,19 @@ jobs:
             ${{ runner.os }}-maven-${{ github.workflow }}
 
       - name: Set up Artifact Name # Removes invalid artifact name characters: ",:,<,>,|,*,?,\,/.
-        if: ${{ github.event.inputs.skip_tests != 'true' }} || failure()
+        if: ${{ github.event.inputs.skip_tests != true  }}
         run: |
           name=$(echo -n "${{ matrix.branch }}" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
           echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
 
       - name: Run Tests
         working-directory: cdap-build
-        if: ${{ github.event.inputs.skip_tests != 'true' }} || failure()
+        if: ${{ github.event.inputs.skip_tests != true  }}
         run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2 -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v3
-        if: ${{ github.event.inputs.skip_tests != 'true' }} || failure()
+        if: ${{ github.event.inputs.skip_tests != true || failure() }}
         with:
           name: Build debug files - ${{ env.ARTIFACT_NAME }}
           path: |
@@ -117,7 +120,7 @@ jobs:
       - name: Surefire Report
         # Pinned 1.0.5 version
         uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
-        if: ${{ github.event.inputs.skip_tests != 'true' }} || failure()
+        if: ${{ github.event.inputs.skip_tests != true || failure() }}
         with:
           # GITHUB_TOKEN
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -151,11 +154,13 @@ jobs:
           path: cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
 
       - name: Set up GPG conf
+        if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
         run: |
           echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
           echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
 
       - name: Import GPG key
+        if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
         run: |
           echo "$GPG_PRIVATE_KEY" > private.key
           gpg --import --batch private.key
@@ -192,7 +197,7 @@ jobs:
           then
             echo "TAG_NAME=v$CDAP_VERSION" >> $GITHUB_ENV
             echo "TAG_NAME=v$CDAP_VERSION"
-            git tag -f v$CDAP_VERSION    
+            git tag -f v$CDAP_VERSION
           elif [[ ${{ matrix.branch }} != "develop" ]];
           then
             export TAG=$(git check-ref-format --normalize "tags/${{ matrix.branch }}/tag" | cut -c6- | rev | cut -c5- | rev)
