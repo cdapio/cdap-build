@@ -47,7 +47,7 @@ jobs:
         run: |
           if [ ${{ github.event_name }} != "workflow_dispatch" ];
           then
-            echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.7"}, {"branch":"release/6.8"}, {"branch": "feature/wrangler-2022"}]}' >> $GITHUB_ENV
+            echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.7"}, {"branch":"release/6.8"}, {"branch":"feature/wrangler-2022"}]}' >> $GITHUB_ENV
           else
             echo 'BRANCH_MATRIX={"include":[{"branch":"${{ github.event.inputs.branch }}"}]}' >> $GITHUB_ENV
           fi
@@ -103,9 +103,16 @@ jobs:
           echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
 
       - name: Run Tests
-        working-directory: cdap-build
         if: ${{ github.event.inputs.skip_tests != true  }}
-        run: MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2 -U -V -am -amd -P templates,unit-tests --fail-at-end -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+        uses: nick-fields/retry@b4fa57557dda8c2f30bcb2d19372cc3237190f7f
+        with:
+          timeout_minutes: 120
+          max_attempts: 3
+          retry_on: error
+          on_retry_command: echo "Tests failed in this attempt, retrying ..."
+          command: |
+            cd cdap-build
+            MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2 -U -V -am -amd -P templates,unit-tests -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v3
@@ -118,18 +125,26 @@ jobs:
             /cdap-build/oom.bin
 
       - name: Surefire Report
-        # Pinned 1.0.5 version
-        uses: ScaCap/action-surefire-report@ad808943e6bfbd2e6acba7c53fdb5c89534da533
-        if: ${{ github.event.inputs.skip_tests != true || failure() }}
+        # Pinned 3.5.2 version
+        uses: mikepenz/action-junit-report@16a9560bd02f11e7e3bf6b3e2ef6bba6c9d07c32
+        if: ${{ always() }}
         with:
-          # GITHUB_TOKEN
+          report_paths: '**/target//surefire-reports/TEST-*.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
+          detailed_summary: true
           commit: ${{ github.sha }}
+          check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
       - name: Build Standalone
-        working-directory: cdap-build
-        run: MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+        uses: nick-fields/retry@b4fa57557dda8c2f30bcb2d19372cc3237190f7f
+        with:
+          timeout_minutes: 60
+          max_attempts: 3
+          retry_on: error
+          on_retry_command: echo "Tests failed in this attempt, retrying ..."
+          command: |
+              cd cdap-build
+              MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Find Build Version
         working-directory: cdap-build/cdap
@@ -168,19 +183,25 @@ jobs:
           GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
       - name: Maven Deploy
-        working-directory: cdap-build
-        run: |
-          if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
-          then
-            mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
-          else
-            mvn verify -B -V -T2 -DskipTests -Dgpg.skip -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
-          fi
-        env:
-          CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
-          CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
-          CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
-          MAVEN_OPTS: "-Xmx12G"
+        uses: nick-fields/retry@b4fa57557dda8c2f30bcb2d19372cc3237190f7f
+        with:
+          timeout_minutes: 120
+          max_attempts: 3
+          retry_on: error
+          on_retry_command: echo "Tests failed in this attempt, retrying ..."
+          command: |
+            cd cdap-build
+            if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
+            then
+              mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
+            else
+              mvn verify -B -V -T2 -DskipTests -Dgpg.skip -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
+            fi
+          env:
+            CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
+            CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
+            CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
+            MAVEN_OPTS: "-Xmx12G"
 
       - name: Build DEB Bundle
         working-directory: cdap-build/cdap
@@ -227,6 +248,6 @@ jobs:
             cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip,cdap-build/cdap/cdap-distributions/target/cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz
 
       - name: Alert team if build fails
-        if: failure()
+        if: ${{ (matrix.branch == 'develop' || startsWith(matrix.branch, 'release/')) && failure() }}
         run: |
           gcloud logging write cdapio-github-builds-logs '{ "message": "Build failure", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' --payload-type=json --severity=ERROR
