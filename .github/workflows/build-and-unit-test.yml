@@ -25,6 +25,11 @@ on:
         required: true
         type: boolean
         default: false
+      run_tests_with_retries:
+        description: "Run tests with retries, it will be ignored if tests are skipped."
+        required: true
+        type: boolean
+        default: false
       keep_existing_release:
         description: "Do not overwrite the GitHub release for versions without snapshot"
         required: true
@@ -36,6 +41,7 @@ env:
   PRE_RELEASE: true
   REPLACE_ARTIFACTS: true
   REMOVE_ARTIFACTS: true
+  MAX_ATTEMPTS: 3
 
 jobs:
 
@@ -50,6 +56,10 @@ jobs:
             echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.7"}, {"branch":"release/6.8"}, {"branch":"feature/wrangler-2022"}]}' >> $GITHUB_ENV
           else
             echo 'BRANCH_MATRIX={"include":[{"branch":"${{ github.event.inputs.branch }}"}]}' >> $GITHUB_ENV
+            if [ "${{ github.event.inputs.run_tests_with_retries }}" == "false" ]
+            then
+              echo 'MAX_ATTEMPTS=1' >> $GITHUB_ENV
+            fi
           fi
 
     outputs:
@@ -97,17 +107,18 @@ jobs:
             ${{ runner.os }}-maven-${{ github.workflow }}
 
       - name: Set up Artifact Name # Removes invalid artifact name characters: ",:,<,>,|,*,?,\,/.
-        if: ${{ github.event.inputs.skip_tests != true  }}
+        if: "${{ github.event.inputs.skip_tests != 'true' }}"
         run: |
           name=$(echo -n "${{ matrix.branch }}" | sed -e 's/[ \t:\/\\"<>|*?]/-/g' -e 's/--*/-/g')
           echo "ARTIFACT_NAME=$name" >> $GITHUB_ENV
 
       - name: Run Tests
-        if: ${{ github.event.inputs.skip_tests != true  }}
-        uses: nick-fields/retry@b4fa57557dda8c2f30bcb2d19372cc3237190f7f
+        if: "${{ github.event.inputs.skip_tests != 'true' }}"
+        # Pinned version 2.8.2
+        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
         with:
           timeout_minutes: 120
-          max_attempts: 3
+          max_attempts: ${{ env.MAX_ATTEMPTS }}
           retry_on: error
           on_retry_command: echo "Tests failed in this attempt, retrying ..."
           command: |
@@ -116,7 +127,7 @@ jobs:
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v3
-        if: ${{ github.event.inputs.skip_tests != true || failure() }}
+        if: "${{ github.event.inputs.skip_tests != 'true' || failure() }}"
         with:
           name: Build debug files - ${{ env.ARTIFACT_NAME }}
           path: |
@@ -129,19 +140,20 @@ jobs:
         uses: mikepenz/action-junit-report@16a9560bd02f11e7e3bf6b3e2ef6bba6c9d07c32
         if: ${{ always() }}
         with:
-          report_paths: '**/target//surefire-reports/TEST-*.xml'
+          report_paths: '**/target/surefire-reports/TEST-*.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           detailed_summary: true
           commit: ${{ github.sha }}
           check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
       - name: Build Standalone
-        uses: nick-fields/retry@b4fa57557dda8c2f30bcb2d19372cc3237190f7f
+        # Pinned version 2.8.2
+        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
         with:
           timeout_minutes: 60
           max_attempts: 3
           retry_on: error
-          on_retry_command: echo "Tests failed in this attempt, retrying ..."
+          on_retry_command: echo "Build Standalone failed in this attempt, retrying ..."
           command: |
               cd cdap-build
               MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
@@ -183,12 +195,13 @@ jobs:
           GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
       - name: Maven Deploy
-        uses: nick-fields/retry@b4fa57557dda8c2f30bcb2d19372cc3237190f7f
+        # Pinned version 2.8.2
+        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
         with:
           timeout_minutes: 120
           max_attempts: 3
           retry_on: error
-          on_retry_command: echo "Tests failed in this attempt, retrying ..."
+          on_retry_command: echo "Maven Deploy failed in this attempt, retrying ..."
           command: |
             cd cdap-build
             if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
@@ -219,16 +232,18 @@ jobs:
             echo "TAG_NAME=v$CDAP_VERSION" >> $GITHUB_ENV
             echo "TAG_NAME=v$CDAP_VERSION"
             git tag -f v$CDAP_VERSION
+            git push -f origin refs/tags/v$CDAP_VERSION:refs/tags/v$CDAP_VERSION
           elif [[ ${{ matrix.branch }} != "develop" ]];
           then
             export TAG=$(git check-ref-format --normalize "tags/${{ matrix.branch }}/tag" | cut -c6- | rev | cut -c5- | rev)
             echo "TAG_NAME=$TAG" >> $GITHUB_ENV
             echo "TAG_NAME=$TAG"
             git tag -f $TAG
+            git push -f origin refs/tags/$TAG:refs/tags/$TAG
           else
             git tag -f ${{ env.TAG_NAME }}
+            git push -f origin refs/tags/${{ env.TAG_NAME }}:refs/tags/${{ env.TAG_NAME }}
           fi
-          git push -f origin --tags
 
       - name: Upload CDAP Standalone and CDAP DEB Bundle
         # Pinned 1.11.1 version
