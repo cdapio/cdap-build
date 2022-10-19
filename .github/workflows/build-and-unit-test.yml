@@ -25,6 +25,11 @@ on:
         required: true
         type: boolean
         default: false
+      run_tests_with_retries:
+        description: "Run tests with retries, it will be ignored if tests are skipped."
+        required: true
+        type: boolean
+        default: false
       keep_existing_release:
         description: "Do not overwrite the GitHub release for versions without snapshot"
         required: true
@@ -36,6 +41,7 @@ env:
   PRE_RELEASE: true
   REPLACE_ARTIFACTS: true
   REMOVE_ARTIFACTS: true
+  MAX_ATTEMPTS: 3
 
 jobs:
 
@@ -50,6 +56,10 @@ jobs:
             echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.7"}, {"branch":"release/6.8"}, {"branch":"feature/wrangler-2022"}]}' >> $GITHUB_ENV
           else
             echo 'BRANCH_MATRIX={"include":[{"branch":"${{ github.event.inputs.branch }}"}]}' >> $GITHUB_ENV
+            if [ "${{ github.event.inputs.run_tests_with_retries }}" == "false" ]
+            then
+              echo 'MAX_ATTEMPTS=1' >> $GITHUB_ENV
+            fi
           fi
 
     outputs:
@@ -107,7 +117,7 @@ jobs:
         uses: nick-fields/retry@b4fa57557dda8c2f30bcb2d19372cc3237190f7f
         with:
           timeout_minutes: 120
-          max_attempts: 3
+          max_attempts: ${{ env.MAX_ATTEMPTS }}
           retry_on: error
           on_retry_command: echo "Tests failed in this attempt, retrying ..."
           command: |
@@ -129,7 +139,7 @@ jobs:
         uses: mikepenz/action-junit-report@16a9560bd02f11e7e3bf6b3e2ef6bba6c9d07c32
         if: ${{ always() }}
         with:
-          report_paths: '**/target//surefire-reports/TEST-*.xml'
+          report_paths: '**/target/surefire-reports/TEST-*.xml'
           github_token: ${{ secrets.GITHUB_TOKEN }}
           detailed_summary: true
           commit: ${{ github.sha }}
@@ -141,7 +151,7 @@ jobs:
           timeout_minutes: 60
           max_attempts: 3
           retry_on: error
-          on_retry_command: echo "Tests failed in this attempt, retrying ..."
+          on_retry_command: echo "Build Standalone failed in this attempt, retrying ..."
           command: |
               cd cdap-build
               MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
@@ -188,7 +198,7 @@ jobs:
           timeout_minutes: 120
           max_attempts: 3
           retry_on: error
-          on_retry_command: echo "Tests failed in this attempt, retrying ..."
+          on_retry_command: echo "Maven Deploy failed in this attempt, retrying ..."
           command: |
             cd cdap-build
             if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
