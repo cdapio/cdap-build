@@ -175,6 +175,7 @@ jobs:
           fi
 
       - name: Upload CDAP Standalone
+        if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
         uses: actions/upload-artifact@v3 # https://github.com/actions/upload-artifact#zipped-artifact-downloads
         with:
           name: cdap-sandbox-${{env.CDAP_VERSION}}.zip
