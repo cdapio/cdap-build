@@ -54,17 +54,17 @@ RUN apt-get update && \
   mkdir -p /opt/hadoop && \
   mkdir -p /opt/cdap/master/ext/jdbc/postgresql && \
   curl -L -o /opt/hadoop/hadoop-2.9.2.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz && \
-  curl -L -o /opt/spark/spark-3.1.1-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.1.1/spark-3.1.1-bin-without-hadoop.tgz && \
+  curl -L -o /opt/spark/spark-3.2.2-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.2.2/spark-3.2.2-bin-without-hadoop.tgz && \
   curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop2-2.2.5.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.2.5.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgres-socket-factory-1.0.12-jar-with-dependencies.jar https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.12/postgres-socket-factory-1.0.12-jar-with-dependencies.jar && \
   tar -xzf /opt/hadoop/hadoop-2.9.2.tar.gz -C /opt/hadoop && \
   curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/hadoop-aws-2.9.2.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.9.2/hadoop-aws-2.9.2.jar && \
   curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/aws-java-sdk-bundle-1.11.199.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.199/aws-java-sdk-bundle-1.11.199.jar && \
-  tar -xzf /opt/spark/spark-3.1.1-bin-without-hadoop.tgz -C /opt/spark && \
+  tar -xzf /opt/spark/spark-3.2.2-bin-without-hadoop.tgz -C /opt/spark && \
   # Copy downloaded JAR licenses to COPYRIGHT folder
   mkdir /opt/cdap/LICENSES/hadoop-2.9.2 && cp /opt/hadoop/hadoop-2.9.2/*.txt /opt/cdap/LICENSES/hadoop-2.9.2 && \
-  mkdir /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && cp /opt/spark/spark-3.1.1-bin-without-hadoop/LICENSE /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && cp /opt/spark/spark-3.1.1-bin-without-hadoop/NOTICE /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && \
+  mkdir /opt/cdap/LICENSES/spark-3.2.2-bin-without-hadoop && cp /opt/spark/spark-3.2.2-bin-without-hadoop/LICENSE /opt/cdap/LICENSES/spark-3.2.2-bin-without-hadoop && cp /opt/spark/spark-3.2.2-bin-without-hadoop/NOTICE /opt/cdap/LICENSES/spark-3.2.2-bin-without-hadoop && \
   mkdir /opt/cdap/LICENSES/gcs-connector-hadoop2-2.2.5 && curl -L -o /opt/cdap/LICENSES/gcs-connector-hadoop2-2.2.5/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.5/LICENSE && \
   mkdir /opt/cdap/LICENSES/postgresql-42.2.5 && jar xvf /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar META-INF/LICENSE && cp ./META-INF/LICENSE /opt/cdap/LICENSES/postgresql-42.2.5 && rm -r ./META-INF && \
   mkdir /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies && curl -L -o /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies/LICENSE https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/v1.0.12/LICENSE && \
@@ -78,7 +78,7 @@ RUN apt-get update && \
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
 ENV HADOOP_HOME=/opt/hadoop/hadoop-2.9.2
-ENV SPARK_HOME=/opt/spark/spark-3.1.1-bin-without-hadoop
+ENV SPARK_HOME=/opt/spark/spark-3.2.2-bin-without-hadoop
 ENV SPARK_COMPAT=spark3_2.12
 ENV HBASE_VERSION=1.2
 
