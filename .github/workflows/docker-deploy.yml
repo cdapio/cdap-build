@@ -78,7 +78,7 @@ jobs:
       - name: Set up CDAP Version
         working-directory: cdap-build/cdap
         run: |
-          export VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          export VERSION=$(mvn org.apache.maven.plugins:maven-help-plugin:3.2.0:evaluate -Dexpression=project.version -q -DforceStdout)
           echo "CDAP_VERSION=${VERSION}"
           echo "CDAP_VERSION=${VERSION}" >> $GITHUB_ENV
 
