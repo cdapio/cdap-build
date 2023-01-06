@@ -5,7 +5,7 @@
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = ../hydrator-plugins.git
-	branch = develop
+	branch = remove-explore
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
@@ -13,11 +13,11 @@
 [submodule "app-artifacts/mmds"]
 	path = app-artifacts/mmds
 	url = ../../cdap-solutions/mmds.git
-	branch = develop
+	branch = remove-explore
 [submodule "app-artifacts/delta"]
 	path = app-artifacts/delta
 	url = ../../data-integrations/delta.git
-	branch = develop
+	branch = remove-explore
 [submodule "app-artifacts/bigquery-delta-plugins"]
 	path = app-artifacts/bigquery-delta-plugins
 	url = ../../data-integrations/bigquery-delta-plugins.git
@@ -33,7 +33,7 @@
 [submodule "app-artifacts/database-plugins"]
 	path = app-artifacts/database-plugins
 	url = ../../data-integrations/database-plugins.git
-	branch = develop
+	branch = remove-explore
 [submodule "app-artifacts/delta-transformation"]
 	path = app-artifacts/delta-transformation
 	url = ../../data-integrations/delta-transformation.git
