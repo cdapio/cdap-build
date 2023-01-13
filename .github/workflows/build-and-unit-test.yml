@@ -64,6 +64,7 @@ jobs:
 
     outputs:
       matrix: ${{ env.BRANCH_MATRIX }}
+      retries: ${{ env. MAX_ATTEMPTS }}
 
   build:
     needs: set-branch-matrix
@@ -118,7 +119,7 @@ jobs:
         uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
         with:
           timeout_minutes: 120
-          max_attempts: ${{ env.MAX_ATTEMPTS }}
+          max_attempts: ${{ needs.set-branch-matrix.outputs.retries }}
           retry_on: error
           on_retry_command: echo "Tests failed in this attempt, retrying ..."
           command: |
