@@ -10,10 +10,6 @@
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
 	branch = develop
-[submodule "app-artifacts/mmds"]
-	path = app-artifacts/mmds
-	url = ../../cdap-solutions/mmds.git
-	branch = develop
 [submodule "app-artifacts/delta"]
 	path = app-artifacts/delta
 	url = ../../data-integrations/delta.git
