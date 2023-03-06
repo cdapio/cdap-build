@@ -22,6 +22,11 @@ on:
         description: "branch name on which workflow will be triggered"
         required: true
         default: "develop"
+      update_submodules_remote:
+        description: "update submodules with latest commits from the remote branch"
+        required: true
+        type: boolean
+        default: true  
 
 env:
   TAG_NAME: latest
@@ -64,6 +69,7 @@ jobs:
 
       - name: Update Submodules
         working-directory: cdap-build
+        if: ${{ github.event.inputs.update_submodules_remote }}
         run: |
           git submodule update --init --recursive --remote
 
