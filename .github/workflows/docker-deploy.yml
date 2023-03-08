@@ -69,7 +69,7 @@ jobs:
 
       - name: Update Submodules
         working-directory: cdap-build
-        if: ${{ github.event.inputs.update_submodules_remote == 'true' }}
+        if: ${{ github.event.inputs.update_submodules_remote != 'false' }}
         run: |
           git submodule update --init --recursive --remote
 
