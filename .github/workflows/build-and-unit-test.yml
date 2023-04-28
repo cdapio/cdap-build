@@ -75,6 +75,9 @@ jobs:
       matrix: ${{ fromJson(needs.set-branch-matrix.outputs.matrix) }}
 
     steps:
+      - name: Get Start Time
+        run: echo "STARTED_AT=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+
       - name: Get Secrets from GCP Secret Manager
         id: 'secrets'
         uses: 'google-github-actions/get-secretmanager-secrets@v0'
@@ -268,3 +271,11 @@ jobs:
         if: ${{ (matrix.branch == 'develop' || startsWith(matrix.branch, 'release/')) && failure() }}
         run: |
           gcloud logging write cdapio-github-builds-logs '{ "message": "Build failure", "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"}' --payload-type=json --severity=ERROR
+
+      - name: Get End Time
+        run: echo "ENDED_AT=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+
+      - name: Report Result
+        if: ${{ (matrix.branch == 'develop' || startsWith(matrix.branch, 'release/')) }}
+        run: |
+          echo '{ "repository": "${{ github.repository }}", "build_name": "${{ github.workflow }}", "branch": "${{ matrix.branch }}", "conclusion": "${{ job.status }}", "started_at": "'$STARTED_AT'", "ended_at": "'$ENDED_AT'", "url": "https://github.com/${{ github.repository }}/actions/runs/${{  github.run_id }}", "run_id": "${{ github.run_id }}", "run_attempt": "${{ github.run_attempt }}" }' | bq insert ${{ vars.BUILD_HISTORY_TABLE }}
