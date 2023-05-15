@@ -127,7 +127,7 @@ jobs:
           on_retry_command: echo "Tests failed in this attempt, retrying ..."
           command: |
             cd cdap-build
-            MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -Drat.skip=true -fae -T2 -U -V -am -amd -P templates,unit-tests -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+            MAVEN_OPTS="-Xmx16G -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/cdap-build/oom.bin" mvn test -fae -T2 -U -V -am -amd -P templates,unit-tests -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Archive build artifacts
         uses: actions/upload-artifact@v3
@@ -160,7 +160,7 @@ jobs:
           on_retry_command: echo "Build Standalone failed in this attempt, retrying ..."
           command: |
               cd cdap-build
-              MAVEN_OPTS="-Xmx12G" mvn -Drat.skip=true -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+              MAVEN_OPTS="-Xmx12G" mvn -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Find Build Version
         working-directory: cdap-build/cdap
