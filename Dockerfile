@@ -49,6 +49,8 @@ COPY --from=build /cdap/build/cdap/cdap-distributions/src/etc/cdap/conf.dist/log
 COPY --from=build /cdap/build/cdap/cdap-distributions/src/COPYRIGHT /opt/cdap/LICENSES
 COPY --from=build /cdap/build/cdap-build-sources.tar.gz /opt/cdap/cdap-build-sources.tar.gz
 
+USER root
+RUN rm -rf /var/lib/apt/lists/lock
 RUN apt-get update && \
   apt-get -y install libxml2-utils && \
   apt-get upgrade -y && \
