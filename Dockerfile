@@ -78,6 +78,8 @@ RUN apt-get update && \
   find /opt/hadoop -name 'paranamer-2.3.jar' -exec rm {} + && \
   find /opt/cdap/ui/ -maxdepth 1 -mindepth 1 -exec ln -s {} /opt/cdap/ \;
 
+RUN df --local -P | awk '{if (NR!=1) print $6}' | xargs -I '{}' find '{}' -xdev -type d \( -perm -0002 -a ! -perm -1000 \) 2>/dev/null | xargs -I '{}' chmod a+t '{}'
+
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
 ENV HADOOP_HOME=/opt/hadoop/hadoop-2.9.2
 ENV SPARK_HOME=/opt/spark/spark-3.1.1-bin-without-hadoop
