@@ -5,7 +5,7 @@
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = ../hydrator-plugins.git
-	branch = release/2.11
+	branch = lidennis-release-692-spark-regression
 [submodule "security-extensions/cdap-security-extn"]
 	path = security-extensions/cdap-security-extn
 	url = ../cdap-security-extn.git
