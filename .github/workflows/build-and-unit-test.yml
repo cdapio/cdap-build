@@ -214,15 +214,15 @@ jobs:
                 build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE 2>&1 || true)
               fi
               echo "$build_output"
-              if [ grep -q "BUILD FAILURE" <<< "$build_output" ]; 
+              if [ echo "$build_output" | grep -c "BUILD FAILURE" ]; 
               then
-                echo "[INFO] Deployment successful"
-                break
-              else
                 echo "[WARNING] Deployment failed, retrying..."
                 failed_module=$(echo "$build_output" | grep -e 'mvn <args> -rf' | sed -n 's/.*mvn <args> -rf ://p')
                 echo "[INFO] FAILED MODULE = $failed_module"
                 retry_count=$((retry_count + 1))
+              else
+                echo "[INFO] Deployment successful"
+                break
               fi
             done
             if [ $retry_count -ge ${{ needs.set-branch-matrix.outputs.retries }} ]; 
