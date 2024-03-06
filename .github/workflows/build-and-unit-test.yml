@@ -200,21 +200,39 @@ jobs:
           GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
       - name: Maven Deploy
-        # Pinned version 2.8.2
-        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
-        with:
-          timeout_minutes: 120
-          max_attempts: 3
-          retry_on: error
-          on_retry_command: echo "Maven Deploy failed in this attempt, retrying ..."
-          command: |
-            cd cdap-build
-            if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
+        run: |
+          cd cdap-build
+          if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
+          then
+            retry_count=0
+            failed_module=""
+            while [ $retry_count -lt ${{ needs.set-branch-matrix.outputs.retries }} ]; do
+              if [ -n "$failed_module" ];
+              then
+                build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE -rf :"$failed_module" 2>&1 || true)
+              else
+                build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE 2>&1 || true)
+              fi
+              echo "$build_output"
+              if [ grep -q "BUILD FAILURE" <<< "$build_output" ]; 
+              then
+                echo "[INFO] Deployment successful"
+                break
+              else
+                echo "[WARNING] Deployment failed, retrying..."
+                failed_module=$(echo "$build_output" | grep -e 'mvn <args> -rf' | sed -n 's/.*mvn <args> -rf ://p')
+                echo "[INFO] FAILED MODULE = $failed_module"
+                retry_count=$((retry_count + 1))
+              fi
+            done
+            if [ $retry_count -ge ${{ needs.set-branch-matrix.outputs.retries }} ]; 
             then
-              mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE
-            else
-              mvn verify -B -V -T2 -DskipTests -Dgpg.skip -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
+              echo "[ERROR] Max retries reached..., deployment failed"
+              exit 1
             fi
+          else
+            mvn verify -B -V -T2 -DskipTests -Dgpg.skip -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
+          fi
         env:
           CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
           CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
