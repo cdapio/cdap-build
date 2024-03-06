@@ -206,7 +206,7 @@ jobs:
           then
             retry_count=0
             failed_module=""
-            while [ $retry_count -lt ${{ needs.set-branch-matrix.outputs.retries }} ]; do
+            while [ $retry_count -lt 3 ]; do
               if [ -n "$failed_module" ];
               then
                 build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE -rf :"$failed_module" 2>&1 || true)
@@ -225,7 +225,7 @@ jobs:
                 break
               fi
             done
-            if [ $retry_count -ge ${{ needs.set-branch-matrix.outputs.retries }} ]; 
+            if [ $retry_count -ge 3 ];
             then
               echo "[ERROR] Max retries reached..., deployment failed"
               exit 1
