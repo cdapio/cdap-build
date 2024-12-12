@@ -1,7 +1,7 @@
 [submodule "cdap"]
 	path = cdap
 	url = ../cdap.git
-	branch = release/6.10
+	branch = itn_messaging_fix
 [submodule "app-artifacts/hydrator-plugins"]
 	path = app-artifacts/hydrator-plugins
 	url = ../hydrator-plugins.git
