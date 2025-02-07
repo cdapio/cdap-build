@@ -44,6 +44,11 @@ env:
   SKIP_RELEASE: false
   MAX_ATTEMPTS: 3
 
+permissions:
+  contents: write
+  checks: write
+  statuses: write
+
 jobs:
 
   set-branch-matrix:
