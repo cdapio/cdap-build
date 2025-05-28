@@ -129,7 +129,7 @@ jobs:
         with:
           timeout_minutes: 120
           max_attempts: ${{ needs.set-branch-matrix.outputs.retries }}
-          retry_on: error
+          retry_on: any
           on_retry_command: echo "Tests failed in this attempt, retrying ..."
           command: |
             cd cdap-build
@@ -162,7 +162,7 @@ jobs:
         with:
           timeout_minutes: 60
           max_attempts: 3
-          retry_on: error
+          retry_on: any
           on_retry_command: echo "Build Standalone failed in this attempt, retrying ..."
           command: |
               cd cdap-build
