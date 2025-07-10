@@ -58,17 +58,6 @@
           <ignorePublishedComponents>true</ignorePublishedComponents>
         </configuration>
       </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-deploy-plugin</artifactId>
-        <version>3.1.4</version> <!-- or the latest compatible version -->
-        <executions>
-          <execution>
-            <id>default-deploy</id>
-            <phase>none</phase> <!-- disables it -->
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
