@@ -55,8 +55,7 @@
         <configuration>
           <publishingServerId>sonatype.release</publishingServerId>
           <autoPublish>false</autoPublish>
-          <ignorePublishedComponents>true</ignorePublishedComponents>
-          <skipPublishing>true</skipPublishing>
+          <waitUntil>uploaded</waitUntil>
         </configuration>
       </plugin>
     </plugins>
