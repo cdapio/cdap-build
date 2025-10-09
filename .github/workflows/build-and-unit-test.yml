@@ -1,4 +1,4 @@
-# Copyright © 2022 Cask Data, Inc.
+# Copyright © 2025 Cask Data, Inc.
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may not
 #  use this file except in compliance with the License. You may obtain a copy of
 #  the License at
@@ -48,6 +48,7 @@ permissions:
   contents: write
   checks: write
   statuses: write
+  id-token: write
 
 jobs:
 
@@ -90,10 +91,7 @@ jobs:
         if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
         with:
           secrets: |-
-            CDAP_OSSRH_USERNAME:cdapio-github-builds/CDAP_OSSRH_USERNAME
-            CDAP_OSSRH_PASSWORD:cdapio-github-builds/CDAP_OSSRH_PASSWORD
-            CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
-            CDAP_GPG_PRIVATE_KEY:cdapio-github-builds/CDAP_GPG_PRIVATE_KEY
+            RELEASE_STAGING_BUCKET:cdapio-github-builds/CDAP_RELEASE_STAGING_BUCKET
 
       - name: Recursively Checkout Repository
         uses: actions/checkout@v4
@@ -156,18 +154,6 @@ jobs:
           commit: ${{ github.sha }}
           check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
-      - name: Build Standalone
-        # Pinned version 3.0.2
-        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08
-        with:
-          timeout_minutes: 60
-          max_attempts: 3
-          retry_on: any
-          on_retry_command: echo "Build Standalone failed in this attempt, retrying ..."
-          command: |
-              cd cdap-build
-              MAVEN_OPTS="-Xmx12G" mvn -e -T2 -U clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
-
       - name: Find Build Version
         working-directory: cdap-build/cdap
         run:  |
@@ -185,66 +171,30 @@ jobs:
             echo "Release will be overwritten if exists."
           fi
 
-      - name: Upload CDAP Standalone
+      - name: 'Submit Build to GCB'
         if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
-        uses: actions/upload-artifact@v4 # https://github.com/actions/upload-artifact#zipped-artifact-downloads
-        with:
-          name: cdap-sandbox-${{env.CDAP_VERSION}}.zip
-          path: cdap-build/cdap/cdap-standalone/target/cdap-sandbox-${{env.CDAP_VERSION}}.zip
-
-      - name: Set up GPG conf
-        if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
+        working-directory: cdap-build
         run: |
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
-
-      - name: Import GPG key
-        if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
-        run: |
-          echo "$GPG_PRIVATE_KEY" > private.key
-          gpg --import --batch private.key
-        env:
-          GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
-
-      - name: Maven Deploy
-        run: |
-          cd cdap-build
-          if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
-          then
-            retry_count=0
-            failed_module=""
-            while [ $retry_count -lt 3 ]; do
-              if [ -n "$failed_module" ];
-              then
-                build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE -rf :"$failed_module" 2>&1 || true)
-              else
-                build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE 2>&1 || true)
-              fi
-              echo "$build_output"
-              if [ $(echo "$build_output" | grep -c "BUILD FAILURE") -gt 0 ];
-              then
-                echo "[WARNING] Deployment failed, retrying..."
-                failed_module=$(echo "$build_output" | grep -e 'mvn <args> -rf' | sed -n 's/.*mvn <args> -rf ://p')
-                echo "[INFO] FAILED MODULE = $failed_module"
-                retry_count=$((retry_count + 1))
-              else
-                echo "[INFO] Deployment successful"
-                break
-              fi
-            done
-            if [ $retry_count -ge 3 ];
-            then
-              echo "[ERROR] Max retries reached..., deployment failed"
-              exit 1
-            fi
-          else
-            mvn verify -B -V -T2 -DskipTests -Dgpg.skip -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
+          if [ -z "${{ steps.secrets.outputs.RELEASE_STAGING_BUCKET }}" ]; then
+            echo "ERROR: Failed to fetch RELEASE_STAGING_BUCKET from Secret Manager."
+            exit 1
           fi
-        env:
-          CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
-          CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
-          CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
-          MAVEN_OPTS: "-Xmx12G"
+
+          STAGING_BUCKET_NAME="${{ steps.secrets.outputs.RELEASE_STAGING_BUCKET }}"
+          echo "Submitting GCB build to stage artifacts for branch ${{ github.ref_name }} and version ${{ env.CDAP_VERSION }}"
+
+          if [ ! -f cloudbuild.yaml ]; then
+            echo "ERROR: cloudbuild.yaml not found in $(pwd)!"
+            exit 1
+          fi
+
+          GCS_STAGING_PATH="gs://${STAGING_BUCKET_NAME}/${{ env.CDAP_VERSION }}"
+          echo "Staging Path: ${GCS_STAGING_PATH}"
+          
+          gcloud builds submit . \
+            --config=cloudbuild.yaml \
+            --substitutions=_CDAP_VERSION=${{ env.CDAP_VERSION }},_BRANCH=${{ github.ref_name }},_ARTIFACT_STAGING_PATH=${GCS_STAGING_PATH}
+          echo "GCB build for staging initiated. Artifacts will be staged at ${GCS_STAGING_PATH}"          
 
       - name: Build DEB Bundle
         working-directory: cdap-build/cdap
@@ -275,7 +225,7 @@ jobs:
             git push -f origin refs/tags/${{ env.TAG_NAME }}:refs/tags/${{ env.TAG_NAME }}
           fi
 
-      - name: Upload CDAP Standalone and CDAP DEB Bundle
+      - name: Upload Artifacts
         # Pinned 1.14.0 version
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
         with:

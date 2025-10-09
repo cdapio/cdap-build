@@ -1,0 +1,112 @@
+# Copyright © 2025 Cask Data, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+steps:
+  # Step 1: Access GPG Key from Secret Manager
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud secrets versions access latest --secret=CDAP_GPG_PRIVATE_KEY --out-file=/workspace/private.key
+        gcloud secrets versions access latest --secret=CDAP_GPG_PASSPHRASE --out-file=/workspace/gpg_passphrase.txt
+    id: 'get-gpg-secrets'
+
+  # Step 2: Import GPG Key
+  - name: 'maven:3.8-jdk-11'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Importing GPG key..."
+        mkdir -p /root/.gnupg
+        echo "pinentry-mode loopback" > /root/.gnupg/gpg.conf
+        echo "allow-loopback-pinentry" > /root/.gnupg/gpg-agent.conf
+        gpg --import --batch /workspace/private.key
+    id: 'import-gpg'
+    volumes:
+      - name: 'm2'
+        path: '/root/.m2'
+
+  # Step 3: Build and "Deploy" Maven artifacts to a local staging directory
+  - name: 'maven:3.8-jdk-11'
+    id: 'maven-build-stage'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        echo "Building and Staging Maven Artifacts"
+        export GPG_PASSPHRASE=$(cat /workspace/gpg_passphrase.txt)
+        export STAGING_DIR="/workspace/release_staging"  # More generic name
+        mkdir -p $STAGING_DIR/maven-repo
+        # This command builds, signs, and deploys all artifacts to the local STAGING_DIR
+        MAVEN_OPTS="-Xmx12G" mvn clean deploy -B -V -T2 -U \
+          -DskipTests \
+          -Ddocker.skip=true \
+          -nsu -am -amd \
+          -P templates,dist,release \
+          -Dadditional.artifacts.dir=$(pwd)/app-artifacts \
+          -Dsecurity.extensions.dir=$(pwd)/security-extensions \
+          -DaltDeploymentRepository=local-staging::default::file:$STAGING_DIR/maven-repo \
+          -Dgpg.passphrase="$GPG_PASSPHRASE"
+    volumes:
+      - name: 'm2'
+        path: '/root/.m2'
+    env:
+      - 'GPG_TTY=/dev/console'
+
+  # Step 4: Generate manifest.json
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'generate-manifest'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        STAGING_DIR="/workspace/release_staging" 
+        REPO_DIR="$STAGING_DIR/maven-repo"
+        MANIFEST_FILE="$STAGING_DIR/manifest.json"
+        GCS_BASE_PATH="${_ARTIFACT_STAGING_PATH}" 
+        echo "Generating manifest.json for ${GCS_BASE_PATH}"
+        echo '{"artifacts": [' > $MANIFEST_FILE
+        FIRST=true
+        find "$REPO_DIR" -type f | while read ARTIFACT_PATH; do
+          GCS_REL_PATH=$(echo "$ARTIFACT_PATH" | sed "s|$STAGING_DIR/||")
+          GCS_URI="${GCS_BASE_PATH}/${GCS_REL_PATH}"
+          HASH=$(sha256sum "$ARTIFACT_PATH" | awk '{print $1}')
+          ATTESTATION_FILE="${ARTIFACT_PATH}.intoto.jsonl"
+          if [ -f "$ATTESTATION_FILE" ]; then
+            ATTESTATION_REL_PATH=$(echo "$ATTESTATION_FILE" | sed "s|$STAGING_DIR/||")
+            ATTESTATION_URI="${GCS_BASE_PATH}/${ATTESTATION_REL_PATH}"
+            ATTESTATION_ENTRY=", \"attestations\": [{\"gcs_uri\": \"$ATTESTATION_URI\"}]"
+          else
+            ATTESTATION_ENTRY=""
+          fi
+          if [ "$FIRST" = true ]; then FIRST=false; else echo ',' >> $MANIFEST_FILE; fi
+          echo -n "  {\"gcs_uri\": \"$GCS_URI\", \"hash\": \"sha256:$HASH\"$ATTESTATION_ENTRY}" >> $MANIFEST_FILE
+        done
+        echo >> $MANIFEST_FILE
+        echo ']}' >> $MANIFEST_FILE
+        echo "Manifest content:"
+        cat $MANIFEST_FILE
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    id: 'upload-to-gcs'
+    args: [ 'gsutil', '-m', 'cp', '-r', '/workspace/release_staging/*', '${_ARTIFACT_STAGING_PATH}/' ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'
+  caching:
+    maven:
+      volume: 'm2'
+  requestedVerifyOption: 'VERIFIED'
