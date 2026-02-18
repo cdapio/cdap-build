@@ -43,8 +43,9 @@ jobs:
           then
             echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}]}' >> $GITHUB_ENV
           else
-            echo 'BRANCH_MATRIX={"include":[{"branch":"${{ github.event.inputs.branch }}"}]}' >> $GITHUB_ENV
-          fi
+            echo 'BRANCH_MATRIX={"include":[{"branch":"${GITHUB_EVENT_INPUTS_BRANCH}"}]}' >> $GITHUB_ENV
+          fi        env:
+          GITHUB_EVENT_INPUTS_BRANCH: ${{ github.event.inputs.branch }}
 
     outputs:
       matrix: ${{ env.BRANCH_MATRIX }}
