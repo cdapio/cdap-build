@@ -61,7 +61,7 @@ jobs:
           then
             echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.10"}, {"branch":"release/6.11"}]}' >> $GITHUB_ENV
           else
-            echo 'BRANCH_MATRIX={"include":[{"branch":"${GITHUB_EVENT_INPUTS_BRANCH}"}]}' >> $GITHUB_ENV
+            echo 'BRANCH_MATRIX={"include":[{"branch":"'"${GITHUB_EVENT_INPUTS_BRANCH}"'"}]}' >> $GITHUB_ENV
             if [ "${GITHUB_EVENT_INPUTS_RUN_TESTS_WITH_RETRIES}" == "false" ]
             then
               echo 'MAX_ATTEMPTS=1' >> $GITHUB_ENV
