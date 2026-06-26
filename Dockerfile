@@ -25,13 +25,10 @@ RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.
 RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_modules' --exclude='target' --exclude-vcs \
         --exclude-vcs-ignores app-artifacts cdap eventwriters-extensions metricswriters-extensions security-extensions \
         Dockerfile LICENSE.txt README.md && \
-    apt-get update && apt-get install -y lsb-release && \
-    DISTRO="$(lsb_release -s -c)" && \
-    echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_10.x ${DISTRO} main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
-    curl https://deb.nodesource.com/gpgkey/nodesource.gpg.key -o /usr/share/keyrings/nodesource.gpg.key && \
-    apt-key --keyring /usr/share/keyrings/nodesource.gpg add /usr/share/keyrings/nodesource.gpg.key && \
-    # installation of nodejs expects /bin/bash instead of /bin/sh
-    apt-get update && /bin/bash -c 'apt-get -y install nodejs' && \
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && \
+    bash -c '. "$NVM_DIR/nvm.sh" && nvm install 22.22.3' && \
+    export PATH="$NVM_DIR/versions/node/v22.22.3/bin:$PATH" && \
     mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P 'templates,!unit-tests' && \
     mvn install -B -V -Ddocker.skip=true -DskipTests -P 'templates,dist,k8s,!unit-tests' \
       -Dadditional.artifacts.dir="$DIR/app-artifacts" \
