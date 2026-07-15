@@ -15,7 +15,7 @@
 
 FROM gcr.io/cdapio/cdap-build:latest AS build
 ENV DIR /cdap/build
-ENV MAVEN_OPTS -Xmx2048m -Dhttp.keepAlive=false
+ENV MAVEN_OPTS -Xmx4096m -Dhttp.keepAlive=false
 ENV NODE_OPTIONS --max-old-space-size=8192
 ARG EXTEND_DEFAULT_CONFIGS=false
 ARG CONFIG_FILE_NAME
@@ -25,13 +25,13 @@ RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.
 RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_modules' --exclude='target' --exclude-vcs \
         --exclude-vcs-ignores app-artifacts cdap eventwriters-extensions metricswriters-extensions security-extensions \
         Dockerfile LICENSE.txt README.md && \
-    apt-get update && apt-get install -y lsb-release && \
-    DISTRO="$(lsb_release -s -c)" && \
-    echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_10.x ${DISTRO} main" | tee -a /etc/apt/sources.list.d/nodesource.list && \
-    curl https://deb.nodesource.com/gpgkey/nodesource.gpg.key -o /usr/share/keyrings/nodesource.gpg.key && \
-    apt-key --keyring /usr/share/keyrings/nodesource.gpg add /usr/share/keyrings/nodesource.gpg.key && \
+    apt-get update && apt-get install -y lsb-release gnupg curl && \
+    mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key -o /tmp/nodesource.key && gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg /tmp/nodesource.key && rm /tmp/nodesource.key && \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list && \
     # installation of nodejs expects /bin/bash instead of /bin/sh
     apt-get update && /bin/bash -c 'apt-get -y install nodejs' && \
+
     mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P 'templates,!unit-tests' && \
     mvn install -B -V -Ddocker.skip=true -DskipTests -P 'templates,dist,k8s,!unit-tests' \
       -Dadditional.artifacts.dir="$DIR/app-artifacts" \
@@ -41,7 +41,7 @@ RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_module
       -Dextend-default-configs="$EXTEND_DEFAULT_CONFIGS" -Dconfig-path="$DIR/$CONFIG_FILE_NAME" \
       -Dui.build.name=cdap-non-optimized-full-build
 
-FROM openjdk:8-jdk AS run
+FROM openjdk:8-jdk@sha256:99bac5bf83633e3c7399aed725c8415e7b569b54e03e4599e580fc9cdb7c21ab AS run
 WORKDIR /
 COPY --from=build /cdap/build/cdap/cdap-master/target/stage-packaging/opt/cdap/master /opt/cdap/master
 COPY --from=build /cdap/build/cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /opt/cdap/ui
