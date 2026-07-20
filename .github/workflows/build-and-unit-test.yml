@@ -59,18 +59,21 @@ jobs:
         run: |
           if [ ${{ github.event_name }} != "workflow_dispatch" ];
           then
-            echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.9"}, {"branch":"release/6.10"}, {"branch":"release/6.11"}]}' >> $GITHUB_ENV
+            echo 'BRANCH_MATRIX={"include":[{"branch":"develop"}, {"branch":"release/6.10"}, {"branch":"release/6.11"}]}' >> $GITHUB_ENV
           else
-            echo 'BRANCH_MATRIX={"include":[{"branch":"${{ github.event.inputs.branch }}"}]}' >> $GITHUB_ENV
-            if [ "${{ github.event.inputs.run_tests_with_retries }}" == "false" ]
+            echo 'BRANCH_MATRIX={"include":[{"branch":"'"${GITHUB_EVENT_INPUTS_BRANCH}"'"}]}' >> $GITHUB_ENV
+            if [ "${GITHUB_EVENT_INPUTS_RUN_TESTS_WITH_RETRIES}" == "false" ]
             then
               echo 'MAX_ATTEMPTS=1' >> $GITHUB_ENV
             fi
           fi
+        env:
+          GITHUB_EVENT_INPUTS_BRANCH: ${{ github.event.inputs.branch }}
+          GITHUB_EVENT_INPUTS_RUN_TESTS_WITH_RETRIES: ${{ github.event.inputs.run_tests_with_retries }}
 
     outputs:
       matrix: ${{ env.BRANCH_MATRIX }}
-      retries: ${{ env. MAX_ATTEMPTS }}
+      retries: ${{ env.MAX_ATTEMPTS }}
 
   build:
     needs: set-branch-matrix
@@ -124,12 +127,12 @@ jobs:
 
       - name: Run Tests
         if: "${{ github.event.inputs.skip_tests != 'true' }}"
-        # Pinned version 2.8.2
-        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
+        # Pinned version 3.0.2
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08
         with:
           timeout_minutes: 120
           max_attempts: ${{ needs.set-branch-matrix.outputs.retries }}
-          retry_on: error
+          retry_on: any
           on_retry_command: echo "Tests failed in this attempt, retrying ..."
           command: |
             cd cdap-build
@@ -157,16 +160,16 @@ jobs:
           check_name: Test Report - ${{ env.ARTIFACT_NAME }}
 
       - name: Build Standalone
-        # Pinned version 2.8.2
-        uses: nick-fields/retry@3e91a01664abd3c5cd539100d10d33b9c5b68482
+        # Pinned version 3.0.2
+        uses: nick-fields/retry@ce71cc2ab81d554ebbe88c79ab5975992d79ba08
         with:
           timeout_minutes: 60
           max_attempts: 3
-          retry_on: error
+          retry_on: any
           on_retry_command: echo "Build Standalone failed in this attempt, retrying ..."
           command: |
               cd cdap-build
-              MAVEN_OPTS="-Xmx12G" mvn -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+              MAVEN_OPTS="-Xmx12G" mvn -e -T2 -U clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Find Build Version
         working-directory: cdap-build/cdap
