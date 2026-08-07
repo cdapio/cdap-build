@@ -1,4 +1,4 @@
-# Copyright © 2022 Cask Data, Inc.
+# Copyright © 2025 Cask Data, Inc.
 #  Licensed under the Apache License, Version 2.0 (the "License"); you may not
 #  use this file except in compliance with the License. You may obtain a copy of
 #  the License at
@@ -88,10 +88,10 @@ jobs:
         if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
         with:
           secrets: |-
-            CDAP_OSSRH_USERNAME:cdapio-github-builds/CDAP_OSSRH_USERNAME
-            CDAP_OSSRH_PASSWORD:cdapio-github-builds/CDAP_OSSRH_PASSWORD
-            CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
             CDAP_GPG_PRIVATE_KEY:cdapio-github-builds/CDAP_GPG_PRIVATE_KEY
+            CDAP_GPG_PASSPHRASE:cdapio-github-builds/CDAP_GPG_PASSPHRASE
+            ARTIFACT_BUCKET:cdapio-github-builds/artifacts_bucket
+            SECURE_PUBLISH_BUCKET:cdapio-github-builds/publish_bucket
 
       - name: Recursively Checkout Repository
         uses: actions/checkout@v4
@@ -163,8 +163,8 @@ jobs:
           retry_on: error
           on_retry_command: echo "Build Standalone failed in this attempt, retrying ..."
           command: |
-              cd cdap-build
-              MAVEN_OPTS="-Xmx12G" mvn -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
+            cd cdap-build
+            MAVEN_OPTS="-Xmx12G" mvn -e -T2 clean package -Dgpg.skip -DskipTests -Ddocker.skip=true -nsu -am -amd -P templates,dist,release -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30
 
       - name: Find Build Version
         working-directory: cdap-build/cdap
@@ -192,65 +192,38 @@ jobs:
 
       - name: Set up GPG conf
         if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
-        run: |
-          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
-          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
 
       - name: Import GPG key
         if: ${{ matrix.branch == 'develop' || startsWith(matrix.branch, 'release/') }}
         run: |
-          echo "$GPG_PRIVATE_KEY" > private.key
-          gpg --import --batch private.key
+            echo "$GPG_PRIVATE_KEY" > private.key
+            gpg --import --batch private.key
         env:
           GPG_PRIVATE_KEY: ${{ steps.secrets.outputs.CDAP_GPG_PRIVATE_KEY }}
 
-      - name: Maven Deploy
+      - name: Submit Build to GCB
+        id: gcb
+        working-directory: cdap-build
         run: |
-          cd cdap-build
-          if [[ (${{ matrix.branch }} == "develop") || (${{ matrix.branch }} == release/*) ]];
-          then
-            retry_count=0
-            failed_module=""
-            while [ $retry_count -lt 3 ]; do
-              if [ -n "$failed_module" ];
-              then
-                build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE -rf :"$failed_module" 2>&1 || true)
-              else
-                build_output=$(mvn deploy -B -V -DskipTests -DskipLocalStaging=true -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true -Dgpg.passphrase=$CDAP_GPG_PASSPHRASE 2>&1 || true)
-              fi
-              echo "$build_output"
-              if [ $(echo "$build_output" | grep -c "BUILD FAILURE") -gt 0 ];
-              then
-                echo "[WARNING] Deployment failed, retrying..."
-                failed_module=$(echo "$build_output" | grep -e 'mvn <args> -rf' | sed -n 's/.*mvn <args> -rf ://p')
-                echo "[INFO] FAILED MODULE = $failed_module"
-                retry_count=$((retry_count + 1))
-              else
-                echo "[INFO] Deployment successful"
-                break
-              fi
-            done
-            if [ $retry_count -ge 3 ];
-            then
-              echo "[ERROR] Max retries reached..., deployment failed"
-              exit 1
-            fi
-          else
-            mvn verify -B -V -T2 -DskipTests -Dgpg.skip -Ddocker.skip=true -P templates,dist,release,rpm-prepare,rpm,deb-prepare,deb,tgz,unit-tests -Dadditional.artifacts.dir=$(pwd)/app-artifacts -Dsecurity.extensions.dir=$(pwd)/security-extensions -Dmaven.wagon.http.retryHandler.count=5 -Dmaven.wagon.httpconnectionManager.ttlSeconds=30 -Dmaven.wagon.http.retryHandler.requestSentEnabled=true
+          BUILD_OUTPUT=$(gcloud builds submit . \
+          --config=cloudbuild-release.yaml \
+          --project='cdapio-github-builds' \
+          --substitutions="_SECURE_PUBLISH_BUCKET_NAME=${{ SECURE_PUBLISH_BUCKET }}, GPG_PASSPHRASE=${{CDAP_GPG_PASSPHRASE}})
+          echo "$BUILD_OUTPUT"
+          BUILD_ID=$(echo "$BUILD_OUTPUT" | grep -oP 'ID: \K[a-f0-9-]+' | head -n 1)
+          if [ -z "$BUILD_ID" ]; then
+          echo "Failed to extract BUILD_ID from gcloud output." >&2
+          # Fallback: Get the last build submitted by this service account.
+          # This assumes no other concurrent builds are started by this SA.
+          BUILD_ID=$(gcloud builds list --project='cdapio-github-builds' --limit=1 --format='value(ID)' --filter="buildTriggerId='' AND status!=WORKING AND status!=QUEUED" --sort-by=~CREATE_TIME)
+          if [ -z "$BUILD_ID" ]; then
+          echo "Fallback failed to get BUILD_ID." >&2
+          exit 1
           fi
-        env:
-          CDAP_OSSRH_USERNAME: ${{ steps.secrets.outputs.CDAP_OSSRH_USERNAME }}
-          CDAP_OSSRH_PASSWORD: ${{ steps.secrets.outputs.CDAP_OSSRH_PASSWORD }}
-          CDAP_GPG_PASSPHRASE: ${{ steps.secrets.outputs.CDAP_GPG_PASSPHRASE }}
-          MAVEN_OPTS: "-Xmx12G"
-
-      - name: Build DEB Bundle
-        working-directory: cdap-build/cdap
-        run: |
-          mkdir -p cdap-distributions/target/deb-bundle-tmp
-          cd cdap-distributions/target/deb-bundle-tmp
-          cp ../../../*/target/*.deb .
-          tar zcf ../cdap-distributed-deb-bundle-${{env.CDAP_VERSION}}.tgz *.deb
+          echo "Fallback BUILD_ID: $BUILD_ID"
+          fi
+          echo "build_id=$BUILD_ID" >> $GITHUB_OUTPUT
+          echo "GCB Build ID: $BUILD_ID"
 
       - name: Set Up Tag
         working-directory: cdap-build
