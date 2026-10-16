@@ -41,7 +41,12 @@ RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_module
       -Dextend-default-configs="$EXTEND_DEFAULT_CONFIGS" -Dconfig-path="$DIR/$CONFIG_FILE_NAME" \
       -Dui.build.name=cdap-non-optimized-full-build
 
-FROM openjdk:8-jdk@sha256:99bac5bf83633e3c7399aed725c8415e7b569b54e03e4599e580fc9cdb7c21ab AS run
+FROM eclipse-temurin:11-jdk-jammy@sha256:0ab919c546b23b2da000376778ce947596d1f92d18a32fd69342743bd0e1e431 AS jdk-source
+
+FROM debian:13-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS run
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+COPY --from=jdk-source /opt/java/openjdk /opt/java/openjdk
 WORKDIR /
 COPY --from=build /cdap/build/cdap/cdap-master/target/stage-packaging/opt/cdap/master /opt/cdap/master
 COPY --from=build /cdap/build/cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /opt/cdap/ui
@@ -50,9 +55,10 @@ COPY --from=build /cdap/build/cdap/cdap-distributions/src/COPYRIGHT /opt/cdap/LI
 COPY --from=build /cdap/build/cdap-build-sources.tar.gz /opt/cdap/cdap-build-sources.tar.gz
 
 RUN apt-get update && \
-  apt-get -y install libxml2-utils && \
+  apt-get install -y --no-install-recommends curl ca-certificates procps libxml2-utils && \
   apt-get upgrade -y && \
   apt-get autoremove -y && \
+  rm -rf /var/lib/apt/lists/* && \
   mkdir -p /opt/spark && \
   mkdir -p /opt/hadoop && \
   mkdir -p /opt/cdap/master/ext/jdbc/postgresql && \
