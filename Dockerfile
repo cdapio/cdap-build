@@ -65,7 +65,7 @@ RUN apt-get update && \
   curl -L -o /opt/hadoop/hadoop-3.3.6.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz && \
   curl -L -o /opt/spark/spark-3.3.2-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.3.2-bin-without-hadoop.tgz && \
   curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop3-2.2.21.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-2.2.21.jar && \
-  curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar https://jdbc.postgresql.org/download/postgresql-42.2.5.jar && \
+  curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar https://jdbc.postgresql.org/download/postgresql-42.7.11.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgres-socket-factory-1.0.12-jar-with-dependencies.jar https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.12/postgres-socket-factory-1.0.12-jar-with-dependencies.jar && \
   tar -xzf /opt/hadoop/hadoop-3.3.6.tar.gz -C /opt/hadoop && rm /opt/hadoop/hadoop-3.3.6.tar.gz && \
   tar -xzf /opt/spark/spark-3.3.2-bin-without-hadoop.tgz -C /opt/spark && rm /opt/spark/spark-3.3.2-bin-without-hadoop.tgz && \
@@ -87,7 +87,7 @@ RUN apt-get update && \
   mkdir /opt/cdap/LICENSES/hadoop-3.3.6 && cp /opt/hadoop/hadoop-3.3.6/*.txt /opt/cdap/LICENSES/hadoop-3.3.6 && \
   mkdir /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && cp /opt/spark/spark-3.3.2-bin-without-hadoop/LICENSE /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && cp /opt/spark/spark-3.3.2-bin-without-hadoop/NOTICE /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && \
   mkdir /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21 && curl -L -o /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.21/LICENSE && \
-  mkdir /opt/cdap/LICENSES/postgresql-42.2.5 && jar xvf /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.2.5.jar META-INF/LICENSE && cp ./META-INF/LICENSE /opt/cdap/LICENSES/postgresql-42.2.5 && rm -r ./META-INF && \
+  mkdir /opt/cdap/LICENSES/postgresql-42.7.11 && jar xvf /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar META-INF/LICENSE && cp ./META-INF/LICENSE /opt/cdap/LICENSES/postgresql-42.7.11 && rm -r ./META-INF && \
   mkdir /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies && curl -L -o /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies/LICENSE https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/v1.0.12/LICENSE && \
   mkdir /opt/cdap/LICENSES/hadoop-aws-3.3.6 && jar xvf /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/hadoop-aws-3.3.6.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/hadoop-aws-3.3.6 && rm -r ./META-INF && \
   mkdir /opt/cdap/LICENSES/aws-java-sdk-bundle-1.12.552 && jar xvf /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/aws-java-sdk-bundle-1.12.552.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/aws-java-sdk-bundle-1.12.552 && rm -r ./META-INF && \
