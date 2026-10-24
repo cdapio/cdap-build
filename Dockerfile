@@ -41,7 +41,12 @@ RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_module
       -Dextend-default-configs="$EXTEND_DEFAULT_CONFIGS" -Dconfig-path="$DIR/$CONFIG_FILE_NAME" \
       -Dui.build.name=cdap-non-optimized-full-build
 
-FROM openjdk:8-jdk@sha256:99bac5bf83633e3c7399aed725c8415e7b569b54e03e4599e580fc9cdb7c21ab AS run
+FROM eclipse-temurin:11-jdk-jammy@sha256:0ab919c546b23b2da000376778ce947596d1f92d18a32fd69342743bd0e1e431 AS jdk-source
+
+FROM debian:13-slim@sha256:a29215f6a35e51e22adffa17f89e9d2ef06214e64a2bad10d765c46aea49f11f AS run
+ENV JAVA_HOME=/opt/java/openjdk
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+COPY --from=jdk-source /opt/java/openjdk /opt/java/openjdk
 WORKDIR /
 COPY --from=build /cdap/build/cdap/cdap-master/target/stage-packaging/opt/cdap/master /opt/cdap/master
 COPY --from=build /cdap/build/cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /opt/cdap/ui
@@ -50,29 +55,42 @@ COPY --from=build /cdap/build/cdap/cdap-distributions/src/COPYRIGHT /opt/cdap/LI
 COPY --from=build /cdap/build/cdap-build-sources.tar.gz /opt/cdap/cdap-build-sources.tar.gz
 
 RUN apt-get update && \
-  apt-get -y install libxml2-utils && \
+  apt-get install -y --no-install-recommends curl ca-certificates procps libxml2-utils && \
   apt-get upgrade -y && \
   apt-get autoremove -y && \
+  rm -rf /var/lib/apt/lists/* && \
   mkdir -p /opt/spark && \
   mkdir -p /opt/hadoop && \
   mkdir -p /opt/cdap/master/ext/jdbc/postgresql && \
-  curl -L -o /opt/hadoop/hadoop-2.9.2.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-2.9.2/hadoop-2.9.2.tar.gz && \
-  curl -L -o /opt/spark/spark-3.1.1-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.1.1/spark-3.1.1-bin-without-hadoop.tgz && \
-  curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop2-2.2.5.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop2-2.2.5.jar && \
+  curl -L -o /opt/hadoop/hadoop-3.3.6.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz && \
+  curl -L -o /opt/spark/spark-3.3.2-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.3.2-bin-without-hadoop.tgz && \
+  curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop3-2.2.21.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-2.2.21.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar https://jdbc.postgresql.org/download/postgresql-42.7.11.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgres-socket-factory-1.0.12-jar-with-dependencies.jar https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.12/postgres-socket-factory-1.0.12-jar-with-dependencies.jar && \
-  tar -xzf /opt/hadoop/hadoop-2.9.2.tar.gz -C /opt/hadoop && \
-  curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/hadoop-aws-2.9.2.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/2.9.2/hadoop-aws-2.9.2.jar && \
-  curl -L -o /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/aws-java-sdk-bundle-1.11.199.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.11.199/aws-java-sdk-bundle-1.11.199.jar && \
-  tar -xzf /opt/spark/spark-3.1.1-bin-without-hadoop.tgz -C /opt/spark && \
+  tar -xzf /opt/hadoop/hadoop-3.3.6.tar.gz -C /opt/hadoop && rm /opt/hadoop/hadoop-3.3.6.tar.gz && \
+  tar -xzf /opt/spark/spark-3.3.2-bin-without-hadoop.tgz -C /opt/spark && rm /opt/spark/spark-3.3.2-bin-without-hadoop.tgz && \
+  # Align Hadoop/Spark jar overrides with the Cloud Data Fusion image.
+  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/zookeeper-3.4.5.jar https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper/3.4.5/zookeeper-3.4.5.jar && \
+  cp /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/zookeeper-3.4.5.jar /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/zookeeper-3.4.5.jar && \
+  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/zookeeper-3.6.3.jar && \
+  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/zookeeper-3.6.3.jar && \
+  curl -L -o /opt/spark/spark-3.3.2-bin-without-hadoop/jars/avro-1.11.0.jar https://repo1.maven.org/maven2/org/apache/avro/avro/1.11.4/avro-1.11.4.jar && \
+  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.8.0.jar && \
+  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/commons-configuration2-2.8.0.jar && \
+  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.10.1.jar https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.10.1/commons-configuration2-2.10.1.jar && \
+  cp /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.10.1.jar /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/commons-configuration2-2.10.1.jar && \
+  # Remove htrace-core 3.1.0 which shades a vulnerable jackson-databind.
+  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/timelineservice/lib/htrace-core-3.1.0-incubating.jar && \
+  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/hadoop-aws-3.3.6.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.6/hadoop-aws-3.3.6.jar && \
+  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/aws-java-sdk-bundle-1.12.552.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.552/aws-java-sdk-bundle-1.12.552.jar && \
   # Copy downloaded JAR licenses to COPYRIGHT folder
-  mkdir /opt/cdap/LICENSES/hadoop-2.9.2 && cp /opt/hadoop/hadoop-2.9.2/*.txt /opt/cdap/LICENSES/hadoop-2.9.2 && \
-  mkdir /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && cp /opt/spark/spark-3.1.1-bin-without-hadoop/LICENSE /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && cp /opt/spark/spark-3.1.1-bin-without-hadoop/NOTICE /opt/cdap/LICENSES/spark-3.1.1-bin-without-hadoop && \
-  mkdir /opt/cdap/LICENSES/gcs-connector-hadoop2-2.2.5 && curl -L -o /opt/cdap/LICENSES/gcs-connector-hadoop2-2.2.5/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.5/LICENSE && \
+  mkdir /opt/cdap/LICENSES/hadoop-3.3.6 && cp /opt/hadoop/hadoop-3.3.6/*.txt /opt/cdap/LICENSES/hadoop-3.3.6 && \
+  mkdir /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && cp /opt/spark/spark-3.3.2-bin-without-hadoop/LICENSE /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && cp /opt/spark/spark-3.3.2-bin-without-hadoop/NOTICE /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && \
+  mkdir /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21 && curl -L -o /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.21/LICENSE && \
   mkdir /opt/cdap/LICENSES/postgresql-42.7.11 && jar xvf /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar META-INF/LICENSE && cp ./META-INF/LICENSE /opt/cdap/LICENSES/postgresql-42.7.11 && rm -r ./META-INF && \
   mkdir /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies && curl -L -o /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies/LICENSE https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/v1.0.12/LICENSE && \
-  mkdir /opt/cdap/LICENSES/hadoop-aws-2.9.2 && jar xvf /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/hadoop-aws-2.9.2.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/hadoop-aws-2.9.2 && rm -r ./META-INF && \
-  mkdir /opt/cdap/LICENSES/aws-java-sdk-bundle-1.11.199 && jar xvf /opt/hadoop/hadoop-2.9.2/share/hadoop/common/lib/aws-java-sdk-bundle-1.11.199.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/aws-java-sdk-bundle-1.11.199 && rm -r ./META-INF && \
+  mkdir /opt/cdap/LICENSES/hadoop-aws-3.3.6 && jar xvf /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/hadoop-aws-3.3.6.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/hadoop-aws-3.3.6 && rm -r ./META-INF && \
+  mkdir /opt/cdap/LICENSES/aws-java-sdk-bundle-1.12.552 && jar xvf /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/aws-java-sdk-bundle-1.12.552.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/aws-java-sdk-bundle-1.12.552 && rm -r ./META-INF && \
   mv /opt/cdap/ui/server_dist/index.js /opt/cdap/ui/ && \
   mv /opt/cdap/ui/server_dist/graphql /opt/cdap/ui/ && \
   mv /opt/cdap/ui/server_dist/server /opt/cdap/ui/ && \
@@ -80,8 +98,8 @@ RUN apt-get update && \
   find /opt/cdap/ui/ -maxdepth 1 -mindepth 1 -exec ln -s {} /opt/cdap/ \;
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
-ENV HADOOP_HOME=/opt/hadoop/hadoop-2.9.2
-ENV SPARK_HOME=/opt/spark/spark-3.1.1-bin-without-hadoop
+ENV HADOOP_HOME=/opt/hadoop/hadoop-3.3.6
+ENV SPARK_HOME=/opt/spark/spark-3.3.2-bin-without-hadoop
 ENV SPARK_COMPAT=spark3_2.12
 ENV HBASE_VERSION=1.2
 
