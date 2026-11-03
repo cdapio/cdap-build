@@ -80,8 +80,8 @@ steps:
     - |
       set -euo pipefail
       PREV=$(cat /workspace/prev_latest 2>/dev/null || true)
-      NEW=$(gcloud container images describe ${_CDAP_IMAGE}:latest --format='value(image_summary.digest)')
       if [ -z "$${PREV}" ]; then echo "no previous latest - nothing to retire"; exit 0; fi
+      NEW=$(gcloud container images describe ${_CDAP_IMAGE}:latest --format='value(image_summary.digest)')
       if [ "$${PREV}" = "$${NEW}" ]; then echo "latest unchanged ($${NEW}) - refusing to tag the live image"; exit 0; fi
       TAG="no-new-use-public-image-$${PREV#sha256:}"
       if [ "${_TAG_PREVIOUS}" = "true" ]; then
