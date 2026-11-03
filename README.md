@@ -38,6 +38,16 @@ head of that branch by appending `--remote` to the update command:
 git submodule update --remote
 ```
 
+## Nightly Docker image (`gcr.io/cdapio/cdap:latest`)
+
+The nightly `gcr.io/cdapio/cdap:latest` image is built from the `develop`
+branch by the Cloud Build trigger `cdap-docker` in GCP project `cdapio`,
+using [`cloudbuild-gcr.yaml`](cloudbuild-gcr.yaml) from this repository.
+After pushing the new `latest`, the build tags the previous `latest` digest
+with `no-new-use-public-image-<sha256>` so that vulnerability scanning stops
+reporting against superseded nightly images. See the header of
+`cloudbuild-gcr.yaml` for how to dry-run it.
+
 ## Building a CDAP release
 
 ### Compiling/Installing Apache Sentry 1.7.0

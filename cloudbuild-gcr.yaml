@@ -1,0 +1,101 @@
+#
+# Copyright © 2026 Cask Data, Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License. You may obtain a copy of
+# the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations under
+# the License.
+
+# Cloud Build recipe for the nightly gcr.io/cdapio/cdap:latest image.
+#
+# Run by the Cloud Build trigger `cdap-docker` in GCP project `cdapio`
+# (fired daily by Cloud Scheduler job `cdap-oss-docker-build-develop`).
+# This file replaces `cloudbuild.yaml` from the retired Cloud Source
+# Repositories repo `cdap-oss-build`, so that the build recipe is reviewed in
+# the same pull requests as the Dockerfile it builds.
+#
+# In addition to building and pushing `latest`, the build retires the digest
+# that *was* `latest` before this run by adding the tag
+# `no-new-use-public-image-<sha256>` to it. Vulnerability scanning treats that
+# tag as "superseded, do not file new findings", so nightly rebuilds stop
+# accumulating open vulnerability bugs against stale images.
+#
+# Dry run (prints what would be retired, tags nothing):
+#   gcloud builds submit --project=cdapio --no-source \
+#       --config=cloudbuild-gcr.yaml --substitutions=_TAG_PREVIOUS=false
+
+steps:
+# Remember which digest is 'latest' BEFORE anything is built or pushed.
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  id: 'record-previous-latest'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      gcloud container images describe ${_CDAP_IMAGE}:latest \
+        --format='value(image_summary.digest)' > /workspace/prev_latest 2>/dev/null || true
+      echo "previous latest: $(cat /workspace/prev_latest)"
+# Checkout source. An explicit clone (rather than the trigger's checkout) is
+# used because .gitmodules uses relative URLs, which need an `origin` remote
+# pointing at github.com to resolve. Builds the branch that fired the trigger,
+# or `develop` when run manually.
+- name: 'gcr.io/cloud-builders/git'
+  id: 'checkout'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      BRANCH='${BRANCH_NAME}'
+      BRANCH="$${BRANCH:-develop}"
+      echo "cloning cdap-build branch $${BRANCH}"
+      git clone -b "$${BRANCH}" https://github.com/cdapio/cdap-build.git cdap-build
+# Pull the latest of each sub-module
+- name: 'gcr.io/cloud-builders/git'
+  id: 'git-pull'
+  args: ['submodule', 'update', '--init', '--recursive', '--remote']
+  dir: 'cdap-build'
+# Build the CDAP docker image
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'build-docker'
+  args: ['build', '-t', '${_CDAP_IMAGE}:latest', '-f', 'Dockerfile', '.']
+  dir: 'cdap-build'
+# Explicit push so the retire step provably runs AFTER the new 'latest' exists.
+- name: 'gcr.io/cloud-builders/docker'
+  id: 'push-latest'
+  args: ['push', '${_CDAP_IMAGE}:latest']
+# Retire the previous 'latest' so vulnerability scanning stops filing bugs
+# against it. Only ever adds one tag to one digest; never deletes anything.
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  id: 'tag-previous-latest'
+  entrypoint: 'bash'
+  args:
+    - '-c'
+    - |
+      set -euo pipefail
+      PREV=$(cat /workspace/prev_latest 2>/dev/null || true)
+      NEW=$(gcloud container images describe ${_CDAP_IMAGE}:latest --format='value(image_summary.digest)')
+      if [ -z "$${PREV}" ]; then echo "no previous latest - nothing to retire"; exit 0; fi
+      if [ "$${PREV}" = "$${NEW}" ]; then echo "latest unchanged ($${NEW}) - refusing to tag the live image"; exit 0; fi
+      TAG="no-new-use-public-image-$${PREV#sha256:}"
+      if [ "${_TAG_PREVIOUS}" = "true" ]; then
+        gcloud container images add-tag "${_CDAP_IMAGE}@$${PREV}" "${_CDAP_IMAGE}:$${TAG}" --quiet
+        echo "retired $${PREV} as $${TAG}"
+      else
+        echo "DRY RUN: would tag $${PREV} as $${TAG}"
+      fi
+
+options:
+  machineType: 'N1_HIGHCPU_32'
+substitutions:
+  _CDAP_IMAGE: 'gcr.io/cdapio/cdap'
+  _TAG_PREVIOUS: 'true'        # set to 'false' for a dry run
+images:
+  - '${_CDAP_IMAGE}:latest'
+timeout: 3h
