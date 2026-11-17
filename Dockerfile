@@ -79,6 +79,11 @@ RUN apt-get update && \
   rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/commons-configuration2-2.8.0.jar && \
   curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.10.1.jar https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.10.1/commons-configuration2-2.10.1.jar && \
   cp /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.10.1.jar /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/commons-configuration2-2.10.1.jar && \
+  # Upgrade JLine to 3.30.17 in YARN and remove unused Hadoop archives bundling JLine 3.9.0.
+  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/lib/jline-3.9.0.jar \
+        /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/hadoop-yarn-applications-catalog-webapp-3.3.6.war \
+        /opt/hadoop/hadoop-3.3.6/share/hadoop/client/hadoop-client-runtime-3.3.6.jar && \
+  curl -fsSL -o /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/lib/jline-3.30.17.jar https://repo1.maven.org/maven2/org/jline/jline/3.30.17/jline-3.30.17.jar && \
   # Remove htrace-core 3.1.0 which shades a vulnerable jackson-databind.
   rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/timelineservice/lib/htrace-core-3.1.0-incubating.jar && \
   curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/hadoop-aws-3.3.6.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.6/hadoop-aws-3.3.6.jar && \
