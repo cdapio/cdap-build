@@ -100,6 +100,9 @@ RUN apt-get update && \
   mv /opt/cdap/ui/server_dist/graphql /opt/cdap/ui/ && \
   mv /opt/cdap/ui/server_dist/server /opt/cdap/ui/ && \
   find /opt/hadoop -name 'paranamer-2.3.jar' -exec rm {} + && \
+  # Remove unused HDFS C/C++ native client (CVE-2025-27821); keep libhadoop.so for Java native IO.
+  find /opt/hadoop -name 'hadoop-hdfs-native-client-*.jar' -exec rm -f {} + && \
+  rm -f /opt/hadoop/hadoop-3.3.6/lib/native/libhdfs* /opt/hadoop/hadoop-3.3.6/include/hdfs.h && \
   find /opt/cdap/ui/ -maxdepth 1 -mindepth 1 -exec ln -s {} /opt/cdap/ \;
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
