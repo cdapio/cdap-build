@@ -21,17 +21,17 @@ ARG EXTEND_DEFAULT_CONFIGS=false
 ARG CONFIG_FILE_NAME
 WORKDIR $DIR/
 COPY . $DIR/
-RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list
+RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y curl make && \
+    curl -L https://raw.githubusercontent.com/tj/n/master/bin/n -o n && \
+    bash n 10.24.1 && \
+    npm install -g n && \
+    n 10.24.1
+
 RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_modules' --exclude='target' --exclude-vcs \
         --exclude-vcs-ignores app-artifacts cdap eventwriters-extensions metricswriters-extensions security-extensions \
         Dockerfile LICENSE.txt README.md && \
-    apt-get update && apt-get install -y lsb-release gnupg curl && \
-    mkdir -p /etc/apt/keyrings && \
-    curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key -o /tmp/nodesource.key && gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg /tmp/nodesource.key && rm /tmp/nodesource.key && \
-    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" > /etc/apt/sources.list.d/nodesource.list && \
-    # installation of nodejs expects /bin/bash instead of /bin/sh
-    apt-get update && /bin/bash -c 'apt-get -y install nodejs' && \
-
     mvn install -f cdap -B -V -Ddocker.skip=true -DskipTests -P 'templates,!unit-tests' && \
     mvn install -B -V -Ddocker.skip=true -DskipTests -P 'templates,dist,k8s,!unit-tests' \
       -Dadditional.artifacts.dir="$DIR/app-artifacts" \
