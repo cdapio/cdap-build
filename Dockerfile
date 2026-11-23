@@ -21,7 +21,7 @@ ARG EXTEND_DEFAULT_CONFIGS=false
 ARG CONFIG_FILE_NAME
 WORKDIR $DIR/
 COPY . $DIR/
-RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list
+RUN if grep -q '^VERSION_CODENAME=stretch' /etc/os-release 2>/dev/null; then echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list; fi
 RUN tar -zcvf cdap-build-sources.tar.gz --exclude='.git*' --exclude='node_modules' --exclude='target' --exclude-vcs \
         --exclude-vcs-ignores app-artifacts cdap eventwriters-extensions metricswriters-extensions security-extensions \
         Dockerfile LICENSE.txt README.md && \
