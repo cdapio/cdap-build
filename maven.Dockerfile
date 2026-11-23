@@ -15,7 +15,7 @@
 
 # Dockerfile for building container for building CDAP.
 # It populate maven cache with dependencies needed for building CDAP.
-FROM gcr.io/cloud-builders/mvn:3.8-jdk-8 AS build
+FROM maven:3.9.16-eclipse-temurin-11 AS build
 ENV MAVEN_OPTS -Xmx4096m -Dhttp.keepAlive=false
 WORKDIR /cdap/maven/
 COPY . /cdap/maven/
