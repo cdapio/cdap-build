@@ -69,6 +69,7 @@
     <module>app-artifacts/database-plugins/cloudsql-postgresql-plugin</module>
     <module>metricswriters-extensions/metrics-writer-extension</module>
     <module>eventwriters-extensions/events-writer-extension</module>
+    <module>hadoop-aws-sdk</module>
     <module>cdap</module>
   </modules>
 
