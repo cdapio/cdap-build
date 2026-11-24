@@ -1,0 +1,185 @@
+# Third-party jar overrides for the Hadoop and Spark distributions in the CDAP
+# images, applied by scripts/jar_overrides.sh (called from prepare_hadoop.sh and
+# prepare_spark.sh). See jar_overrides.sh for the full format.
+#
+#   <dirs relative to /opt> | <old file glob> | <Maven path of new jar>
+#   +<dirs relative to /opt> | - | <Maven path of new jar>
+#   <dirs relative to /opt> | <old file glob> | -
+#   !<dist> | <extended regex that must not match any jar name under dist>
+#
+# Rules:
+# - Comments go on their own lines; no trailing comments.
+# - One entry covers one distribution (hadoop/hadoop-<ver> or
+#   spark/spark-<ver>-bin-without-hadoop); entries for other versions are
+#   skipped.
+# - A family (netty, jackson, jetty, log4j, ...) is replaced with all of its
+#   members at once, and every family change adds a guard for the old version.
+# - New jars must be Java 8 bytecode (class major <= 52 outside
+#   META-INF/versions), like the Hadoop and Spark jars they replace.
+
+# --- Remove what CDAP never loads ---
+# share/hadoop/tools/lib is not on `hadoop classpath` (HADOOP_OPTIONAL_TOOLS is
+# unset; hadoop-aws is in common/lib in Hadoop 3.4). Flagged: kafka-clients.
+hadoop/hadoop-3.4.3/share/hadoop/tools | lib | -
+# YARN timeline service v2 (only the timelinereader daemon loads it). Flagged:
+# hbase-shaded-netty, hbase-shaded-miscellaneous, commons-beanutils 1.9.2.
+hadoop/hadoop-3.4.3/share/hadoop/yarn | timelineservice | -
+# YARN CSI adaptor, not on `hadoop classpath`.
+hadoop/hadoop-3.4.3/share/hadoop/yarn | csi | -
+# Hadoop test jars.
+hadoop/hadoop-3.4.3/share/hadoop/common hadoop/hadoop-3.4.3/share/hadoop/hdfs hadoop/hadoop-3.4.3/share/hadoop/mapreduce | *-tests.jar | -
+hadoop/hadoop-3.4.3/share/hadoop/yarn | test | -
+!hadoop/hadoop-3.4.3 | -tests\.jar$|^kafka-clients-|^hbase-shaded-|^hadoop-yarn-csi-
+# Spark YARN shuffle service (runs inside YARN NodeManagers only). Flagged:
+# spark-3.5.8-yarn-shuffle.jar (embedded netty, jackson, log4j, guava).
+spark/spark-3.5.8-bin-without-hadoop | yarn | -
+# Mesos cluster manager. Flagged: mesos-1.4.3-shaded-protobuf. spark-mesos goes
+# too so no cluster manager is registered without its classes.
+spark/spark-3.5.8-bin-without-hadoop/jars | mesos-1.4.3-shaded-protobuf.jar | -
+spark/spark-3.5.8-bin-without-hadoop/jars | spark-mesos_2.12-3.5.8.jar | -
+!spark/spark-3.5.8-bin-without-hadoop | ^mesos-|^spark-mesos_|-yarn-shuffle\.jar$
+
+# --- PATCH swaps ---
+# netty 4.1.127.Final (Hadoop) / 4.1.96.Final (Spark) -> 4.1.141.Final, all members.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-all-4.1.127.Final.jar | io/netty/netty-all/4.1.141.Final/netty-all-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-buffer-4.1.127.Final.jar | io/netty/netty-buffer/4.1.141.Final/netty-buffer-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-4.1.127.Final.jar | io/netty/netty-codec/4.1.141.Final/netty-codec-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-dns-4.1.127.Final.jar | io/netty/netty-codec-dns/4.1.141.Final/netty-codec-dns-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-haproxy-4.1.127.Final.jar | io/netty/netty-codec-haproxy/4.1.141.Final/netty-codec-haproxy-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-http-4.1.127.Final.jar | io/netty/netty-codec-http/4.1.141.Final/netty-codec-http-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-http2-4.1.127.Final.jar | io/netty/netty-codec-http2/4.1.141.Final/netty-codec-http2-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-memcache-4.1.127.Final.jar | io/netty/netty-codec-memcache/4.1.141.Final/netty-codec-memcache-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-mqtt-4.1.127.Final.jar | io/netty/netty-codec-mqtt/4.1.141.Final/netty-codec-mqtt-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-redis-4.1.127.Final.jar | io/netty/netty-codec-redis/4.1.141.Final/netty-codec-redis-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-smtp-4.1.127.Final.jar | io/netty/netty-codec-smtp/4.1.141.Final/netty-codec-smtp-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-socks-4.1.127.Final.jar | io/netty/netty-codec-socks/4.1.141.Final/netty-codec-socks-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-stomp-4.1.127.Final.jar | io/netty/netty-codec-stomp/4.1.141.Final/netty-codec-stomp-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-codec-xml-4.1.127.Final.jar | io/netty/netty-codec-xml/4.1.141.Final/netty-codec-xml-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-common-4.1.127.Final.jar | io/netty/netty-common/4.1.141.Final/netty-common-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-handler-4.1.127.Final.jar | io/netty/netty-handler/4.1.141.Final/netty-handler-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-handler-proxy-4.1.127.Final.jar | io/netty/netty-handler-proxy/4.1.141.Final/netty-handler-proxy-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-handler-ssl-ocsp-4.1.127.Final.jar | io/netty/netty-handler-ssl-ocsp/4.1.141.Final/netty-handler-ssl-ocsp-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-resolver-4.1.127.Final.jar | io/netty/netty-resolver/4.1.141.Final/netty-resolver-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-resolver-dns-4.1.127.Final.jar | io/netty/netty-resolver-dns/4.1.141.Final/netty-resolver-dns-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-resolver-dns-classes-macos-4.1.127.Final.jar | io/netty/netty-resolver-dns-classes-macos/4.1.141.Final/netty-resolver-dns-classes-macos-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-resolver-dns-native-macos-4.1.127.Final-osx-aarch_64.jar | io/netty/netty-resolver-dns-native-macos/4.1.141.Final/netty-resolver-dns-native-macos-4.1.141.Final-osx-aarch_64.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-resolver-dns-native-macos-4.1.127.Final-osx-x86_64.jar | io/netty/netty-resolver-dns-native-macos/4.1.141.Final/netty-resolver-dns-native-macos-4.1.141.Final-osx-x86_64.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-4.1.127.Final.jar | io/netty/netty-transport/4.1.141.Final/netty-transport-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-classes-epoll-4.1.127.Final.jar | io/netty/netty-transport-classes-epoll/4.1.141.Final/netty-transport-classes-epoll-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-classes-kqueue-4.1.127.Final.jar | io/netty/netty-transport-classes-kqueue/4.1.141.Final/netty-transport-classes-kqueue-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-native-epoll-4.1.127.Final-linux-aarch_64.jar | io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-aarch_64.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-native-epoll-4.1.127.Final-linux-riscv64.jar | io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-riscv64.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-native-epoll-4.1.127.Final-linux-x86_64.jar | io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-x86_64.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-native-epoll-4.1.127.Final.jar | io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-native-kqueue-4.1.127.Final-osx-aarch_64.jar | io/netty/netty-transport-native-kqueue/4.1.141.Final/netty-transport-native-kqueue-4.1.141.Final-osx-aarch_64.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-native-kqueue-4.1.127.Final-osx-x86_64.jar | io/netty/netty-transport-native-kqueue/4.1.141.Final/netty-transport-native-kqueue-4.1.141.Final-osx-x86_64.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-native-unix-common-4.1.127.Final.jar | io/netty/netty-transport-native-unix-common/4.1.141.Final/netty-transport-native-unix-common-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-rxtx-4.1.127.Final.jar | io/netty/netty-transport-rxtx/4.1.141.Final/netty-transport-rxtx-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-sctp-4.1.127.Final.jar | io/netty/netty-transport-sctp/4.1.141.Final/netty-transport-sctp-4.1.141.Final.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | netty-transport-udt-4.1.127.Final.jar | io/netty/netty-transport-udt/4.1.141.Final/netty-transport-udt-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-all-4.1.96.Final.jar | io/netty/netty-all/4.1.141.Final/netty-all-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-buffer-4.1.96.Final.jar | io/netty/netty-buffer/4.1.141.Final/netty-buffer-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-codec-4.1.96.Final.jar | io/netty/netty-codec/4.1.141.Final/netty-codec-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-codec-http-4.1.96.Final.jar | io/netty/netty-codec-http/4.1.141.Final/netty-codec-http-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-codec-http2-4.1.96.Final.jar | io/netty/netty-codec-http2/4.1.141.Final/netty-codec-http2-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-codec-socks-4.1.96.Final.jar | io/netty/netty-codec-socks/4.1.141.Final/netty-codec-socks-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-common-4.1.96.Final.jar | io/netty/netty-common/4.1.141.Final/netty-common-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-handler-4.1.96.Final.jar | io/netty/netty-handler/4.1.141.Final/netty-handler-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-handler-proxy-4.1.96.Final.jar | io/netty/netty-handler-proxy/4.1.141.Final/netty-handler-proxy-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-resolver-4.1.96.Final.jar | io/netty/netty-resolver/4.1.141.Final/netty-resolver-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-4.1.96.Final.jar | io/netty/netty-transport/4.1.141.Final/netty-transport-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-classes-epoll-4.1.96.Final.jar | io/netty/netty-transport-classes-epoll/4.1.141.Final/netty-transport-classes-epoll-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-classes-kqueue-4.1.96.Final.jar | io/netty/netty-transport-classes-kqueue/4.1.141.Final/netty-transport-classes-kqueue-4.1.141.Final.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-native-epoll-4.1.96.Final-linux-aarch_64.jar | io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-aarch_64.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-native-epoll-4.1.96.Final-linux-x86_64.jar | io/netty/netty-transport-native-epoll/4.1.141.Final/netty-transport-native-epoll-4.1.141.Final-linux-x86_64.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-native-kqueue-4.1.96.Final-osx-aarch_64.jar | io/netty/netty-transport-native-kqueue/4.1.141.Final/netty-transport-native-kqueue-4.1.141.Final-osx-aarch_64.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-native-kqueue-4.1.96.Final-osx-x86_64.jar | io/netty/netty-transport-native-kqueue/4.1.141.Final/netty-transport-native-kqueue-4.1.141.Final-osx-x86_64.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | netty-transport-native-unix-common-4.1.96.Final.jar | io/netty/netty-transport-native-unix-common/4.1.141.Final/netty-transport-native-unix-common-4.1.141.Final.jar
+# arrow-memory-netty 12.0.1 reads PoolArena.chunkSize, which netty 4.1.1xx moved; 15.0.2 is the first release
+# that links against netty 4.1.141 and still works with arrow-memory-core / arrow-vector 12.0.1.
+spark/spark-3.5.8-bin-without-hadoop/jars | arrow-memory-netty-12.0.1.jar | org/apache/arrow/arrow-memory-netty/15.0.2/arrow-memory-netty-15.0.2.jar
+# Jetty 9.4.57 -> 9.4.58.v20250814, all members (yarn/lib is on the CDAP classpath too).
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-http-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-http/9.4.58.v20250814/jetty-http-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-io-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-io/9.4.58.v20250814/jetty-io-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-security-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-security/9.4.58.v20250814/jetty-security-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-server-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-server/9.4.58.v20250814/jetty-server-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-servlet-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-servlet/9.4.58.v20250814/jetty-servlet-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-util-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-util/9.4.58.v20250814/jetty-util-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-util-ajax-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-util-ajax/9.4.58.v20250814/jetty-util-ajax-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-webapp-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-webapp/9.4.58.v20250814/jetty-webapp-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jetty-xml-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-xml/9.4.58.v20250814/jetty-xml-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | javax-websocket-client-impl-9.4.57.v20241219.jar | org/eclipse/jetty/websocket/javax-websocket-client-impl/9.4.58.v20250814/javax-websocket-client-impl-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | javax-websocket-server-impl-9.4.57.v20241219.jar | org/eclipse/jetty/websocket/javax-websocket-server-impl/9.4.58.v20250814/javax-websocket-server-impl-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jetty-annotations-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-annotations/9.4.58.v20250814/jetty-annotations-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jetty-client-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-client/9.4.58.v20250814/jetty-client-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jetty-jndi-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-jndi/9.4.58.v20250814/jetty-jndi-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jetty-plus-9.4.57.v20241219.jar | org/eclipse/jetty/jetty-plus/9.4.58.v20250814/jetty-plus-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | websocket-api-9.4.57.v20241219.jar | org/eclipse/jetty/websocket/websocket-api/9.4.58.v20250814/websocket-api-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | websocket-client-9.4.57.v20241219.jar | org/eclipse/jetty/websocket/websocket-client/9.4.58.v20250814/websocket-client-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | websocket-common-9.4.57.v20241219.jar | org/eclipse/jetty/websocket/websocket-common/9.4.58.v20250814/websocket-common-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | websocket-server-9.4.57.v20241219.jar | org/eclipse/jetty/websocket/websocket-server/9.4.58.v20250814/websocket-server-9.4.58.v20250814.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | websocket-servlet-9.4.57.v20241219.jar | org/eclipse/jetty/websocket/websocket-servlet/9.4.58.v20250814/websocket-servlet-9.4.58.v20250814.jar
+# snappy-java 1.1.10.4 (Hadoop) / 1.1.10.5 (Spark) -> 1.1.10.12; ivy 2.5.1 -> 2.5.2.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | snappy-java-1.1.10.4.jar | org/xerial/snappy/snappy-java/1.1.10.12/snappy-java-1.1.10.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | snappy-java-1.1.10.5.jar | org/xerial/snappy/snappy-java/1.1.10.12/snappy-java-1.1.10.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | ivy-2.5.1.jar | org/apache/ivy/ivy/2.5.2/ivy-2.5.2.jar
+!hadoop/hadoop-3.4.3 | ^netty-.*-4\.1\.127\.Final|^(jetty|websocket|javax-websocket)-.*-9\.4\.57\.|^snappy-java-1\.1\.10\.4\.jar$
+!spark/spark-3.5.8-bin-without-hadoop | ^netty-.*-4\.1\.96\.Final|^arrow-memory-netty-12\.|^snappy-java-1\.1\.10\.5\.jar$|^ivy-2\.5\.1\.jar$
+
+# --- MINOR swaps ---
+# commons-compress 1.23.0 -> 1.26.2 and log4j2 2.20.0 -> 2.25.5 (all members) in Spark.
+spark/spark-3.5.8-bin-without-hadoop/jars | commons-compress-1.23.0.jar | org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-1.2-api-2.20.0.jar | org/apache/logging/log4j/log4j-1.2-api/2.25.5/log4j-1.2-api-2.25.5.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-api-2.20.0.jar | org/apache/logging/log4j/log4j-api/2.25.5/log4j-api-2.25.5.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-core-2.20.0.jar | org/apache/logging/log4j/log4j-core/2.25.5/log4j-core-2.25.5.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-slf4j2-impl-2.20.0.jar | org/apache/logging/log4j/log4j-slf4j2-impl/2.25.5/log4j-slf4j2-impl-2.25.5.jar
+# commons-configuration2 2.10.1 -> 2.15.1 in Hadoop, with the commons-io / commons-lang3 / commons-text versions
+# it needs (its builders extend commons-io 2.17+ AbstractSupplier). Same versions as CDAP master/lib.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-configuration2-2.10.1.jar | org/apache/commons/commons-configuration2/2.15.1/commons-configuration2-2.15.1.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-io-2.16.1.jar | commons-io/commons-io/2.22.0/commons-io-2.22.0.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-lang3-3.18.0.jar | org/apache/commons/commons-lang3/3.22.0/commons-lang3-3.22.0.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-text-1.14.0.jar | org/apache/commons/commons-text/1.15.0/commons-text-1.15.0.jar
+# Bouncy Castle 1.82 -> 1.85 (jdk18on), all members.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib | bcprov-jdk18on-1.82.jar | org/bouncycastle/bcprov-jdk18on/1.85/bcprov-jdk18on-1.85.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | bcpkix-jdk18on-1.82.jar | org/bouncycastle/bcpkix-jdk18on/1.85/bcpkix-jdk18on-1.85.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | bcutil-jdk18on-1.82.jar | org/bouncycastle/bcutil-jdk18on/1.85/bcutil-jdk18on-1.85.jar
+!hadoop/hadoop-3.4.3 | ^commons-configuration2-2\.10\.|^commons-io-2\.16\.|^commons-lang3-3\.18\.|^commons-text-1\.14\.|^bc[a-z]+-jdk1[58][a-z]*-1\.(6|7|8[0-4])
+!spark/spark-3.5.8-bin-without-hadoop | ^commons-compress-1\.23\.|^log4j-.*-2\.20\.0\.jar$
+
+# --- parquet-jackson shaded swap ---
+# parquet-jackson 1.13.1 -> 1.17.1 (shaded Jackson 2.13.4 -> 2.21.3, same shaded/parquet prefix).
+spark/spark-3.5.8-bin-without-hadoop/jars | parquet-jackson-1.13.1.jar | org/apache/parquet/parquet-jackson/1.17.1/parquet-jackson-1.17.1.jar
+!spark/spark-3.5.8-bin-without-hadoop | ^parquet-jackson-1\.13\.
+
+# --- Jackson 2.18.12 ---
+# Jackson 2.12.7 (Hadoop) / 2.15.2 (Spark) -> 2.18.12, all members. Jackson 1 (*-asl) is unchanged.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jackson-annotations-2.12.7.jar | com/fasterxml/jackson/core/jackson-annotations/2.18.12/jackson-annotations-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jackson-core-2.12.7.jar | com/fasterxml/jackson/core/jackson-core/2.18.12/jackson-core-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jackson-databind-2.12.7.1.jar | com/fasterxml/jackson/core/jackson-databind/2.18.12/jackson-databind-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jackson-jaxrs-base-2.12.7.jar | com/fasterxml/jackson/jaxrs/jackson-jaxrs-base/2.18.12/jackson-jaxrs-base-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jackson-jaxrs-json-provider-2.12.7.jar | com/fasterxml/jackson/jaxrs/jackson-jaxrs-json-provider/2.18.12/jackson-jaxrs-json-provider-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jackson-module-jaxb-annotations-2.12.7.jar | com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.18.12/jackson-module-jaxb-annotations-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-annotations-2.15.2.jar | com/fasterxml/jackson/core/jackson-annotations/2.18.12/jackson-annotations-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-core-2.15.2.jar | com/fasterxml/jackson/core/jackson-core/2.18.12/jackson-core-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-databind-2.15.2.jar | com/fasterxml/jackson/core/jackson-databind/2.18.12/jackson-databind-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-dataformat-yaml-2.15.2.jar | com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.18.12/jackson-dataformat-yaml-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-datatype-jsr310-2.15.2.jar | com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.12/jackson-datatype-jsr310-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-module-scala_2.12-2.15.2.jar | com/fasterxml/jackson/module/jackson-module-scala_2.12/2.18.12/jackson-module-scala_2.12-2.18.12.jar
+!hadoop/hadoop-3.4.3 | ^jackson-.*-2\.12\.
+!spark/spark-3.5.8-bin-without-hadoop | ^jackson-.*-2\.15\.
+
+# --- aircompressor ---
+# aircompressor 0.27 -> 2.0.3 (same io.airlift.compress API, Java 8).
+spark/spark-3.5.8-bin-without-hadoop/jars | aircompressor-0.27.jar | io/airlift/aircompressor/2.0.3/aircompressor-2.0.3.jar
+!spark/spark-3.5.8-bin-without-hadoop | ^aircompressor-0\.
+
+# --- Kerby (draft: land together with the CDAP master/lib kerby 2.1.2 change) ---
+# Kerby 2.0.3 -> 2.1.2, all members. Land together with the CDAP master/lib kerby change.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerb-core-2.0.3.jar | org/apache/kerby/kerb-core/2.1.2/kerb-core-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerb-crypto-2.0.3.jar | org/apache/kerby/kerb-crypto/2.1.2/kerb-crypto-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerb-util-2.0.3.jar | org/apache/kerby/kerb-util/2.1.2/kerb-util-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-asn1-2.0.3.jar | org/apache/kerby/kerby-asn1/2.1.2/kerby-asn1-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-config-2.0.3.jar | org/apache/kerby/kerby-config/2.1.2/kerby-config-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-pkix-2.0.3.jar | org/apache/kerby/kerby-pkix/2.1.2/kerby-pkix-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-util-2.0.3.jar | org/apache/kerby/kerby-util/2.1.2/kerby-util-2.1.2.jar
+!hadoop/hadoop-3.4.3 | ^(kerb|kerby)-[a-z]+-2\.0\.
