@@ -24,7 +24,10 @@ set -euo pipefail
 : "${AWS_SDK_JAR:?}"             # path to hadoop-aws-sdk-<ver>.jar
 : "${ZOOKEEPER_JAR:?}"           # path to zookeeper-3.4.5.jar
 : "${JLINE_JAR:?}"               # path to jline-3.30.17.jar
+: "${JAR_OVERRIDES:?}"           # path to jar-overrides.txt
+: "${JAR_SOURCE:?}"              # repository base URL or local directory, see jar_overrides.sh
 LICENSES_DIR="${LICENSES_DIR:-/opt/cdap/LICENSES}"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 H="/opt/hadoop/hadoop-${HADOOP_VERSION}"
 
 echo "${HADOOP_TARBALL_SHA512}  ${HADOOP_TARBALL}" | sha512sum -c -
@@ -49,6 +52,9 @@ rm -f "${H}/share/hadoop/yarn/hadoop-yarn-applications-catalog-webapp-${HADOOP_V
 
 # Remove paranamer-2.3.jar if present (carried over from the 3.3.6 image cleanup).
 find "${H}" -name 'paranamer-2.3.jar' -delete
+
+# Shared jar replacements, additions and deletions.
+JAR_SOURCE="${JAR_SOURCE}" bash "${SCRIPT_DIR}/jar_overrides.sh" apply "${JAR_OVERRIDES}" "hadoop/hadoop-${HADOOP_VERSION}"
 
 # Licenses.
 mkdir -p "${LICENSES_DIR}/hadoop-${HADOOP_VERSION}"
