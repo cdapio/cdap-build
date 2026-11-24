@@ -53,6 +53,8 @@ COPY --from=build /cdap/build/cdap/cdap-ui/target/stage-packaging/opt/cdap/ui /o
 COPY --from=build /cdap/build/cdap/cdap-distributions/src/etc/cdap/conf.dist/logback*.xml /opt/cdap/master/conf/
 COPY --from=build /cdap/build/cdap/cdap-distributions/src/COPYRIGHT /opt/cdap/LICENSES
 COPY --from=build /cdap/build/cdap-build-sources.tar.gz /opt/cdap/cdap-build-sources.tar.gz
+COPY --from=build /cdap/build/hadoop-aws-sdk/target/hadoop-aws-sdk-2.35.4.jar /tmp/h/hadoop-aws-sdk-2.35.4.jar
+COPY scripts/prepare_hadoop.sh scripts/prepare_spark.sh scripts/jar_overrides.sh scripts/jar-overrides.txt /tmp/h/
 
 RUN apt-get update && \
   apt-get install -y --no-install-recommends curl ca-certificates procps libxml2-utils && \
@@ -60,50 +62,34 @@ RUN apt-get update && \
   apt-get autoremove -y && \
   rm -rf /var/lib/apt/lists/* && \
   mkdir -p /opt/spark && \
-  mkdir -p /opt/hadoop && \
   mkdir -p /opt/cdap/master/ext/jdbc/postgresql && \
-  curl -L -o /opt/hadoop/hadoop-3.3.6.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-3.3.6/hadoop-3.3.6.tar.gz && \
-  curl -L -o /opt/spark/spark-3.3.2-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.3.2-bin-without-hadoop.tgz && \
+  curl -fsSL -o /tmp/h/hadoop-3.4.3.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-3.4.3/hadoop-3.4.3.tar.gz && \
+  curl -fsSL -o /tmp/h/zookeeper-3.4.5.jar https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper/3.4.5/zookeeper-3.4.5.jar && \
+  curl -fsSL -o /tmp/h/jline-3.30.17.jar https://repo1.maven.org/maven2/org/jline/jline/3.30.17/jline-3.30.17.jar && \
+  curl -fsSL -o /tmp/h/spark-3.3.2-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.3.2-bin-without-hadoop.tgz && \
+  export JAR_OVERRIDES=/tmp/h/jar-overrides.txt JAR_SOURCE=https://repo1.maven.org/maven2 && \
+  HADOOP_VERSION=3.4.3 HADOOP_TARBALL=/tmp/h/hadoop-3.4.3.tar.gz \
+  HADOOP_TARBALL_SHA512=e25be7e57b4d3c5bfe83895844321a21d6cf7331266d524d8983c27cf484e576c3d79b3b60d590f8cddecf16229d0e232de2491b1b61b362ee7d67072c7290e1 \
+  AWS_SDK_JAR=/tmp/h/hadoop-aws-sdk-2.35.4.jar ZOOKEEPER_JAR=/tmp/h/zookeeper-3.4.5.jar JLINE_JAR=/tmp/h/jline-3.30.17.jar \
+  bash /tmp/h/prepare_hadoop.sh && \
+  SPARK_VERSION=3.3.2 SPARK_TARBALL=/tmp/h/spark-3.3.2-bin-without-hadoop.tgz \
+  SPARK_TARBALL_SHA512=347fd9029128b12e7b05e9cd7948a5b571a57f16bbbbffc8ad4023b4edc0e127cffd27d66fcdbf5f926fa33362a2ae4fc0a8d59ab3abdaa1d4c4ef1e23126932 \
+  bash /tmp/h/prepare_spark.sh && rm -rf /tmp/h && \
   curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop3-2.2.21.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-2.2.21.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar https://jdbc.postgresql.org/download/postgresql-42.7.11.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgres-socket-factory-1.0.12-jar-with-dependencies.jar https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.12/postgres-socket-factory-1.0.12-jar-with-dependencies.jar && \
-  tar -xzf /opt/hadoop/hadoop-3.3.6.tar.gz -C /opt/hadoop && rm /opt/hadoop/hadoop-3.3.6.tar.gz && \
-  tar -xzf /opt/spark/spark-3.3.2-bin-without-hadoop.tgz -C /opt/spark && rm /opt/spark/spark-3.3.2-bin-without-hadoop.tgz && \
-  # Align Hadoop/Spark jar overrides with the Cloud Data Fusion image.
-  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/zookeeper-3.4.5.jar https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper/3.4.5/zookeeper-3.4.5.jar && \
-  cp /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/zookeeper-3.4.5.jar /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/zookeeper-3.4.5.jar && \
-  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/zookeeper-3.6.3.jar && \
-  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/zookeeper-3.6.3.jar && \
   curl -L -o /opt/spark/spark-3.3.2-bin-without-hadoop/jars/avro-1.11.0.jar https://repo1.maven.org/maven2/org/apache/avro/avro/1.11.4/avro-1.11.4.jar && \
-  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.8.0.jar && \
-  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/commons-configuration2-2.8.0.jar && \
-  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.10.1.jar https://repo1.maven.org/maven2/org/apache/commons/commons-configuration2/2.10.1/commons-configuration2-2.10.1.jar && \
-  cp /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/commons-configuration2-2.10.1.jar /opt/hadoop/hadoop-3.3.6/share/hadoop/hdfs/lib/commons-configuration2-2.10.1.jar && \
-  # Upgrade JLine to 3.30.17 in YARN and remove unused Hadoop archives bundling JLine 3.9.0.
-  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/lib/jline-3.9.0.jar \
-        /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/hadoop-yarn-applications-catalog-webapp-3.3.6.war \
-        /opt/hadoop/hadoop-3.3.6/share/hadoop/client/hadoop-client-runtime-3.3.6.jar && \
-  curl -fsSL -o /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/lib/jline-3.30.17.jar https://repo1.maven.org/maven2/org/jline/jline/3.30.17/jline-3.30.17.jar && \
-  # Remove htrace-core 3.1.0 which shades a vulnerable jackson-databind.
-  rm -f /opt/hadoop/hadoop-3.3.6/share/hadoop/yarn/timelineservice/lib/htrace-core-3.1.0-incubating.jar && \
-  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/hadoop-aws-3.3.6.jar https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.6/hadoop-aws-3.3.6.jar && \
-  curl -L -o /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/aws-java-sdk-bundle-1.12.552.jar https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.552/aws-java-sdk-bundle-1.12.552.jar && \
   # Copy downloaded JAR licenses to COPYRIGHT folder
-  mkdir /opt/cdap/LICENSES/hadoop-3.3.6 && cp /opt/hadoop/hadoop-3.3.6/*.txt /opt/cdap/LICENSES/hadoop-3.3.6 && \
-  mkdir /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && cp /opt/spark/spark-3.3.2-bin-without-hadoop/LICENSE /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && cp /opt/spark/spark-3.3.2-bin-without-hadoop/NOTICE /opt/cdap/LICENSES/spark-3.3.2-bin-without-hadoop && \
   mkdir /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21 && curl -L -o /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.21/LICENSE && \
   mkdir /opt/cdap/LICENSES/postgresql-42.7.11 && jar xvf /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar META-INF/LICENSE && cp ./META-INF/LICENSE /opt/cdap/LICENSES/postgresql-42.7.11 && rm -r ./META-INF && \
   mkdir /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies && curl -L -o /opt/cdap/LICENSES/postgres-socket-factory-1.0.12-jar-with-dependencies/LICENSE https://raw.githubusercontent.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/v1.0.12/LICENSE && \
-  mkdir /opt/cdap/LICENSES/hadoop-aws-3.3.6 && jar xvf /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/hadoop-aws-3.3.6.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/hadoop-aws-3.3.6 && rm -r ./META-INF && \
-  mkdir /opt/cdap/LICENSES/aws-java-sdk-bundle-1.12.552 && jar xvf /opt/hadoop/hadoop-3.3.6/share/hadoop/common/lib/aws-java-sdk-bundle-1.12.552.jar META-INF/LICENSE META-INF/LICENSE.txt && cp ./META-INF/LICENSE* /opt/cdap/LICENSES/aws-java-sdk-bundle-1.12.552 && rm -r ./META-INF && \
   mv /opt/cdap/ui/server_dist/index.js /opt/cdap/ui/ && \
   mv /opt/cdap/ui/server_dist/graphql /opt/cdap/ui/ && \
   mv /opt/cdap/ui/server_dist/server /opt/cdap/ui/ && \
-  find /opt/hadoop -name 'paranamer-2.3.jar' -exec rm {} + && \
   find /opt/cdap/ui/ -maxdepth 1 -mindepth 1 -exec ln -s {} /opt/cdap/ \;
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
-ENV HADOOP_HOME=/opt/hadoop/hadoop-3.3.6
+ENV HADOOP_HOME=/opt/hadoop/hadoop-3.4.3
 ENV SPARK_HOME=/opt/spark/spark-3.3.2-bin-without-hadoop
 ENV SPARK_COMPAT=spark3_2.12
 ENV HBASE_VERSION=1.2
