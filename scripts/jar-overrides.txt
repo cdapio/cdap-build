@@ -172,3 +172,14 @@ spark/spark-3.5.8-bin-without-hadoop/jars | jackson-module-scala_2.12-2.15.2.jar
 # aircompressor 0.27 -> 2.0.3 (same io.airlift.compress API, Java 8).
 spark/spark-3.5.8-bin-without-hadoop/jars | aircompressor-0.27.jar | io/airlift/aircompressor/2.0.3/aircompressor-2.0.3.jar
 !spark/spark-3.5.8-bin-without-hadoop | ^aircompressor-0\.
+
+# --- Kerby (draft: land together with the CDAP master/lib kerby 2.1.2 change) ---
+# Kerby 2.0.3 -> 2.1.2, all members. Land together with the CDAP master/lib kerby change.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerb-core-2.0.3.jar | org/apache/kerby/kerb-core/2.1.2/kerb-core-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerb-crypto-2.0.3.jar | org/apache/kerby/kerb-crypto/2.1.2/kerb-crypto-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerb-util-2.0.3.jar | org/apache/kerby/kerb-util/2.1.2/kerb-util-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-asn1-2.0.3.jar | org/apache/kerby/kerby-asn1/2.1.2/kerby-asn1-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-config-2.0.3.jar | org/apache/kerby/kerby-config/2.1.2/kerby-config-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-pkix-2.0.3.jar | org/apache/kerby/kerby-pkix/2.1.2/kerby-pkix-2.1.2.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | kerby-util-2.0.3.jar | org/apache/kerby/kerby-util/2.1.2/kerby-util-2.1.2.jar
+!hadoop/hadoop-3.4.3 | ^(kerb|kerby)-[a-z]+-2\.0\.
