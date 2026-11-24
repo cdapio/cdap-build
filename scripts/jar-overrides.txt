@@ -167,3 +167,8 @@ spark/spark-3.5.8-bin-without-hadoop/jars | jackson-datatype-jsr310-2.15.2.jar |
 spark/spark-3.5.8-bin-without-hadoop/jars | jackson-module-scala_2.12-2.15.2.jar | com/fasterxml/jackson/module/jackson-module-scala_2.12/2.18.12/jackson-module-scala_2.12-2.18.12.jar
 !hadoop/hadoop-3.4.3 | ^jackson-.*-2\.12\.
 !spark/spark-3.5.8-bin-without-hadoop | ^jackson-.*-2\.15\.
+
+# --- aircompressor ---
+# aircompressor 0.27 -> 2.0.3 (same io.airlift.compress API, Java 8).
+spark/spark-3.5.8-bin-without-hadoop/jars | aircompressor-0.27.jar | io/airlift/aircompressor/2.0.3/aircompressor-2.0.3.jar
+!spark/spark-3.5.8-bin-without-hadoop | ^aircompressor-0\.
