@@ -66,19 +66,18 @@ RUN apt-get update && \
   curl -fsSL -o /tmp/h/hadoop-3.4.3.tar.gz https://archive.apache.org/dist/hadoop/common/hadoop-3.4.3/hadoop-3.4.3.tar.gz && \
   curl -fsSL -o /tmp/h/zookeeper-3.4.5.jar https://repo1.maven.org/maven2/org/apache/zookeeper/zookeeper/3.4.5/zookeeper-3.4.5.jar && \
   curl -fsSL -o /tmp/h/jline-3.30.17.jar https://repo1.maven.org/maven2/org/jline/jline/3.30.17/jline-3.30.17.jar && \
-  curl -fsSL -o /tmp/h/spark-3.3.2-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.3.2/spark-3.3.2-bin-without-hadoop.tgz && \
+  curl -fsSL -o /tmp/h/spark-3.5.8-bin-without-hadoop.tgz https://archive.apache.org/dist/spark/spark-3.5.8/spark-3.5.8-bin-without-hadoop.tgz && \
   export JAR_OVERRIDES=/tmp/h/jar-overrides.txt JAR_SOURCE=https://repo1.maven.org/maven2 && \
   HADOOP_VERSION=3.4.3 HADOOP_TARBALL=/tmp/h/hadoop-3.4.3.tar.gz \
   HADOOP_TARBALL_SHA512=e25be7e57b4d3c5bfe83895844321a21d6cf7331266d524d8983c27cf484e576c3d79b3b60d590f8cddecf16229d0e232de2491b1b61b362ee7d67072c7290e1 \
   AWS_SDK_JAR=/tmp/h/hadoop-aws-sdk-2.35.4.jar ZOOKEEPER_JAR=/tmp/h/zookeeper-3.4.5.jar JLINE_JAR=/tmp/h/jline-3.30.17.jar \
   bash /tmp/h/prepare_hadoop.sh && \
-  SPARK_VERSION=3.3.2 SPARK_TARBALL=/tmp/h/spark-3.3.2-bin-without-hadoop.tgz \
-  SPARK_TARBALL_SHA512=347fd9029128b12e7b05e9cd7948a5b571a57f16bbbbffc8ad4023b4edc0e127cffd27d66fcdbf5f926fa33362a2ae4fc0a8d59ab3abdaa1d4c4ef1e23126932 \
+  SPARK_VERSION=3.5.8 SPARK_TARBALL=/tmp/h/spark-3.5.8-bin-without-hadoop.tgz \
+  SPARK_TARBALL_SHA512=d011e057fcffcfbe2f5aa188c087b186e5e5da706a5526d121e9b4936c2630d768701c95ad55f6947d37ce4a068e83be86cb8ca00f275d5b6c24bfe9ad05b0c8 \
   bash /tmp/h/prepare_spark.sh && rm -rf /tmp/h && \
   curl -L -o /opt/cdap/master/lib/gcs-connector-hadoop3-2.2.21.jar https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-hadoop3-2.2.21.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar https://jdbc.postgresql.org/download/postgresql-42.7.11.jar && \
   curl -L -o /opt/cdap/master/ext/jdbc/postgresql/postgres-socket-factory-1.0.12-jar-with-dependencies.jar https://github.com/GoogleCloudPlatform/cloud-sql-jdbc-socket-factory/releases/download/v1.0.12/postgres-socket-factory-1.0.12-jar-with-dependencies.jar && \
-  curl -L -o /opt/spark/spark-3.3.2-bin-without-hadoop/jars/avro-1.11.0.jar https://repo1.maven.org/maven2/org/apache/avro/avro/1.11.4/avro-1.11.4.jar && \
   # Copy downloaded JAR licenses to COPYRIGHT folder
   mkdir /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21 && curl -L -o /opt/cdap/LICENSES/gcs-connector-hadoop3-2.2.21/LICENSE https://raw.githubusercontent.com/GoogleCloudDataproc/hadoop-connectors/v2.2.21/LICENSE && \
   mkdir /opt/cdap/LICENSES/postgresql-42.7.11 && jar xvf /opt/cdap/master/ext/jdbc/postgresql/postgresql-42.7.11.jar META-INF/LICENSE && cp ./META-INF/LICENSE /opt/cdap/LICENSES/postgresql-42.7.11 && rm -r ./META-INF && \
@@ -90,7 +89,7 @@ RUN apt-get update && \
 
 ENV CLASSPATH=/etc/cdap/conf:/etc/cdap/security:/etc/hadoop/conf
 ENV HADOOP_HOME=/opt/hadoop/hadoop-3.4.3
-ENV SPARK_HOME=/opt/spark/spark-3.3.2-bin-without-hadoop
+ENV SPARK_HOME=/opt/spark/spark-3.5.8-bin-without-hadoop
 ENV SPARK_COMPAT=spark3_2.12
 ENV HBASE_VERSION=1.2
 
