@@ -1,0 +1,40 @@
+# Third-party jar overrides for the Hadoop and Spark distributions in the CDAP
+# images, applied by scripts/jar_overrides.sh (called from prepare_hadoop.sh and
+# prepare_spark.sh). See jar_overrides.sh for the full format.
+#
+#   <dirs relative to /opt> | <old file glob> | <Maven path of new jar>
+#   +<dirs relative to /opt> | - | <Maven path of new jar>
+#   <dirs relative to /opt> | <old file glob> | -
+#   !<dist> | <extended regex that must not match any jar name under dist>
+#
+# Rules:
+# - Comments go on their own lines; no trailing comments.
+# - One entry covers one distribution (hadoop/hadoop-<ver> or
+#   spark/spark-<ver>-bin-without-hadoop); entries for other versions are
+#   skipped.
+# - A family (netty, jackson, jetty, log4j, ...) is replaced with all of its
+#   members at once, and every family change adds a guard for the old version.
+# - New jars must be Java 8 bytecode (class major <= 52 outside
+#   META-INF/versions), like the Hadoop and Spark jars they replace.
+
+# --- Remove what CDAP never loads ---
+# share/hadoop/tools/lib is not on `hadoop classpath` (HADOOP_OPTIONAL_TOOLS is
+# unset; hadoop-aws is in common/lib in Hadoop 3.4). Flagged: kafka-clients.
+hadoop/hadoop-3.4.3/share/hadoop/tools | lib | -
+# YARN timeline service v2 (only the timelinereader daemon loads it). Flagged:
+# hbase-shaded-netty, hbase-shaded-miscellaneous, commons-beanutils 1.9.2.
+hadoop/hadoop-3.4.3/share/hadoop/yarn | timelineservice | -
+# YARN CSI adaptor, not on `hadoop classpath`.
+hadoop/hadoop-3.4.3/share/hadoop/yarn | csi | -
+# Hadoop test jars.
+hadoop/hadoop-3.4.3/share/hadoop/common hadoop/hadoop-3.4.3/share/hadoop/hdfs hadoop/hadoop-3.4.3/share/hadoop/mapreduce | *-tests.jar | -
+hadoop/hadoop-3.4.3/share/hadoop/yarn | test | -
+!hadoop/hadoop-3.4.3 | -tests\.jar$|^kafka-clients-|^hbase-shaded-|^hadoop-yarn-csi-
+# Spark YARN shuffle service (runs inside YARN NodeManagers only). Flagged:
+# spark-3.5.8-yarn-shuffle.jar (embedded netty, jackson, log4j, guava).
+spark/spark-3.5.8-bin-without-hadoop | yarn | -
+# Mesos cluster manager. Flagged: mesos-1.4.3-shaded-protobuf. spark-mesos goes
+# too so no cluster manager is registered without its classes.
+spark/spark-3.5.8-bin-without-hadoop/jars | mesos-1.4.3-shaded-protobuf.jar | -
+spark/spark-3.5.8-bin-without-hadoop/jars | spark-mesos_2.12-3.5.8.jar | -
+!spark/spark-3.5.8-bin-without-hadoop | ^mesos-|^spark-mesos_|-yarn-shuffle\.jar$
