@@ -125,3 +125,23 @@ spark/spark-3.5.8-bin-without-hadoop/jars | snappy-java-1.1.10.5.jar | org/xeria
 spark/spark-3.5.8-bin-without-hadoop/jars | ivy-2.5.1.jar | org/apache/ivy/ivy/2.5.2/ivy-2.5.2.jar
 !hadoop/hadoop-3.4.3 | ^netty-.*-4\.1\.127\.Final|^(jetty|websocket|javax-websocket)-.*-9\.4\.57\.|^snappy-java-1\.1\.10\.4\.jar$
 !spark/spark-3.5.8-bin-without-hadoop | ^netty-.*-4\.1\.96\.Final|^arrow-memory-netty-12\.|^snappy-java-1\.1\.10\.5\.jar$|^ivy-2\.5\.1\.jar$
+
+# --- MINOR swaps ---
+# commons-compress 1.23.0 -> 1.26.2 and log4j2 2.20.0 -> 2.25.5 (all members) in Spark.
+spark/spark-3.5.8-bin-without-hadoop/jars | commons-compress-1.23.0.jar | org/apache/commons/commons-compress/1.26.2/commons-compress-1.26.2.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-1.2-api-2.20.0.jar | org/apache/logging/log4j/log4j-1.2-api/2.25.5/log4j-1.2-api-2.25.5.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-api-2.20.0.jar | org/apache/logging/log4j/log4j-api/2.25.5/log4j-api-2.25.5.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-core-2.20.0.jar | org/apache/logging/log4j/log4j-core/2.25.5/log4j-core-2.25.5.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | log4j-slf4j2-impl-2.20.0.jar | org/apache/logging/log4j/log4j-slf4j2-impl/2.25.5/log4j-slf4j2-impl-2.25.5.jar
+# commons-configuration2 2.10.1 -> 2.15.1 in Hadoop, with the commons-io / commons-lang3 / commons-text versions
+# it needs (its builders extend commons-io 2.17+ AbstractSupplier). Same versions as CDAP master/lib.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-configuration2-2.10.1.jar | org/apache/commons/commons-configuration2/2.15.1/commons-configuration2-2.15.1.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-io-2.16.1.jar | commons-io/commons-io/2.22.0/commons-io-2.22.0.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-lang3-3.18.0.jar | org/apache/commons/commons-lang3/3.22.0/commons-lang3-3.22.0.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | commons-text-1.14.0.jar | org/apache/commons/commons-text/1.15.0/commons-text-1.15.0.jar
+# Bouncy Castle 1.82 -> 1.85 (jdk18on), all members.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib | bcprov-jdk18on-1.82.jar | org/bouncycastle/bcprov-jdk18on/1.85/bcprov-jdk18on-1.85.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | bcpkix-jdk18on-1.82.jar | org/bouncycastle/bcpkix-jdk18on/1.85/bcpkix-jdk18on-1.85.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | bcutil-jdk18on-1.82.jar | org/bouncycastle/bcutil-jdk18on/1.85/bcutil-jdk18on-1.85.jar
+!hadoop/hadoop-3.4.3 | ^commons-configuration2-2\.10\.|^commons-io-2\.16\.|^commons-lang3-3\.18\.|^commons-text-1\.14\.|^bc[a-z]+-jdk1[58][a-z]*-1\.(6|7|8[0-4])
+!spark/spark-3.5.8-bin-without-hadoop | ^commons-compress-1\.23\.|^log4j-.*-2\.20\.0\.jar$
