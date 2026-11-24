@@ -1,0 +1,18 @@
+# Third-party jar overrides for the Hadoop and Spark distributions in the CDAP
+# images, applied by scripts/jar_overrides.sh (called from prepare_hadoop.sh and
+# prepare_spark.sh). See jar_overrides.sh for the full format.
+#
+#   <dirs relative to /opt> | <old file glob> | <Maven path of new jar>
+#   +<dirs relative to /opt> | - | <Maven path of new jar>
+#   <dirs relative to /opt> | <old file glob> | -
+#   !<dist> | <extended regex that must not match any jar name under dist>
+#
+# Rules:
+# - Comments go on their own lines; no trailing comments.
+# - One entry covers one distribution (hadoop/hadoop-<ver> or
+#   spark/spark-<ver>-bin-without-hadoop); entries for other versions are
+#   skipped.
+# - A family (netty, jackson, jetty, log4j, ...) is replaced with all of its
+#   members at once, and every family change adds a guard for the old version.
+# - New jars must be Java 8 bytecode (class major <= 52 outside
+#   META-INF/versions), like the Hadoop and Spark jars they replace.
