@@ -63,8 +63,8 @@ cp -r "${H}"/*.txt "${H}/LICENSE-binary" "${H}/NOTICE-binary" "${H}/licenses-bin
 # Self-checks: fail the image build loudly if the layout is not what we expect.
 test -f "${H}/share/hadoop/common/hadoop-common-${HADOOP_VERSION}.jar"
 test -f "${H}/share/hadoop/common/lib/hadoop-aws-${HADOOP_VERSION}.jar"
-test -f "${H}/share/hadoop/common/lib/commons-configuration2-2.10.1.jar"
-test -f "${H}/share/hadoop/hdfs/lib/commons-configuration2-2.10.1.jar"
+test -f "${H}/share/hadoop/common/lib/commons-configuration2-2.15.1.jar"
+test -f "${H}/share/hadoop/hdfs/lib/commons-configuration2-2.15.1.jar"
 test -f "${H}/share/hadoop/common/lib/$(basename "${AWS_SDK_JAR}")"
 test -f "${H}/share/hadoop/common/lib/$(basename "${ZOOKEEPER_JAR}")"
 test -f "${H}/share/hadoop/hdfs/lib/$(basename "${ZOOKEEPER_JAR}")"
