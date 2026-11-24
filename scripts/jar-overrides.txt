@@ -151,3 +151,20 @@ hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | bcutil-jdk18on-1.82.jar | org/bouncy
 # parquet-jackson 1.13.1 -> 1.17.1 (shaded Jackson 2.13.4 -> 2.21.3, same shaded/parquet prefix).
 spark/spark-3.5.8-bin-without-hadoop/jars | parquet-jackson-1.13.1.jar | org/apache/parquet/parquet-jackson/1.17.1/parquet-jackson-1.17.1.jar
 !spark/spark-3.5.8-bin-without-hadoop | ^parquet-jackson-1\.13\.
+
+# --- Jackson 2.18.12 ---
+# Jackson 2.12.7 (Hadoop) / 2.15.2 (Spark) -> 2.18.12, all members. Jackson 1 (*-asl) is unchanged.
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jackson-annotations-2.12.7.jar | com/fasterxml/jackson/core/jackson-annotations/2.18.12/jackson-annotations-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jackson-core-2.12.7.jar | com/fasterxml/jackson/core/jackson-core/2.18.12/jackson-core-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/common/lib hadoop/hadoop-3.4.3/share/hadoop/hdfs/lib | jackson-databind-2.12.7.1.jar | com/fasterxml/jackson/core/jackson-databind/2.18.12/jackson-databind-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jackson-jaxrs-base-2.12.7.jar | com/fasterxml/jackson/jaxrs/jackson-jaxrs-base/2.18.12/jackson-jaxrs-base-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jackson-jaxrs-json-provider-2.12.7.jar | com/fasterxml/jackson/jaxrs/jackson-jaxrs-json-provider/2.18.12/jackson-jaxrs-json-provider-2.18.12.jar
+hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | jackson-module-jaxb-annotations-2.12.7.jar | com/fasterxml/jackson/module/jackson-module-jaxb-annotations/2.18.12/jackson-module-jaxb-annotations-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-annotations-2.15.2.jar | com/fasterxml/jackson/core/jackson-annotations/2.18.12/jackson-annotations-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-core-2.15.2.jar | com/fasterxml/jackson/core/jackson-core/2.18.12/jackson-core-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-databind-2.15.2.jar | com/fasterxml/jackson/core/jackson-databind/2.18.12/jackson-databind-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-dataformat-yaml-2.15.2.jar | com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.18.12/jackson-dataformat-yaml-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-datatype-jsr310-2.15.2.jar | com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.12/jackson-datatype-jsr310-2.18.12.jar
+spark/spark-3.5.8-bin-without-hadoop/jars | jackson-module-scala_2.12-2.15.2.jar | com/fasterxml/jackson/module/jackson-module-scala_2.12/2.18.12/jackson-module-scala_2.12-2.18.12.jar
+!hadoop/hadoop-3.4.3 | ^jackson-.*-2\.12\.
+!spark/spark-3.5.8-bin-without-hadoop | ^jackson-.*-2\.15\.
