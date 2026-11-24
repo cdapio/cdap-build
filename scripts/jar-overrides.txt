@@ -145,3 +145,8 @@ hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | bcpkix-jdk18on-1.82.jar | org/bouncy
 hadoop/hadoop-3.4.3/share/hadoop/yarn/lib | bcutil-jdk18on-1.82.jar | org/bouncycastle/bcutil-jdk18on/1.85/bcutil-jdk18on-1.85.jar
 !hadoop/hadoop-3.4.3 | ^commons-configuration2-2\.10\.|^commons-io-2\.16\.|^commons-lang3-3\.18\.|^commons-text-1\.14\.|^bc[a-z]+-jdk1[58][a-z]*-1\.(6|7|8[0-4])
 !spark/spark-3.5.8-bin-without-hadoop | ^commons-compress-1\.23\.|^log4j-.*-2\.20\.0\.jar$
+
+# --- parquet-jackson shaded swap ---
+# parquet-jackson 1.13.1 -> 1.17.1 (shaded Jackson 2.13.4 -> 2.21.3, same shaded/parquet prefix).
+spark/spark-3.5.8-bin-without-hadoop/jars | parquet-jackson-1.13.1.jar | org/apache/parquet/parquet-jackson/1.17.1/parquet-jackson-1.17.1.jar
+!spark/spark-3.5.8-bin-without-hadoop | ^parquet-jackson-1\.13\.
