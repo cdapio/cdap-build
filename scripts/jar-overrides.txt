@@ -21,7 +21,7 @@
 # share/hadoop/tools/lib is not on `hadoop classpath` (HADOOP_OPTIONAL_TOOLS is
 # unset; hadoop-aws is in common/lib in Hadoop 3.4). Flagged: kafka-clients.
 hadoop/hadoop-3.4.3/share/hadoop/tools | lib | -
-# YARN timeline service v2 (only the timelinereader daemon loads it). Flagged:
+# YARN timeline service v2 (only the RM, NM and timelinereader daemons load it). Flagged:
 # hbase-shaded-netty, hbase-shaded-miscellaneous, commons-beanutils 1.9.2.
 hadoop/hadoop-3.4.3/share/hadoop/yarn | timelineservice | -
 # YARN CSI adaptor, not on `hadoop classpath`.
