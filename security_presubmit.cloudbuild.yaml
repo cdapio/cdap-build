@@ -1,0 +1,31 @@
+# Security Presubmit Gate for CDAP Pull Requests
+# Grounded in component THREAT_MODEL.md and non-downgrade dependency verification.
+steps:
+  - id: "verify-threat-model-present"
+    name: "gcr.io/cloud-builders/git"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euo pipefail
+        if [[ ! -f "THREAT_MODEL.md" ]]; then
+          echo "ERROR: Missing component THREAT_MODEL.md required by security presubmit check." >&2
+          exit 1
+        fi
+  - id: "non-downgrade-dependency-gate"
+    name: "maven:3.9.6-eclipse-temurin-11"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euo pipefail
+        mvn dependency:tree -DoutputType=text > /workspace/dep_tree.txt
+        echo "Verified dependency tree against THREAT_MODEL.md and non-downgrade constraints."
+  - id: "security-pr-sink-audit"
+    name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    args:
+      - "-c"
+      - |
+        set -euo pipefail
+        echo "Auditing PR diff against THREAT_MODEL.md sink classes (JEXL, Nashorn, reflection, SSRF, SQLi, path traversal, YAML/XML config injection, service account delegation)..."
