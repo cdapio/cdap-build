@@ -15,8 +15,8 @@
 #
 # Applies the jar overrides listed in jar-overrides.txt to one unpacked
 # distribution (Hadoop or Spark) under /opt. Called by prepare_hadoop.sh and
-# prepare_spark.sh so that the OSS CDAP image and the Cloud Data Fusion images
-# replace, add and delete exactly the same third-party jars.
+# prepare_spark.sh, so every image that runs them replaces, adds and deletes
+# exactly the same third-party jars.
 #
 # Usage:
 #   jar_overrides.sh apply <manifest> <dist>

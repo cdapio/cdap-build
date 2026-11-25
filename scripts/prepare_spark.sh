@@ -14,8 +14,8 @@
 # the License.
 #
 # Unpacks the Apache Spark distribution used by CDAP images and applies the
-# jar overrides from jar-overrides.txt. Inputs are local files so that both the
-# GitHub and the Cloud Data Fusion builds can fetch artifacts their own way.
+# jar overrides from jar-overrides.txt. The caller passes the local tarball and
+# sets JAR_SOURCE (see jar_overrides.sh).
 set -euo pipefail
 
 : "${SPARK_VERSION:?}"           # e.g. 3.5.8
